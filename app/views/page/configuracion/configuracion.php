@@ -11,15 +11,19 @@
         <div class="bloque-encabezado">
             <h2>Configuración</h2>
         </div>
-
+        
         <div class="card">
             <div class="header">
                 <ul class="nav nav-tabs config-tabs" role="tablist">
                     <li role="presentation" class="active"><a href="#configMedidas" data-toggle="tab"><i class="material-icons">straighten</i> Unidades de medida</a></li>
                     <li role="presentation"><a href="#configCategorias" data-toggle="tab"><i class="material-icons">category</i> Categorías</a></li>
                     <li role="presentation"><a href="#configSubcategorias" data-toggle="tab"><i class="material-icons">account_tree</i> Subcategorías</a></li>
+                    <li role="presentation"><a href="#tab_subcategoria" data-toggle="tab" style="color:white; font-weight:bold;"><i class="material-icons">straighten</i> Lineas de Producto</a></li>
                     <li role="presentation"><a href="vendedores#usuarios"><i class="material-icons">manage_accounts</i> Usuario / Personal</a></li>
                 </ul>
+                 <button type="hidden" style="display: none;" data-toggle="modal" data-target="#modalEditarCategoria" id="abrirModalEditarCategoria"> </button>
+
+                            
             </div>
             <div class="body tab-content">
                 <div role="tabpanel" class="tab-pane fade in active" id="configMedidas">
@@ -34,6 +38,28 @@
                     <div class="config-toolbar"><button class="btn btn-success js-nueva-config" data-tabla="subcategoria"><i class="material-icons">add</i> Nueva subcategoría</button></div>
                     <div class="table-responsive"><table class="table table-bordered table-striped" id="tablaSubcategorias"><thead><tr><th>ID</th><th>Categoría</th><th>Subcategoría</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
                 </div>
+                <div role="tabpanel" class="tab-pane fade" id="tab_subcategoria">
+    <div style="margin-left: 15px;">
+        <button type="button" class="btn btn-info btn-circle waves-effect" data-toggle="modal" data-target="#modalCategoria" id="abrirModalCategoria">
+            <i class="material-icons">add</i>
+        </button> <b style="margin-left:10px;">Agregar Nueva Categoria</b>
+    </div>
+    <div class="table-responsive">
+        <table class="table" id="tablaPresentaciones">
+        <thead>
+            <tr>
+                <th>N°</th>
+                <th>Categoría</th>
+                <th>Sub Categoria</th>
+                <th>Línea de Producto</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
             </div>
         </div>
     </div>
@@ -52,5 +78,7 @@
         <div class="modal-footer"><button type="submit" form="formConfiguracion" class="btn btn-success">GUARDAR</button><button type="button" class="btn btn-default" data-dismiss="modal">CANCELAR</button></div>
     </div></div>
 </div>
+<?php include 'app/views/page/productos/modal.php'; ?>
 <script src="resources/library/plugins/jquery/jquery.min.js"></script>
+<script src="public/js/subcategoria.js"></script>
 <script src="public/js/configuracion.js"></script>

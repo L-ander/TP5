@@ -28,13 +28,13 @@
 		public function listar() {
 			try {
 				$sql = "SELECT p.id,
-                        COALESCE(np.nombre, p.nombre) AS nombre,
+                        np.nombre, p.nombre AS nombre,
                         p.id_linea,
                         lp.nombre AS nombre_linea,
                         p.presentacion,
-                        COALESCE(pr.contenido, p.presentacion) AS nombre_presentacion,
+                        pr.contenido, p.presentacion AS nombre_presentacion,
                         p.id_medida,
-                        COALESCE(um.medida, '') AS nombre_medida,
+                        um.medida, '' AS nombre_medida,
                         p.precio
                 FROM producto p
                 LEFT JOIN linea_producto lp ON p.id_linea = lp.id

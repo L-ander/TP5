@@ -16,11 +16,6 @@
                                     <i class="material-icons">store</i> PRODUCTOS
                                 </a>
                             </li>
-                            <li role="presentation">
-                                <a href="#tab_subcategoria" data-toggle="tab" style="color:white; font-weight:bold;">
-                                    <i class="material-icons">straighten</i> SUB CATEGORIAS
-                                </a>
-                            </li>
                         </ul>
 
 
@@ -64,25 +59,7 @@
                         </div>
 
                             <div role="tabpanel" class="tab-pane fade" id="tab_subcategoria">
-    <div style="margin-left: 15px;">
-        <button type="button" class="btn btn-info btn-circle waves-effect" data-toggle="modal" data-target="#modalCategoria" id="abrirModalCategoria">
-            <i class="material-icons">add</i>
-        </button> <b style="margin-left:10px;">Agregar Nueva Categoria</b>
-    </div>
-    <div class="table-responsive">
-        <table class="table" id="tablaPresentaciones">
-        <thead>
-            <tr>
-                <th>N°</th>
-                <th>Categoría</th>
-                <th>Sub Categoria</th>
-                <th>Línea de Producto</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-            <tbody></tbody>
-        </table>
-    </div>
+    
 </div>
 
 
