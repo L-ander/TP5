@@ -1,0 +1,230 @@
+:root {
+    --celeste-dark: #1a7fa0;
+    --celeste-main: #29b6f6;
+    --celeste-light: #e1f5fe;
+    --naranja-main: #ff9800;
+    --naranja-hover: #f57c00;
+    --bg-dark: #1e293b;
+    --bg-light: #f8fafc;
+    --text-main: #334155;
+    --text-muted: #64748b;
+    --transition: all 0.3s ease;
+}
+
+body {
+    background-color: var(--celeste-fondo);
+    font-family: 'Roboto', Arial, sans-serif;
+    color: var(--texto-oscuro);
+    margin: 0;
+}
+
+
+
+.navbar {
+    background-color: rgb(191, 245, 255);
+    margin: 0%;
+    border-bottom: 5px solid rgb(255, 123, 0);
+}
+
+.navbar-brand {
+    display: flex;       
+    width: 100%;         
+    height: 100%;        
+    text-decoration: none;
+
+}
+
+
+.navbar-header{
+    justify-content:first baseline;
+    width: 180px;
+    height: 80px;
+    padding: 0;
+    object-fit:cover;
+}
+
+.navbar-header img{
+     display: flex;
+    object-fit:cover;
+    margin-top: 0px;
+    
+}
+
+
+
+
+
+/* barra lateral*/
+
+.sidebar {
+    width: 280px;
+    height: calc(100vh - 60px);
+    position: fixed;
+    top: 60px;
+    left: 0;
+    background-color: #ffffff;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    z-index: 1020;
+    overflow-y: auto;
+}
+
+/* Información de Usuario */
+.user-info {
+    padding: 24px;
+    background: linear-gradient(to bottom, var(--celeste-light), #ffffff);
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-info .image img {
+    border-radius: 50%;
+    border: 3px solid var(--celeste-main);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    object-fit: cover;
+}
+
+.info-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.user-info .name {
+    font-weight: 600;
+    color: var(--bg-dark);
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.user-helper-dropdown i {
+    color: var(--celeste-dark);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.user-helper-dropdown i:hover {
+    color: var(--naranja-main);
+}
+
+/* Menú Navegacional */
+.menu {
+    flex-grow: 1;
+    padding: 15px 0;
+}
+
+.menu .list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu .list .header {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 10px 25px;
+    letter-spacing: 1px;
+}
+
+.menu .list li a {
+    display: flex;
+    align-items: center;
+    padding: 14px 25px;
+    color: var(--text-main);
+    text-decoration: none;
+    font-weight: 500;
+    border-left: 4px solid transparent;
+    transition: var(--transition);
+}
+
+/* Iconos de Material Icons */
+.menu .list li a i {
+    margin-right: 15px;
+    color: var(--text-muted);
+    transition: var(--transition);
+}
+
+/* Efectos Hover y Activo en el Menú */
+.menu .list li a:hover {
+    background-color: var(--celeste-light);
+    color: var(--celeste-dark);
+    border-left-color: var(--naranja-main);
+}
+
+.menu .list li a:hover i {
+    color: var(--naranja-main);
+    transform: translateX(3px);
+}
+
+/* Footer del Sidebar (Legal) */
+.legal {
+    padding: 20px 25px;
+    background-color: var(--bg-dark);
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.legal .copyright a {
+    color: var(--celeste-main);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.legal .copyright a:hover {
+    color: var(--naranja-main);
+}
+
+.legal .version {
+    margin-top: 5px;
+    color: #64748b;
+}
+
+/* ==========================================================================
+   Ajustes de Dropdown (Desplegables)
+   ========================================================================== */
+.dropdown-menu {
+    position: absolute;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    border: 1px solid rgba(0,0,0,0.05);
+    padding: 8px 0;
+    list-style: none;
+    min-width: 150px;
+}
+
+.dropdown-menu li a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    color: var(--text-main);
+    text-decoration: none;
+    font-size: 14px;
+    transition: var(--transition);
+}
+
+.dropdown-menu li a:hover {
+    background-color: #fff7ed; /* Naranja muy suave */
+    color: var(--naranja-hover);
+}
+
+.dropdown-menu li a i {
+    color: var(--text-muted);
+}
+
+.dropdown-menu li a:hover i {
+    color: var(--naranja-hover);
+}
+
+.divider {
+    height: 1px;
+    background-color: #f1f5f9;
+    margin: 6px 0;
+}

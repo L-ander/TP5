@@ -1,0 +1,140 @@
+/* ==========================================================================
+   Estilos de la Sección de Contenido (Dashboard)
+   ========================================================================== */
+
+/* Contenedor General con margen para no chocarse con la barra lateral */
+.contenedor-principal {
+    margin-left: 280px; /* Al ancho de tu sidebar */
+    padding: 90px 30px 30px 30px; /* Espacio superior para la navbar */
+    background-color: #f8fafc;
+    min-height: calc(100vh - 120px);
+}
+
+/* Encabezado */
+.bloque-encabezado h1 {
+    margin: 0;
+    font-size: 28px;
+    color: #1e293b;
+}
+.bloque-encabezado p {
+    margin: 5px 0 25px 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+/* Red de Tarjetas con Flexbox */
+.fila-tarjetas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Separación entre tarjetas */
+    margin-bottom: 30px;
+}
+
+/* Tarjeta Base */
+.tarjeta {
+    flex: 1;
+    min-width: 220px; /* Se adapta a pantallas chicas */
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tarjeta:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* Estilos de Iconos dentro de las Tarjetas */
+.tarjeta-icono {
+    padding: 15px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.tarjeta-icono i {
+    font-size: 32px;
+}
+
+/* Variaciones de Color (Celeste y Naranja) */
+.tarjeta-celeste .tarjeta-icono {
+    background-color: #e1f5fe;
+    color: #29b6f6;
+}
+.tarjeta-celeste {
+    border-bottom: 4px solid #29b6f6;
+}
+
+.tarjeta-naranja .tarjeta-icono {
+    background-color: #fff3e0;
+    color: #ff9800;
+}
+.tarjeta-naranja {
+    border-bottom: 4px solid #ff9800;
+}
+
+/* Información de la Tarjeta */
+.tarjeta-info h3 {
+    margin: 0;
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 500;
+}
+.tarjeta-dato {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+    display: block;
+    margin-top: 5px;
+}
+
+/* Panel Blanco Inferior */
+.panel-blanco {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    border: 1px solid #e2e8f0;
+}
+
+.panel-cabecera {
+    padding: 20px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.panel-cabecera h2 {
+    margin: 0;
+    font-size: 18px;
+    color: #1e293b;
+}
+
+.panel-cabecera small {
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.panel-contenido {
+    padding: 20px;
+}
+
+/* Responsive para pantallas móviles */
+@media (max-width: 768px) {
+    .contenedor-principal {
+        margin-left: 0; /* El menú se acoplaría arriba/oculto */
+        padding-top: 80px;
+    }
+}
+
+.bloque-encabezado{
+    background-color: #eeb370;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    color: #e1f5fe;
+    padding: 10px;
+
+}
