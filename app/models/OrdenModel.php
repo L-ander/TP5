@@ -2,30 +2,27 @@
 require_once __DIR__ . '/../../config/conex.php';
 
 class OrdenModel extends Conexion {
-    // Devuelve la conexion activa a la base de datos.
-    private function obtenerConexion() {
-        return Conexion::conectar();
-    }
+    private $id;
+    private $id_cliente;
+    private $id_vendedor;
+    private $fecha;
+    private $id_estatus;
 
-    // Calcula el siguiente id disponible tomando MAX(id) + 1.
-    // Se usa porque estas tablas no dependen completamente de autoincrement.
-    private function siguienteId($conexion, $tabla) {
-        try {
-            $stmt = $conexion->query("SELECT COALESCE(MAX(id), 0) + 1 AS siguiente FROM $tabla");
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            return (int)($row['siguiente'] ?? 1);
-        } catch (Exception $e) {
-            return 1;
-        }
-    }
+    public function setId($id) { $this->id = $id; }
+    public function getId() { return $this->id; }
+    public function setCliente($id_cliente) { $this->id_cliente = $id_cliente; }
+    public function getCliente() { return $this->id_cliente; }
+    public function setVendedor($id_vendedor) { $this->id_vendedor = $id_vendedor; }
+    public function getVendedor() { return $this->id_vendedor; }
+    public function setFecha($fecha) { $this->fecha = $fecha; }
+    public function getFecha() { return $this->fecha; }
+    public function setEstatus($id_estatus) { $this->id_estatus = $id_estatus; }
+    public function getEstatus() { return $this->id_estatus; }
 
     // Lista las ordenes con sus datos relacionados: cliente, vendedor y estatus.
     public function listar() {
         try {
-            $conexion = $this->obtenerConexion();
-            if (!$conexion) {
-                return [];
-            }
+            $conexion = parent::conectar();
 
             $stmt = $conexion->prepare(
                 "SELECT p.id, p.fecha, p.total, p.id_cliente, p.id_vendedor, p.id_estatus,
@@ -39,139 +36,105 @@ class OrdenModel extends Conexion {
                  ORDER BY p.id DESC"
             );
             $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return array('success' => true, 'datos' => $stmt->fetchAll(PDO::FETCH_ASSOC));
         } catch (Exception $e) {
-            return [];
+            return array('success' => false, 'error' => $e->getMessage());
         }
     }
 
     // Crea una orden nueva.
     // Siempre nace con total 0 y estatus 1 (Pendiente).
-    public function crear($data) {
+    public function crear() {
         try {
-            $conexion = $this->obtenerConexion();
-            if (!$conexion) {
-                return false;
-            }
+            $conexion = parent::conectar();
+            $fecha = !empty($this->fecha) ? $this->fecha : date('Y-m-d');
 
-            $fecha = !empty($data['fecha']) ? $data['fecha'] : date('Y-m-d');
-            $idOrden = $this->siguienteId($conexion, 'pedido');
-
-            $stmt = $conexion->prepare(
-                "INSERT INTO pedido (id, id_cliente, id_vendedor, fecha, total, id_estatus)
-                 VALUES (?, ?, ?, ?, ?, ?)"
+                $sql = "INSERT INTO pedido (id_cliente, id_vendedor, fecha, total, id_estatus)
+                    VALUES (:id_cliente, :id_vendedor, :fecha, 0, :id_estatus)";
+                $stmt = $conexion->prepare($sql);
+                $stmt->bindParam(':id_cliente', $this->id_cliente, PDO::PARAM_INT);
+                $stmt->bindParam(':id_vendedor', $this->id_vendedor, PDO::PARAM_INT);
+                $stmt->bindParam(':fecha', $fecha, PDO::PARAM_STR);
+                $estatus = $this->id_estatus ?: 1;
+                $stmt->bindParam(':id_estatus', $estatus, PDO::PARAM_INT);
+                $ok = $stmt->execute();
+            return array(
+                'success' => $ok,
+                'datos' => array('id' => (int)$conexion->lastInsertId())
             );
-
-            return $stmt->execute([
-                $idOrden,
-                $data['id_cliente'] ?? 0,
-                $data['id_vendedor'] ?? 0,
-                $fecha,
-                0,
-                1
-            ]);
         } catch (Exception $e) {
-            return false;
+            return array('success' => false, 'error' => $e->getMessage());
         }
     }
 
     // Edita la cabecera de una orden.
     // Permite cambiar cliente, vendedor, fecha y estatus, pero no modifica el total.
-    public function editar($data) {
+    public function editar() {
         try {
-            $conexion = $this->obtenerConexion();
-            if (!$conexion) {
-                return false;
-            }
-
-            $fecha = !empty($data['fecha']) ? $data['fecha'] : null;
-            if ($fecha !== null) {
-                $stmt = $conexion->prepare(
-                    "UPDATE pedido SET id_cliente=?, id_vendedor=?, fecha=?, id_estatus=? WHERE id=?"
-                );
-                $params = [
-                    $data['id_cliente'] ?? 0,
-                    $data['id_vendedor'] ?? 0,
-                    $fecha,
-                    $data['id_estatus'] ?? 1,
-                    $data['id'] ?? 0
-                ];
-            } else {
-                $stmt = $conexion->prepare(
-                    "UPDATE pedido SET id_cliente=?, id_vendedor=?, id_estatus=? WHERE id=?"
-                );
-                $params = [
-                    $data['id_cliente'] ?? 0,
-                    $data['id_vendedor'] ?? 0,
-                    $data['id_estatus'] ?? 1,
-                    $data['id'] ?? 0
-                ];
-            }
-
-            return $stmt->execute($params);
+            $sql = "UPDATE pedido SET id_cliente = :id_cliente, id_vendedor = :id_vendedor,
+                    fecha = :fecha, id_estatus = :id_estatus WHERE id = :id";
+            $stmt = parent::conectar()->prepare($sql);
+            $stmt->bindParam(':id_cliente', $this->id_cliente, PDO::PARAM_INT);
+            $stmt->bindParam(':id_vendedor', $this->id_vendedor, PDO::PARAM_INT);
+            $stmt->bindParam(':fecha', $this->fecha, PDO::PARAM_STR);
+            $stmt->bindParam(':id_estatus', $this->id_estatus, PDO::PARAM_INT);
+            $stmt->bindParam(':id', $this->id, PDO::PARAM_INT);
+            $ok = $stmt->execute();
+            return array('success' => $ok);
         } catch (Exception $e) {
-            return false;
+            return array('success' => false, 'error' => $e->getMessage());
         }
     }
 
     // Elimina una orden y primero borra sus productos del detalle para evitar registros huerfanos.
-    public function eliminar($id) {
+    public function eliminar() {
         try {
-            $conexion = $this->obtenerConexion();
-            if (!$conexion) {
-                return false;
-            }
-
-            $conexion->prepare("DELETE FROM detalle_pedido WHERE id_pedido = ?")->execute([$id]);
-            $stmt = $conexion->prepare("DELETE FROM pedido WHERE id = ?");
-            return $stmt->execute([$id]);
+            $conexion = parent::conectar();
+            $detalle = $conexion->prepare("DELETE FROM detalle_pedido WHERE id_pedido = :id_pedido");
+            $detalle->bindParam(':id_pedido', $this->id, PDO::PARAM_INT);
+            $detalle->execute();
+            $stmt = $conexion->prepare("DELETE FROM pedido WHERE id = :id");
+            $stmt->bindParam(':id', $this->id, PDO::PARAM_INT);
+            $ok = $stmt->execute();
+            return array('success' => $ok);
         } catch (Exception $e) {
-            return false;
+            return array('success' => false, 'error' => $e->getMessage());
         }
     }
 
     // Devuelve clientes para llenar el select del formulario de ordenes.
     public function listarClientes() {
         try {
-            $conexion = $this->obtenerConexion();
-            if (!$conexion) {
-                return [];
-            }
+            $conexion = parent::conectar();
             $stmt = $conexion->prepare("SELECT id, nombre, apellido FROM cliente ORDER BY nombre ASC");
             $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return array('success' => true, 'datos' => $stmt->fetchAll(PDO::FETCH_ASSOC));
         } catch (Exception $e) {
-            return [];
+            return array('success' => false, 'error' => $e->getMessage());
         }
     }
 
     // Devuelve vendedores/usuarios para llenar el select del formulario.
     public function listarVendedores() {
         try {
-            $conexion = $this->obtenerConexion();
-            if (!$conexion) {
-                return [];
-            }
+            $conexion = parent::conectar();
             $stmt = $conexion->prepare("SELECT id, nombre, apellido FROM personal ORDER BY nombre ASC");
             $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return array('success' => true, 'datos' => $stmt->fetchAll(PDO::FETCH_ASSOC));
         } catch (Exception $e) {
-            return [];
+            return array('success' => false, 'error' => $e->getMessage());
         }
     }
 
     // Devuelve los estatus disponibles para editar el estado de una orden.
     public function listarEstatus() {
         try {
-            $conexion = $this->obtenerConexion();
-            if (!$conexion) {
-                return [];
-            }
+            $conexion = parent::conectar();
             $stmt = $conexion->prepare("SELECT id, nombre FROM estatus ORDER BY id ASC");
             $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return array('success' => true, 'datos' => $stmt->fetchAll(PDO::FETCH_ASSOC));
         } catch (Exception $e) {
-            return [];
+            return array('success' => false, 'error' => $e->getMessage());
         }
     }
 }
