@@ -2,14 +2,33 @@ let productosDisponibles = [];
 let detallePedido = [];
 let accionActual = 'crear';
 
-$(document).ready(function() {
+enlazarEventos();
+
+$(function() {
     cargarCombos();
     cargarProductos();
     listarPedidos();
     resetPedido();
-    
-    $('#id_producto').on('change', onProductoChange);
 });
+
+function enlazarEventos() {
+    $(document).off('.pedidos');
+
+    $(document).on('click.pedidos', '#btnNuevoPedido', abrirFormularioPedido);
+    $(document).on('click.pedidos', '#btnGuardarPedido', guardarPedido);
+    $(document).on('click.pedidos', '#btnLimpiarPedido', resetPedido);
+    $(document).on('click.pedidos', '#btnAgregarItem', agregarItem);
+    $(document).on('change.pedidos', '#id_producto', onProductoChange);
+    $(document).on('click.pedidos', '.js-editar-pedido', function() {
+        editarPedido(Number($(this).data('id')));
+    });
+    $(document).on('click.pedidos', '.js-eliminar-pedido', function() {
+        eliminarPedido(Number($(this).data('id')));
+    });
+    $(document).on('click.pedidos', '.js-eliminar-item', function() {
+        eliminarItem(Number($(this).data('index')));
+    });
+}
 
 function money(valor) {
     if (valor === null || valor === undefined || valor === '') {
@@ -96,8 +115,8 @@ function listarPedidos() {
                 '<td>' + money(p.total) + '</td>' +
                 '<td>' + (p.estatus || '-') + '</td>' +
                 '<td class="pedido-actions">' +
-                    '<button class="btn btn-xs btn-warning" title="Consultar" onclick="editarPedido(' + p.id + ')"><i class="material-icons">visibility</i></button> ' +
-                    '<button class="btn btn-xs btn-danger" title="Eliminar" onclick="eliminarPedido(' + p.id + ')"><i class="material-icons">delete</i></button>' +
+                    '<button class="btn btn-xs btn-warning js-editar-pedido" title="Consultar" data-id="' + p.id + '"><i class="material-icons">visibility</i></button> ' +
+                    '<button class="btn btn-xs btn-danger js-eliminar-pedido" title="Eliminar" data-id="' + p.id + '"><i class="material-icons">delete</i></button>' +
                 '</td>' +
                 '</tr>';
         });
@@ -212,7 +231,7 @@ function renderDetalle() {
             '<td>' + item.cantidad + '</td>' +
             '<td>' + money(item.precio_unitario) + '</td>' +
             '<td>' + money(subtotal) + '</td>' +
-            '<td><button class="btn btn-xs btn-danger" title="Eliminar" onclick="eliminarItem(' + index + ')"><i class="material-icons">delete</i></button></td>' +
+            '<td><button class="btn btn-xs btn-danger js-eliminar-item" title="Eliminar" data-index="' + index + '"><i class="material-icons">delete</i></button></td>' +
             '</tr>';
     });
 
