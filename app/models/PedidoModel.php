@@ -2,57 +2,29 @@
 require_once __DIR__ . '/../../config/conex.php';
 
 class PedidoModel extends Conexion {
-    private function obtenerConexion() {
-        return Conexion::conectar();
-    }
+    private $id;
+    private $id_cliente;
+    private $id_vendedor;
+    private $fecha;
+    private $id_estatus;
+    private $detalle = [];
 
-    private function asegurarColumnasMonetarias($conexion) {
-        $columnas = [
-            ['tabla' => 'pedido', 'campo' => 'total', 'sql' => "ALTER TABLE pedido MODIFY total DECIMAL(18,6) NOT NULL DEFAULT 0"],
-            ['tabla' => 'detalle_pedido', 'campo' => 'precio_unitario', 'sql' => "ALTER TABLE detalle_pedido MODIFY precio_unitario DECIMAL(18,6) NOT NULL DEFAULT 0"]
-        ];
-
-        foreach ($columnas as $columna) {
-            $stmt = $conexion->prepare("SHOW COLUMNS FROM {$columna['tabla']} WHERE Field = ?");
-            $stmt->execute([$columna['campo']]);
-            $info = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($info && strtolower($info['Type']) !== 'decimal(18,6)') {
-                $conexion->exec($columna['sql']);
-            }
-        }
-    }
-
-    private function siguienteId($conexion, $tabla) {
-        try {
-            $stmt = $conexion->query("SELECT COALESCE(MAX(id), 0) + 1 AS siguiente FROM $tabla");
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            return (int)($row['siguiente'] ?? 1);
-        } catch (Exception $e) {
-            return 1;
-        }
-    }
-
-    private function recalcularTotalOrden($conexion, $idOrden) {
-        $stmt = $conexion->prepare(
-            "SELECT COALESCE(SUM(cantidad * precio_unitario), 0) AS total
-             FROM detalle_pedido
-             WHERE id_pedido = ?"
-        );
-        $stmt->execute([$idOrden]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        $total = $row['total'] ?? 0;
-
-        $update = $conexion->prepare("UPDATE pedido SET total = ? WHERE id = ?");
-        $update->execute([$total, $idOrden]);
-    }
+    public function setId($id) { $this->id = $id; }
+    public function getId() { return $this->id; }
+    public function setCliente($id_cliente) { $this->id_cliente = $id_cliente; }
+    public function getCliente() { return $this->id_cliente; }
+    public function setVendedor($id_vendedor) { $this->id_vendedor = $id_vendedor; }
+    public function getVendedor() { return $this->id_vendedor; }
+    public function setFecha($fecha) { $this->fecha = $fecha; }
+    public function getFecha() { return $this->fecha; }
+    public function setEstatus($id_estatus) { $this->id_estatus = $id_estatus; }
+    public function getEstatus() { return $this->id_estatus; }
+    public function setDetalle($detalle) { $this->detalle = $detalle; }
+    public function getDetalle() { return $this->detalle; }
 
     public function listarOrdenes() {
         try {
-            $conexion = $this->obtenerConexion();
-            if (!$conexion) {
-                return [];
-            }
-            $this->asegurarColumnasMonetarias($conexion);
+            $conexion = parent::conectar();
 
             $stmt = $conexion->prepare(
                 "SELECT p.id, p.fecha, p.total, p.id_cliente, p.id_vendedor, p.id_estatus,
@@ -69,19 +41,15 @@ class PedidoModel extends Conexion {
                  ORDER BY p.id DESC"
             );
             $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return array('success' => true, 'datos' => $stmt->fetchAll(PDO::FETCH_ASSOC));
         } catch (Exception $e) {
-            return [];
+            return array('success' => false, 'error' => $e->getMessage());
         }
     }
 
     public function listarProductos() {
         try {
-            $conexion = $this->obtenerConexion();
-            if (!$conexion) {
-                return [];
-            }
-            $this->asegurarColumnasMonetarias($conexion);
+            $conexion = parent::conectar();
 
             $stmt = $conexion->prepare(
                 "SELECT p.id,
@@ -93,18 +61,15 @@ class PedidoModel extends Conexion {
                  ORDER BY nombre ASC"
             );
             $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return array('success' => true, 'datos' => $stmt->fetchAll(PDO::FETCH_ASSOC));
         } catch (Exception $e) {
-            return [];
+            return array('success' => false, 'error' => $e->getMessage());
         }
     }
 
     public function listarDetalle($idOrden) {
         try {
-            $conexion = $this->obtenerConexion();
-            if (!$conexion) {
-                return [];
-            }
+            $conexion = parent::conectar();
 
             $stmt = $conexion->prepare(
                 "SELECT dp.id, dp.id_pedido, dp.id_producto, dp.cantidad, dp.precio_unitario,
@@ -113,54 +78,61 @@ class PedidoModel extends Conexion {
                  FROM detalle_pedido dp
                  LEFT JOIN producto pr ON dp.id_producto = pr.id
                  LEFT JOIN linea_producto lp ON pr.id_linea = lp.id
-                 WHERE dp.id_pedido = ?
+                 WHERE dp.id_pedido = :id_pedido
                  ORDER BY dp.id ASC"
             );
-            $stmt->execute([$idOrden]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $stmt->bindParam(':id_pedido', $idOrden, PDO::PARAM_INT);
+            $stmt->execute();
+            return array('success' => true, 'datos' => $stmt->fetchAll(PDO::FETCH_ASSOC));
         } catch (Exception $e) {
-            return [];
+            return array('success' => false, 'error' => $e->getMessage());
         }
     }
 
-    public function guardarPedido($data) {
+    public function guardarPedido() {
         try {
-            $conexion = $this->obtenerConexion();
-            if (!$conexion) {
-                return false;
-            }
-            $this->asegurarColumnasMonetarias($conexion);
+            $conexion = parent::conectar();
 
-            $idPedido = !empty($data['id']) ? (int)$data['id'] : $this->siguienteId($conexion, 'pedido');
-            $idCliente = $data['id_cliente'] ?? 0;
-            $idVendedor = $data['id_vendedor'] ?? 0;
-            $fecha = !empty($data['fecha']) ? $data['fecha'] : date('Y-m-d');
-            $idEstatus = $data['id_estatus'] ?? 1;
-            $detalle = $data['detalle'] ?? [];
+            $idPedido = !empty($this->id) ? (int)$this->id : 0;
+            $fecha = !empty($this->fecha) ? $this->fecha : date('Y-m-d');
 
             $conexion->beginTransaction();
 
-            if (!empty($data['id'])) {
-                $stmt = $conexion->prepare(
-                    "UPDATE pedido SET id_cliente=?, id_vendedor=?, fecha=?, id_estatus=? WHERE id=?"
-                );
-                $ok = $stmt->execute([$idCliente, $idVendedor, $fecha, $idEstatus, $idPedido]);
+            if (!empty($this->id)) {
+                $sql = "UPDATE pedido SET id_cliente = :id_cliente, id_vendedor = :id_vendedor,
+                        fecha = :fecha, id_estatus = :id_estatus WHERE id = :id";
+                $stmt = $conexion->prepare($sql);
+                $stmt->bindParam(':id_cliente', $this->id_cliente, PDO::PARAM_INT);
+                $stmt->bindParam(':id_vendedor', $this->id_vendedor, PDO::PARAM_INT);
+                $stmt->bindParam(':fecha', $fecha, PDO::PARAM_STR);
+                $stmt->bindParam(':id_estatus', $this->id_estatus, PDO::PARAM_INT);
+                $stmt->bindParam(':id', $idPedido, PDO::PARAM_INT);
+                $ok = $stmt->execute();
             } else {
-                $stmt = $conexion->prepare(
-                    "INSERT INTO pedido (id, id_cliente, id_vendedor, fecha, total, id_estatus)
-                     VALUES (?, ?, ?, ?, ?, ?)"
-                );
-                $ok = $stmt->execute([$idPedido, $idCliente, $idVendedor, $fecha, 0, $idEstatus]);
+                $sql = "INSERT INTO pedido (id_cliente, id_vendedor, fecha, total, id_estatus)
+                        VALUES (:id_cliente, :id_vendedor, :fecha, :total, :id_estatus)";
+                $stmt = $conexion->prepare($sql);
+                $totalInicial = 0;
+                $estatus = $this->id_estatus ?: 1;
+                $stmt->bindParam(':id_cliente', $this->id_cliente, PDO::PARAM_INT);
+                $stmt->bindParam(':id_vendedor', $this->id_vendedor, PDO::PARAM_INT);
+                $stmt->bindParam(':fecha', $fecha, PDO::PARAM_STR);
+                $stmt->bindParam(':total', $totalInicial, PDO::PARAM_INT);
+                $stmt->bindParam(':id_estatus', $estatus, PDO::PARAM_INT);
+                $ok = $stmt->execute();
+                $idPedido = (int)$conexion->lastInsertId();
             }
 
             if (!$ok) {
                 throw new Exception('No se pudo guardar la cabecera del pedido');
             }
 
-            $conexion->prepare("DELETE FROM detalle_pedido WHERE id_pedido = ?")->execute([$idPedido]);
+            $borrarDetalle = $conexion->prepare("DELETE FROM detalle_pedido WHERE id_pedido = :id_pedido");
+            $borrarDetalle->bindParam(':id_pedido', $idPedido, PDO::PARAM_INT);
+            $borrarDetalle->execute();
 
             $total = 0;
-            foreach ($detalle as $item) {
+            foreach ($this->detalle as $item) {
                 $idProducto = $item['id_producto'] ?? 0;
                 $cantidad = (int)($item['cantidad'] ?? 0);
                 $precio = (float)($item['precio_unitario'] ?? 0);
@@ -169,44 +141,49 @@ class PedidoModel extends Conexion {
                     continue;
                 }
 
-                $idDetalle = $this->siguienteId($conexion, 'detalle_pedido');
-                $stmt = $conexion->prepare(
-                    "INSERT INTO detalle_pedido (id, id_pedido, id_producto, cantidad, precio_unitario)
-                     VALUES (?, ?, ?, ?, ?)"
-                );
-                $stmt->execute([$idDetalle, $idPedido, $idProducto, $cantidad, $precio]);
+                $sql = "INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad, precio_unitario)
+                    VALUES (:id_pedido, :id_producto, :cantidad, :precio_unitario)";
+                $stmt = $conexion->prepare($sql);
+                $stmt->bindParam(':id_pedido', $idPedido, PDO::PARAM_INT);
+                $stmt->bindParam(':id_producto', $idProducto, PDO::PARAM_INT);
+                $stmt->bindParam(':cantidad', $cantidad, PDO::PARAM_INT);
+                $stmt->bindParam(':precio_unitario', $precio);
+                $stmt->execute();
                 $total += $cantidad * $precio;
             }
 
-            $conexion->prepare("UPDATE pedido SET total = ? WHERE id = ?")->execute([$total, $idPedido]);
+            $actualizarTotal = $conexion->prepare("UPDATE pedido SET total = :total WHERE id = :id");
+            $actualizarTotal->bindParam(':total', $total);
+            $actualizarTotal->bindParam(':id', $idPedido, PDO::PARAM_INT);
+            $actualizarTotal->execute();
             $conexion->commit();
-            return true;
+            return array('success' => true, 'datos' => array('id' => $idPedido));
         } catch (Exception $e) {
             if (isset($conexion) && $conexion && $conexion->inTransaction()) {
                 $conexion->rollBack();
             }
-            return false;
+            return array('success' => false, 'error' => $e->getMessage());
         }
     }
 
     public function eliminarPedido($idPedido) {
         try {
-            $conexion = $this->obtenerConexion();
-            if (!$conexion) {
-                return false;
-            }
+            $conexion = parent::conectar();
 
             $conexion->beginTransaction();
-            $conexion->prepare("DELETE FROM detalle_pedido WHERE id_pedido = ?")->execute([$idPedido]);
-            $stmt = $conexion->prepare("DELETE FROM pedido WHERE id = ?");
-            $ok = $stmt->execute([$idPedido]);
+            $detalle = $conexion->prepare("DELETE FROM detalle_pedido WHERE id_pedido = :id_pedido");
+            $detalle->bindParam(':id_pedido', $idPedido, PDO::PARAM_INT);
+            $detalle->execute();
+            $stmt = $conexion->prepare("DELETE FROM pedido WHERE id = :id");
+            $stmt->bindParam(':id', $idPedido, PDO::PARAM_INT);
+            $ok = $stmt->execute();
             $conexion->commit();
-            return $ok;
+            return array('success' => $ok);
         } catch (Exception $e) {
             if (isset($conexion) && $conexion && $conexion->inTransaction()) {
                 $conexion->rollBack();
             }
-            return false;
+            return array('success' => false, 'error' => $e->getMessage());
         }
     }
 }
