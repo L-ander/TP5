@@ -1,51 +1,79 @@
 <?php
-require_once __DIR__ . '/../models/OrdenModel.php';
 
-class OrdenController {
+require_once '../core/BaseController.php';
+require_once '../models/OrdenModel.php';
+
+class OrdenController extends BaseController {
     private $modelo;
 
-    // Crea una instancia del modelo de ordenes para reutilizarla en las acciones.
     public function __construct() {
         $this->modelo = new OrdenModel();
     }
 
-    // Atiende las acciones AJAX del modulo ordenes.
-    // Centraliza listar, crear, editar, eliminar y cargar combos del formulario.
-    public function ejecutar($accion, $datos = []) {
-        switch ($accion) {
-            case 'listar':
-                return json_encode(['success' => true, 'data' => $this->modelo->listar()]);
+    public function ejecutar($action, $data) {
+        $method = lcfirst($action);
 
-            case 'crear':
-                $ok = $this->modelo->crear($datos);
-                return json_encode(['success' => $ok, 'message' => $ok ? 'Orden creada correctamente' : 'Error al crear la orden']);
-
-            case 'editar':
-                $ok = $this->modelo->editar($datos);
-                return json_encode(['success' => $ok, 'message' => $ok ? 'Orden actualizada correctamente' : 'Error al actualizar la orden']);
-
-            case 'eliminar':
-                $id = $datos['id'] ?? 0;
-                $ok = $this->modelo->eliminar($id);
-                return json_encode(['success' => $ok, 'message' => $ok ? 'Orden eliminada correctamente' : 'Error al eliminar la orden']);
-
-            case 'clientes':
-                return json_encode(['success' => true, 'data' => $this->modelo->listarClientes()]);
-
-            case 'vendedores':
-                return json_encode(['success' => true, 'data' => $this->modelo->listarVendedores()]);
-
-            case 'estatus':
-                return json_encode(['success' => true, 'data' => $this->modelo->listarEstatus()]);
-
-            default:
-                return json_encode(['success' => false, 'message' => 'Accion no reconocida']);
+        if (method_exists($this, $method)) {
+            return $this->$method($data);
         }
+
+        return $this->jsonResponse(['success' => false, 'message' => 'Accion no reconocida'], 404);
+    }
+
+    protected function listar($data) {
+        return $this->respuesta($this->modelo->listar(), 'Error al obtener las ordenes');
+    }
+
+    protected function crear($data) {
+        $this->cargarModelo($data);
+        return $this->respuesta($this->modelo->crear(), 'Error al guardar la orden', 'Orden creada correctamente');
+    }
+
+    protected function editar($data) {
+        $this->cargarModelo($data);
+        return $this->respuesta($this->modelo->editar(), 'Error al actualizar la orden', 'Orden actualizada correctamente');
+    }
+
+    protected function eliminar($data) {
+        $this->modelo->setId($data['id'] ?? 0);
+        return $this->respuesta($this->modelo->eliminar(), 'Error al eliminar la orden', 'Orden eliminada correctamente');
+    }
+
+    protected function clientes($data) {
+        return $this->respuesta($this->modelo->listarClientes(), 'Error al obtener los clientes');
+    }
+
+    protected function vendedores($data) {
+        return $this->respuesta($this->modelo->listarVendedores(), 'Error al obtener los vendedores');
+    }
+
+    protected function estatus($data) {
+        return $this->respuesta($this->modelo->listarEstatus(), 'Error al obtener los estatus');
+    }
+
+    private function cargarModelo($data) {
+        $this->modelo->setId($data['id'] ?? 0);
+        $this->modelo->setCliente($data['id_cliente'] ?? 0);
+        $this->modelo->setVendedor($data['id_vendedor'] ?? 0);
+        $this->modelo->setFecha($data['fecha'] ?? date('Y-m-d'));
+        $this->modelo->setEstatus($data['id_estatus'] ?? 1);
+    }
+
+    private function respuesta($resultado, $error, $mensaje = 'Operacion realizada correctamente') {
+        if (!$resultado['success']) {
+            return $this->jsonResponse(['success' => false, 'error' => 3, 'msj' => $error]);
+        }
+
+        return $this->jsonResponse([
+            'success' => true,
+            'data' => $resultado['datos'] ?? [],
+            'message' => $mensaje
+        ]);
     }
 }
 
 if (isset($_POST['action'])) {
     $controller = new OrdenController();
-    echo $controller->ejecutar($_POST['action'], $_POST);
+    $controller->ejecutar($_POST['action'], $_POST);
 }
 ?>
