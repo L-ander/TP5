@@ -2,7 +2,7 @@
 <section class="content">
     <div class="container-fluid">
         <div class="bloque-encabezado">
-            <h2>Gestión de Productos</h2>
+            <h2>Permisos</h2>
         </div>
         <!-- Default Example -->
         <div class="row clearfix">
@@ -13,7 +13,7 @@
                             <ul class="nav nav-tabs tab-nav-right" role="tablist" style="border-bottom: none;">
                             <li role="presentation" class="active">
                                 <a href="#tab_productos" data-toggle="tab" style="color:white; font-weight:bold;">
-                                    <i class="material-icons">store</i> PRODUCTOS
+                                    <i class="material-icons">lock</i> Permisos
                                 </a>
                             </li>
                         </ul>
@@ -26,9 +26,6 @@
 
                             <!-- Se usar para abrir el modal editar, no abre el modal con jQuery x.x -->
                             <button type="hidden" style="display: none;" data-toggle="modal" data-target="#modalEditarProducto" id="abrirModalEditar"> </button>
-
-                            <!-- Agrega esto en la vista, junto con el botón abrirModalEditar existente -->
-                            <button type="hidden" style="display: none;" data-toggle="modal" data-target="#modalEditarCategoria" id="abrirModalEditarCategoria"> </button>
 
                             
                         </div>
@@ -78,7 +75,6 @@
     </div>
 </section>
 
-<?php include 'app/views/page/productos/modal.php'; ?>
+<?php include 'app/views/page/permisos/modal.php'; ?>
 <script src="resources/library/plugins/jquery/jquery.min.js"></script>
-<script src="public/js/productos.js"></script>
-<script src="public/js/subcategoria.js"></script>
+<script src="public/js/permisos.js"></script>

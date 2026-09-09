@@ -2,7 +2,7 @@
 <section class="content">
     <div class="container-fluid">
         <div class="bloque-encabezado">
-            <h2>Gestión de Productos</h2>
+            <h2>Roles y Permisos</h2>
         </div>
         <!-- Default Example -->
         <div class="row clearfix">
@@ -13,7 +13,7 @@
                             <ul class="nav nav-tabs tab-nav-right" role="tablist" style="border-bottom: none;">
                             <li role="presentation" class="active">
                                 <a href="#tab_productos" data-toggle="tab" style="color:white; font-weight:bold;">
-                                    <i class="material-icons">store</i> PRODUCTOS
+                                    <i class="material-icons">lock</i> Roles
                                 </a>
                             </li>
                         </ul>
@@ -46,12 +46,8 @@
                             <table class="table" id="tabla">
                                 <thead>
                                     <tr>
-                                        <th> Codigo </th>
+                                        <th> N </th>
                                         <th> Nombre </th>
-                                        <th> Producto </th>
-                                        <th> presentacion </th>
-                                        <th> Unidad de Medida </th>
-                                        <th> Precio </th>
                                         <th> Opciones </th>
                                     </tr>
                                 </thead>
@@ -78,7 +74,6 @@
     </div>
 </section>
 
-<?php include 'app/views/page/productos/modal.php'; ?>
+<?php include 'app/views/page/permisos/modal.php'; ?>
 <script src="resources/library/plugins/jquery/jquery.min.js"></script>
-<script src="public/js/productos.js"></script>
-<script src="public/js/subcategoria.js"></script>
+<script src="public/js/permisos.js"></script>

@@ -43,8 +43,8 @@ $nombreUsuario = trim(($_SESSION['nombre'] ?? 'Usuario') . ' ' . ($_SESSION['ape
                 <?php if ($esAdministrador): ?>
                     <li>
                         <a href="vendedores">
-                            <i class="material-icons">work</i>
-                            <span>Vendedores</span>
+                            <i class="material-icons">badge</i>
+                            <span>Personal</span>
                         </a>
                     </li>
                     <li>
@@ -79,6 +79,13 @@ $nombreUsuario = trim(($_SESSION['nombre'] ?? 'Usuario') . ' ' . ($_SESSION['ape
                             <span>Configuración</span>
                         </a>
                     </li>
+                    <li>
+                        <a href="roles">
+                            <i class="material-icons">lock</i>
+                            <span>Permisos</span>
+                        </a>
+                    </li>
+                    
                 <?php endif; ?>
 
                 <li>

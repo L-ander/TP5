@@ -40,6 +40,12 @@ return [
         'roles' => [1]
 
     ],
+    'roles' => [
+        'vista' => 'permisos/roles.php',
+        'menu'  => true,
+        'roles' => [1]
+
+    ],
     'pedido' => [
         'vista' => 'ordenes/ordenes.php',
         'menu'  => true,
