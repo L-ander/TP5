@@ -24,7 +24,7 @@
     <div class="container-fluid">
         <div class="bloque-encabezado" style="display:flex; justify-content:space-between; align-items:center;">
             <h2>Gestión de Pedidos</h2>
-            <button type="button" class="btn btn-primary" onclick="abrirFormularioPedido()">
+            <button type="button" id="btnNuevoPedido" class="btn btn-primary">
                 <i class="material-icons">add</i> Nuevo pedido
             </button>
         </div>
@@ -67,8 +67,8 @@
                             </div>
 
                             <div class="form-group">
-                                <button type="button" class="btn btn-success" onclick="guardarPedido()">Guardar pedido</button>
-                                <button type="button" class="btn btn-default" onclick="resetPedido()">Nuevo</button>
+                                <button type="button" id="btnGuardarPedido" class="btn btn-success">Guardar pedido</button>
+                                <button type="button" id="btnLimpiarPedido" class="btn btn-default">Nuevo</button>
                             </div>
                         </form>
                     </div>
@@ -99,7 +99,7 @@
                         </div>
 
                         <div class="form-group" style="margin-top:10px;">
-                            <button type="button" class="btn btn-primary" onclick="agregarItem()">Agregar al pedido</button>
+                            <button type="button" id="btnAgregarItem" class="btn btn-primary">Agregar al pedido</button>
                         </div>
 
                         <div class="table-responsive">
@@ -153,4 +153,4 @@
     </div>
 </section>
 
-<script src="public/js/pedidos.js"></script>
+<script src="public/js/pedidos.js?v=2"></script>
