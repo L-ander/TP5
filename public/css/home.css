@@ -120,12 +120,25 @@
 .panel-contenido {
     padding: 20px;
 }
+/* Base para escritorio */
+.contenedor-principal {
+    margin-left: 280px;
+    padding: 90px 30px 30px 30px;
+}
+
+/* Ajuste para tablet */
+@media (max-width: 991px) {
+    .contenedor-principal {
+        margin-left: 220px;
+        padding: 90px 20px 20px 20px;
+    }
+}
 
 /* Responsive para pantallas móviles */
 @media (max-width: 768px) {
     .contenedor-principal {
-        margin-left: 0; /* El menú se acoplaría arriba/oculto */
-        padding-top: 80px;
+        margin-left: 0;
+        padding: 80px 15px 20px 15px;
     }
 }
 
@@ -138,3 +151,4 @@
     padding: 10px;
 
 }
+
