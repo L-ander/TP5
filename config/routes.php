@@ -14,16 +14,7 @@ return [
         'menu'  => true,
         'roles' => ['*']
     ],
-    'reportes' => [
-        'vista' => 'reportes/reportes.php',
-        'menu'  => true,
-        'roles' => [1]
-    ],
-    'configuracion' => [
-        'vista' => 'configuracion/configuracion.php',
-        'menu'  => true,
-        'roles' => [1]
-    ],
+    
     'clientes' => [
         'vista' => 'clientes/clientes.php',
         'menu'  => true,
@@ -40,21 +31,23 @@ return [
         'roles' => [1]
 
     ],
-    'roles' => [
+
+    'pedidos' => [
+        'vista' => 'pedidos/pedidos.php',
+        'menu'  => true,
+        'roles' => [1, 2]
+    ],
+        'roles' => [
         'vista' => 'permisos/roles.php',
         'menu'  => true,
         'roles' => [1]
 
     ],
-    'pedido' => [
-        'vista' => 'ordenes/ordenes.php',
+    
+    'configuracion' => [
+        'vista' => 'configuracion/configuracion.php',
         'menu'  => true,
-        'roles' => [1, 2]
-    ],
-    'pedidos' => [
-        'vista' => 'pedidos/pedidos.php',
-        'menu'  => true,
-        'roles' => [1, 2]
+        'roles' => [1]
     ],
 
     'salir' => [

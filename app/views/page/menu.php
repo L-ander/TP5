@@ -1,9 +1,11 @@
 <?php
 $rolUsuario = isset($_SESSION['codrol']) ? (int)$_SESSION['codrol'] : 0;
-$esAdministrador = $rolUsuario === 1;
-$esVendedor = $rolUsuario === 2;
-$esAlmacenista = $rolUsuario === 3;
 $nombreUsuario = trim(($_SESSION['nombre'] ?? 'Usuario') . ' ' . ($_SESSION['apellido'] ?? ''));
+
+// Instanciamos el Router para obtener las rutas y sus permisos configurados
+require_once 'app/core/Router.php';
+$routerMenu = new Router();
+$todasLasRutas = $routerMenu->getRoutes();
 ?>
 <link rel="stylesheet" href="public/css/custom.css">
 
@@ -20,74 +22,52 @@ $nombreUsuario = trim(($_SESSION['nombre'] ?? 'Usuario') . ' ' . ($_SESSION['ape
 
 <section>
     <aside id="leftsidebar" class="sidebar">
-
-
         <div class="menu">
             <ul class="list">
-                <li>
-                    <a href="home">
-                        <i class="material-icons">home</i>
-                        <span>Home</span>
-                    </a>
-                </li>
+                <?php foreach ($todasLasRutas as $accion => $config): ?>
+                    <?php 
+                        // Si la ruta no debe mostrarse en el menú, la saltamos
+                        if (empty($config['menu'])) {
+                            continue;
+                        }
 
-                <?php if ($esAdministrador || $esVendedor): ?>
-                    <li>
-                        <a href="clientes">
-                            <i class="material-icons">people</i>
-                            <span>Clientes</span>
-                        </a>
-                    </li>
-                <?php endif; ?>
+                        // Validamos si el rol del usuario actual tiene acceso a esta ruta según routes.php
+                        $rolesPermitidos = $config['roles'];
+                        $tieneAcceso = in_array('*', $rolesPermitidos) || in_array($rolUsuario, array_map('intval', $rolesPermitidos), true);
 
-                <?php if ($esAdministrador): ?>
-                    <li>
-                        <a href="vendedores">
-                            <i class="material-icons">badge</i>
-                            <span>Personal</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="producto">
-                            <i class="material-icons">shopping_cart</i>
-                            <span>Productos</span>
-                        </a>
-                    </li>
-                <?php endif; ?>
+                        // Si no tiene acceso, no dibujamos esta opción en el menú
+                        if (!$tieneAcceso) {
+                            continue;
+                        }
 
-                <?php if ($esAdministrador || $esVendedor): ?>
-                    <li>
+                        // Definimos iconos representativos según la acción
+                        $icono = 'folder'; // Icono por defecto
+                        switch ($accion) {
+                            case 'home': $icono = 'home'; break;
+                            case 'clientes': $icono = 'people'; break;
+                            case 'vendedores': $icono = 'badge'; break;
+                            case 'producto': $icono = 'shopping_cart'; break; 
+                            case 'pedidos': $icono = 'playlist_add'; break;
+                            case 'reportes': $icono = 'insert_chart'; break;
+                            case 'configuracion': $icono = 'settings'; break;
+                            case 'roles': $icono = 'lock'; break;
+                        }
 
+                        // Formateamos el nombre del menú de la primera letra en mayúscula
+                        $nombreModulo = ucfirst($accion);
+                        if ($accion === 'vendedores') $nombreModulo = 'Personal';
+                        if ($accion === 'pedido' || $accion === 'pedidos') $nombreModulo = 'Pedidos';
+                        if ($accion === 'roles') $nombreModulo = 'Permisos';
+                    ?>
                     <li>
-                        <a href="pedidos">
-                            <i class="material-icons">playlist_add</i>
-                            <span>Pedidos</span>
+                        <a href="<?php echo $accion; ?>">
+                            <i class="material-icons"><?php echo $icono; ?></i>
+                            <span><?php echo $nombreModulo; ?></span>
                         </a>
                     </li>
-                <?php endif; ?>
+                <?php endforeach; ?>
 
-                <?php if ($esAdministrador): ?>
-                    <li>
-                        <a href="reportes">
-                            <i class="material-icons">insert_chart</i>
-                            <span>Reportes</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="configuracion">
-                            <i class="material-icons">settings</i>
-                            <span>Configuración</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="roles">
-                            <i class="material-icons">lock</i>
-                            <span>Permisos</span>
-                        </a>
-                    </li>
-                    
-                <?php endif; ?>
-
+                <!-- Opción estática de Salir del Sistema -->
                 <li>
                     <a href="salir">
                         <i class="material-icons">input</i>

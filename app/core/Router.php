@@ -8,6 +8,9 @@ class Router {
         // rutas Del Sistema
         $this->routes = require 'config/routes.php';
     }
+    public function getRoutes() {
+        return $this->routes;
+    }
 
     public function resolve($action, $userRole = null) {
         // Acceso a rutas
