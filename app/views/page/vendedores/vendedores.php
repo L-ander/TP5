@@ -85,3 +85,4 @@
 <?php include 'app/views/page/vendedores/modales.php'; ?>
 <script src="public/js/validaciones.js"></script>
 <script src="public/js/vendedores.js"></script>
+
