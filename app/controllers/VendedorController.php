@@ -7,7 +7,7 @@ class VendedorController {
     private function validarDatos($datos, $modelo, $esEdicion = false) {
         // Validar Cedula
         if (!is_numeric($datos['cedula']) || $datos['cedula'] < 5000000) {
-            return "La cédula debe ser un número mayor a 5.000.000.";
+            return "La cédula debe contener un mínimo de siete dígitos";
         }
         
         // Validar duplicado
@@ -89,6 +89,18 @@ class VendedorController {
             case 'eliminar_usuario':
                 $ok = $modelo->eliminarUsuario($datos['id']);
                 return json_encode(['success' => $ok, 'message' => $ok ? 'Usuario eliminado (El personal sigue intacto)' : 'Error al eliminar usuario']);
+            
+            case 'crear_tipo_personal':
+                $ok = $modelo->crearTipoPersonal($datos['nombre']);
+                return json_encode(['success' => $ok, 'message' => $ok ? 'Cargo registrado exitosamente' : 'Error al registrar']);
+                
+            case 'editar_tipo_personal':
+                $ok = $modelo->editarTipoPersonal($datos['id'], $datos['nombre']);
+                return json_encode(['success' => $ok, 'message' => $ok ? 'Cargo actualizado exitosamente' : 'Error al actualizar']);
+                
+            case 'eliminar_tipo_personal':
+                $ok = $modelo->eliminarTipoPersonal($datos['id']);
+                return json_encode(['success' => $ok, 'message' => $ok ? 'Cargo eliminado' : 'No se puede eliminar: el cargo está siendo usado por personal registrado']);
                 
             default:
                 return json_encode(['success' => false, 'message' => 'Acción no reconocida']);

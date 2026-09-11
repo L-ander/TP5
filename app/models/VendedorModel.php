@@ -56,7 +56,7 @@ class VendedorModel extends Conexion {
 
     public function listarRoles() {
         $conexion = Conexion::conectar();
-        $stmt = $conexion->prepare("SELECT ID as id, roles as nombre FROM roles");
+        $stmt = $conexion->prepare("SELECT ID as id, nombre FROM roles");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -92,7 +92,7 @@ class VendedorModel extends Conexion {
         $conexion = Conexion::conectar();
         $stmt = $conexion->prepare(
             "SELECT u.id, u.username, u.password, u.cod_rol, u.status, u.id_personal, 
-                    p.nombre, p.apellido, r.roles as nombre_rol 
+                    p.nombre, p.apellido, r.nombre as nombre_rol 
              FROM usuario u 
              INNER JOIN personal p ON u.id_personal = p.id 
              LEFT JOIN roles r ON u.cod_rol = r.ID 
@@ -118,6 +118,28 @@ class VendedorModel extends Conexion {
         $conexion = Conexion::conectar();
         $stmt = $conexion->prepare("DELETE FROM usuario WHERE id=?");
         return $stmt->execute([$id]);
+    }
+
+    public function crearTipoPersonal($nombre) {
+        $conexion = Conexion::conectar();
+        $stmt = $conexion->prepare("INSERT INTO tipo_personal (nombre) VALUES (?)");
+        return $stmt->execute([$nombre]);
+    }
+
+    public function editarTipoPersonal($id, $nombre) {
+        $conexion = Conexion::conectar();
+        $stmt = $conexion->prepare("UPDATE tipo_personal SET nombre=? WHERE id=?");
+        return $stmt->execute([$nombre, $id]);
+    }
+
+    public function eliminarTipoPersonal($id) {
+        try {
+            $conexion = Conexion::conectar();
+            $stmt = $conexion->prepare("DELETE FROM tipo_personal WHERE id=?");
+            return $stmt->execute([$id]);
+        } catch (PDOException $e) {
+            return false; // Falla si el cargo ya está asignado a un empleado
+        }
     }
 }
 ?>

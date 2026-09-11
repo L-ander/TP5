@@ -49,6 +49,12 @@ return [
         'menu'  => true,
         'roles' => [1]
     ],
+    
+    'configuracion_usuarios' => [
+        'vista' => 'vendedores/configuracion_usuarios.php',
+        'menu'  => true,
+        'roles' => [1]
+    ],
 
     'salir' => [
         'vista' => 'salir.php',

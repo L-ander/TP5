@@ -2,27 +2,40 @@
 $rolUsuario = isset($_SESSION['codrol']) ? (int)$_SESSION['codrol'] : 0;
 $nombreUsuario = trim(($_SESSION['nombre'] ?? 'Usuario') . ' ' . ($_SESSION['apellido'] ?? ''));
 
-// Instanciamos el Router para obtener las rutas y sus permisos configurados
 require_once 'app/core/Router.php';
 $routerMenu = new Router();
 $todasLasRutas = $routerMenu->getRoutes();
 ?>
 <link rel="stylesheet" href="public/css/custom.css">
 
+<div class="overlay"></div>
+
 <nav class="navbar">
     <div class="container-fluid">
-        <div class="navbar-header">
-            <a href="javascript:void(0);" class="bars"></a>
+        <div class="navbar-header" style="display: flex; align-items: center;">
+            <a href="javascript:void(0);" class="bars">
+                <i class="material-icons">menu</i>
+            </a>
             <a class="navbar-brand" href="home">
-                <img src="public/img/logo/logos.png" alt="User" />
+                <img src="public/img/logo/logos.png" alt="Logo" />
             </a>
         </div>
     </div>
 </nav>
 
-<section>
+<section style="position: relative; z-index: 9999;">
     <aside id="leftsidebar" class="sidebar">
-        <div class="menu">
+    <div class="sidebar-header-mobile">
+        <div class="user-greeting">
+            <i class="material-icons">account_circle</i>
+            <span>Hola, <?php echo $nombreUsuario; ?></span>
+        </div>
+        <a href="javascript:void(0);" class="close-sidebar">
+            <i class="material-icons">close</i>
+        </a>
+    </div>
+
+    <div class="menu">
             <ul class="list">
                 <?php foreach ($todasLasRutas as $accion => $config): ?>
                     <?php 
@@ -37,6 +50,10 @@ $todasLasRutas = $routerMenu->getRoutes();
 
                         // Si no tiene acceso, no dibujamos esta opción en el menú
                         if (!$tieneAcceso) {
+                            continue;
+                        }
+
+                        if ($accion === 'configuracion_usuarios') {
                             continue;
                         }
 
@@ -87,4 +104,4 @@ $todasLasRutas = $routerMenu->getRoutes();
         </div>
     </aside>
 </section>
-<script src="resources/library/plugins/jquery/jquery.min.js"></script>
+<script src="public/js/menu.js"></script>
