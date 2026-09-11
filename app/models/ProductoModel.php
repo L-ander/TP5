@@ -132,15 +132,41 @@
 		}
 
 		public function eliminar() {
-			try {
-				$sql = "DELETE FROM producto WHERE id = :id";
-				$stmt = parent::conectar()->prepare($sql);
-				$stmt->bindParam(":id", $this->id, PDO::PARAM_INT);
-				$stmt->execute();
-				return array('success' => true);
-			} catch (Exception $e) {
-				return array('success' => false, 'error' => $e->getMessage());
-			}
-		}
+    try {
+
+        $conexion = parent::conectar();
+
+        // Verificar si el producto está usado en algún pedido
+        $sql = "SELECT COUNT(*) 
+                FROM detalle_pedido 
+                WHERE id_producto = :id";
+
+        $stmt = $conexion->prepare($sql);
+        $stmt->bindParam(":id", $this->id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        if ($stmt->fetchColumn() > 0) {
+            return array(
+                'success' => false,
+                'error' => 'producto_anclado'
+            );
+        }
+
+        // Si no está usado, se puede eliminar
+        $sql = "DELETE FROM producto WHERE id = :id";
+
+        $stmt = $conexion->prepare($sql);
+        $stmt->bindParam(":id", $this->id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return array('success' => true);
+
+    } catch (Exception $e) {
+        return array(
+            'success' => false,
+            'error' => $e->getMessage()
+        );
+    }
+}
 	}
 ?>

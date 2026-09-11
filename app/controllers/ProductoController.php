@@ -170,26 +170,35 @@
 
         protected function eliminar($data) {
 
-            // var_dump( $data );
-            // exit;
+    $producto = new productoModel();
+    $producto->setId($data["id"]);
 
-            $producto = new productoModel();
-            $producto->setId($data["id"]);
-            $user = $producto->eliminar();
+    $user = $producto->eliminar();
 
-            // var_dump( $user['success'] );
-            // exit();
+    if ($user['success']) {
 
-            if ( $user['success'] ) {
+        return $this->jsonResponse([
+            'success' => true
+        ]);
 
-                return $this->jsonResponse([
-                    'success' => true
-                ]);
-            } else {
+    } else {
 
-                return $this->jsonResponse(['success' => false, 'error' => 3, 'msj' => 'Error Al Guardar la Informacion']);
-            }
+        if ($user['error'] === 'producto_anclado') {
+
+            return $this->jsonResponse([
+                'success' => false,
+                'msj' => 'Producto anclado a un pedido, Error al eliminar'
+            ]);
+
         }
+
+        return $this->jsonResponse([
+            'success' => false,
+            'error' => 3,
+            'msj' => 'Error al eliminar el producto'
+        ]);
+    }
+}
     }
 
     if (isset($_POST['action'])) {

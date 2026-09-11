@@ -24,7 +24,57 @@ class ConfiguracionController {
                 case 'guardar_medida':
                     return $this->resultado($this->modelo->guardarMedida($datos));
                 case 'eliminar':
-                    return $this->resultado($this->modelo->eliminar($datos['tabla'] ?? '', $datos['id'] ?? 0));
+
+    $resultado = $this->modelo->eliminar(
+        $datos['tabla'] ?? '',
+        $datos['id'] ?? 0
+    );
+
+    if ($resultado['success']) {
+        return $this->respuesta(
+            true,
+            [],
+            'Registro eliminado correctamente'
+        );
+    }
+
+    if ($resultado['error'] === 'categoria_anclada') {
+        return $this->respuesta(
+            false,
+            [],
+            'Categoría anclada a una subcategoría, Error al eliminar'
+        );
+    }
+
+    if ($resultado['error'] === 'subcategoria_anclada') {
+        return $this->respuesta(
+            false,
+            [],
+            'Subcategoría anclada a una línea de producto, Error al eliminar'
+        );
+    }
+
+    if ($resultado['error'] === 'medida_anclada') {
+        return $this->respuesta(
+            false,
+            [],
+            'Unidad de medida anclada a un producto, Error al eliminar'
+        );
+    }
+
+    if ($resultado['error'] === 'linea_anclada') {
+    return $this->respuesta(
+        false,
+        [],
+        'Línea de producto anclada a un producto, Error al eliminar'
+    );
+}
+
+    return $this->respuesta(
+        false,
+        [],
+        'Error al eliminar el registro'
+    );
                 default:
                     return $this->respuesta(false, [], 'Accion no reconocida');
             }

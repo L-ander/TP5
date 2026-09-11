@@ -11,7 +11,7 @@
                                     <i class="material-icons">shopping_basket</i>
                                 </span>
                                 <div class="form-line">
-                                    <input type="text" class="form-control" placeholder="Nombre" id="nombre">
+                                    <input type="text" class="form-control" placeholder="Nombre" id="nombre" maxlength="40">
                                 </div>
                             </div>
                         </div>
@@ -96,7 +96,7 @@
                                     <i class="material-icons">shopping_basket</i>
                                 </span>
                                 <div class="form-line">
-                                    <input type="text" class="form-control" placeholder="Nombre" id="nombreEditar">
+                                    <input type="text" class="form-control" placeholder="Nombre" id="nombreEditar" maxlength='40'>
                                 </div>
                             </div>
                         </div>

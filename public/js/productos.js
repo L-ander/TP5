@@ -65,12 +65,21 @@ $('#guardar').on('click', function() {
     crear();
 });
 
+$(document).on('click', '#abrirModal', function() { 
+    $('#idProducto').val('');
+    limpiarFormularioNuevo();
+
+});
+
 function crear() {
     var nombre = $('#nombre').val();
     var id_linea = $('#id_linea').val();
     var presentacion = $('#presentacion').val();
     var id_medida = $('#id_medida').val();
     var precio = $('#precio').val();
+
+
+
 
     $.ajax({
         url: 'app/controllers/ProductoController.php',
