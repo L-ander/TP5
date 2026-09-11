@@ -16,7 +16,7 @@
                                     <i class="material-icons">shopping_basket</i>
                                 </span>
                                 <div class="form-line">
-                                    <input type="text" class="form-control" placeholder="Nombre del Rol" id="nombre" maxlength='20'>
+                                    <input type="text" class="form-control" placeholder="Nombre del Rol" id="nombre">
                                 </div>
                             </div>
                         </div>

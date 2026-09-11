@@ -24,22 +24,56 @@ const cargarCombos = () => api({ action: 'tipos_personal' }, res => {
     if (res.success) $('#id_tipo_personal').html('<option value="">Seleccione el cargo...</option>' + res.data.map(t => `<option value="${t.id}">${t.nombre}</option>`).join(''));
 });
 
-const listarPersonal = () => api({ action: 'listar' }, res => {
-    $('#tablaPersonal').html((res.data || []).map(p => `<tr>
-        <td>${p.cedula}</td>
-        <td>${p.nombre} ${p.apellido}</td>
-        <td>${p.telefono || '-'}</td>
-        <td><span class="label bg-blue">${p.tipo_personal || 'Sin asignar'}</span></td>
-        <td><span class="label bg-${p.status == 1 ? 'green' : 'grey'}">${p.status == 1 ? 'Activo' : 'Inactivo'}</span></td>
-        <td>
-            <button class="btn btn-xs btn-warning" onclick='abrirModalEditar(${JSON.stringify(p).replace(/'/g, "&apos;")})' title="Modificar"><i class="material-icons">edit</i></button>
-            <button class="btn btn-xs btn-danger" onclick="eliminarPersonal(${p.id}, '${p.nombre}', '${p.cedula}')" title="Eliminar"><i class="material-icons">delete</i></button>
-        </td>
-    </tr>`).join(''));
-});
+function listarPersonal() {
+    $.post('app/controllers/VendedorController.php', { action: 'listar' }, function(response) {
+        const res = JSON.parse(response);
+        if (res.success) {
+            let htmlTodos = '';
+            let htmlStaff = '';
+
+            res.data.forEach(p => {
+                // Generar los colores para las etiquetas
+                let estado = (p.status == 1) 
+                    ? '<span class="label bg-green">Activo</span>' 
+                    : '<span class="label bg-red">Inactivo</span>';
+
+                let tipoPersonal = p.tipo_personal 
+                    ? `<span class="label bg-blue">${p.tipo_personal}</span>` 
+                    : '<span class="label bg-grey">Sin Cargo</span>';
+
+                // Crear la fila estándar
+                let fila = `<tr>
+                    <td>${p.cedula}</td>
+                    <td>${p.nombre} ${p.apellido}</td>
+                    <td>${p.telefono || '-'}</td>
+                    <td>${tipoPersonal}</td>
+                    <td>${estado}</td>
+                    <td>
+                        <button class="btn btn-warning btn-xs waves-effect" title="Editar" onclick="editarPersonal(${p.id})">
+                            <i class="material-icons">edit</i>
+                        </button>
+                        <button class="btn btn-danger btn-xs waves-effect" title="Eliminar" onclick="eliminarPersonal(${p.id})">
+                            <i class="material-icons">delete</i>
+                        </button>
+                    </td>
+                </tr>`;
+
+                htmlTodos += fila;
+
+                if (p.id_tipo_personal != 1) {
+                    htmlStaff += fila;
+                }
+            });
+
+            // Imprimir los resultados en sus respectivas tablas
+            $('#tablaPersonal').html(htmlTodos);
+            $('#tablaPersonalStaff').html(htmlStaff);
+        }
+    });
+}
 
 function iniciarValidacionesEnTiempoReal() {
-    // Registramos si el humano hizo click para ignorar los "blur" fantasmas de la plantilla
+    
     $('#cedula, #nombre, #apellido, #telefono').on('focus', function() { $(this).data('tocado', true); });
     $('#id_tipo_personal').on('change', function() { $(this).data('tocado', true); });
 
@@ -232,7 +266,7 @@ const abrirModalEditarUsuario = (u) => {
         
         $('#modalEditarUsuario').modal('show');
 
-        // ¡Este retraso es la magia para que las líneas verdes se queden!
+        
         setTimeout(() => {
             $('#edit_username, #edit_password, #edit_usuario_cod_rol').data('tocado', true);
             $('#edit_username, #edit_password').trigger('input');

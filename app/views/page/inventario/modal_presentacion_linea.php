@@ -25,7 +25,7 @@
                                 <i class="material-icons">edit</i>
                             </span>
                             <div class="form-line">
-                                <input type="text" class="form-control" placeholder="Nombre / Contenido" id="plNombre" maxlength='40' required>
+                                <input type="text" class="form-control" placeholder="Nombre / Contenido" id="plNombre" required>
                             </div>
                         </div>
                     </div>

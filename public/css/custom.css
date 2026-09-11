@@ -228,3 +228,96 @@ body {
     background-color: #f1f5f9;
     margin: 6px 0;
 }
+
+
+.overlay, 
+.bars, 
+.sidebar-header-mobile {
+    display: none !important;
+}
+
+/* 2. ANIMACIÓN SUAVE DE DESLIZAMIENTO */
+.sidebar, .content, .contenedor-principal {
+    transition: left 0.3s ease, margin-left 0.3s ease;
+}
+
+@media (max-width: 991px) {
+    
+    /* Mostrar botón hamburguesa naranja */
+    .bars {
+        display: block !important;
+        color: #ff9800; 
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .bars i {
+        font-size: 32px;
+        margin-top: 5px;
+    }
+
+    /* Configurar el Fondo Oscuro (Overlay) */
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.6); /* Sombra oscura */
+        z-index: 9998;
+    }
+    
+    /* Mostrar el fondo oscuro SOLO cuando el menú está abierto */
+    body.sidebar-open .overlay {
+        display: block !important;
+    }
+
+    /* Convertir el Sidebar en un Cajón Flotante (Tipo Amazon) */
+    .sidebar {
+        position: fixed;
+        top: 0 !important;
+        left: -320px; /* Escondido totalmente a la izquierda */
+        width: 280px;
+        height: 100vh !important;
+        z-index: 9999; /* Sobre el fondo oscuro */
+        box-shadow: none;
+        background-color: #fff;
+    }
+
+    /* Acción: Deslizar el menú hacia adentro cuando se abre */
+    body.sidebar-open .sidebar {
+        left: 0;
+        box-shadow: 5px 0 25px rgba(0,0,0,0.6);
+    }
+
+    /* Diseño de la cabecera oscura del menú (¡La que faltaba en tu foto!) */
+    .sidebar-header-mobile {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 15px;
+        background-color: #1e293b; /* Azul muy oscuro */
+        color: #ffffff;
+    }
+    .sidebar-header-mobile .user-greeting {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 16px;
+        font-weight: 600;
+    }
+    
+    /* Botón X de cerrar */
+    .sidebar-header-mobile .close-sidebar {
+        color: #ffffff;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .sidebar-header-mobile .close-sidebar i {
+        font-size: 26px;
+    }
+
+    /* Expandir el contenido principal para que no quede un espacio en blanco */
+    .content, .contenedor-principal {
+        margin-left: 0 !important;
+    }
+}
