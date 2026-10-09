@@ -3,142 +3,284 @@ require_once __DIR__ . '/../../config/conex.php';
 
 class VendedorModel extends Conexion {
     
+    private $id;
+    private $cedula;
+    private $nombre;
+    private $apellido;
+    private $telefono;
+    private $id_tipo_personal;
+    private $status;
+
+    private $id_usuario;
+    private $username;
+    private $password;
+    private $cod_rol;
+
+    public function setId($id) { $this->id = $id; }
+    public function getId() { return $this->id; }
+
+    public function setCedula($cedula) { $this->cedula = $cedula; }
+    public function getCedula() { return $this->cedula; }
+
+    public function setNombre($nombre) { $this->nombre = $nombre; }
+    public function getNombre() { return $this->nombre; }
+
+    public function setApellido($apellido) { $this->apellido = $apellido; }
+    public function getApellido() { return $this->apellido; }
+
+    public function setTelefono($telefono) { $this->telefono = $telefono; }
+    public function getTelefono() { return $this->telefono; }
+
+    public function setIdTipoPersonal($id_tipo_personal) { $this->id_tipo_personal = $id_tipo_personal; }
+    public function getIdTipoPersonal() { return $this->id_tipo_personal; }
+
+    public function setStatus($status) { $this->status = $status; }
+    public function getStatus() { return $this->status; }
+
+    public function setIdUsuario($id_usuario) { $this->id_usuario = $id_usuario; }
+    public function getIdUsuario() { return $this->id_usuario; }
+
+    public function setUsername($username) { $this->username = $username; }
+    public function getUsername() { return $this->username; }
+
+    public function setPassword($password) { $this->password = $password; }
+    public function getPassword() { return $this->password; }
+
+    public function setCodRol($cod_rol) { $this->cod_rol = $cod_rol; }
+    public function getCodRol() { return $this->cod_rol; }
+
+    //Personal
+
     public function listar() {
-        $conexion = Conexion::conectar();
-        $stmt = $conexion->prepare(
-            "SELECT p.id, p.cedula, p.nombre, p.apellido, p.telefono, p.status, 
-                    tp.nombre as tipo_personal, p.id_tipo_personal 
-             FROM personal p 
-             LEFT JOIN tipo_personal tp ON p.id_tipo_personal = tp.id 
-             ORDER BY p.id DESC"
-        );
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    // Verifica si la cedula ya existe
-    public function existeCedula($cedula, $idExcluir = null) {
-        $conexion = Conexion::conectar();
-        if ($idExcluir) {
-            $stmt = $conexion->prepare("SELECT id FROM personal WHERE cedula = ? AND id != ?");
-            $stmt->execute([$cedula, $idExcluir]);
-        } else {
-            $stmt = $conexion->prepare("SELECT id FROM personal WHERE cedula = ?");
-            $stmt->execute([$cedula]);
+        try {
+            $sql = "SELECT p.id, p.cedula, p.nombre, p.apellido, p.telefono, p.status, 
+                           tp.nombre as tipo_personal, p.id_tipo_personal 
+                    FROM personal p 
+                    LEFT JOIN tipo_personal tp ON p.id_tipo_personal = tp.id 
+                    ORDER BY p.id DESC";
+            $stmt = parent::conectar()->prepare($sql);
+            $stmt->execute();
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return array('success' => true, 'datos' => $data);
+        } catch (Exception $e) {
+            return array('success' => false, 'error' => $e->getMessage());
         }
-        return $stmt->rowCount() > 0;
     }
 
-    public function crear($data) {
-        $conexion = Conexion::conectar();
-        $stmt = $conexion->prepare("INSERT INTO personal (cedula, nombre, apellido, telefono, id_tipo_personal, status) VALUES (?, ?, ?, ?, ?, ?)");
-        return $stmt->execute([$data['cedula'], $data['nombre'], $data['apellido'], $data['telefono'], $data['id_tipo_personal'], $data['status']]);
+    public function existeCedula($idExcluir = null) {
+        try {
+            if ($idExcluir) {
+                $sql = "SELECT id FROM personal WHERE cedula = :cedula AND id != :id";
+                $stmt = parent::conectar()->prepare($sql);
+                $stmt->bindParam(":cedula", $this->cedula, PDO::PARAM_INT);
+                $stmt->bindParam(":id", $idExcluir, PDO::PARAM_INT);
+            } else {
+                $sql = "SELECT id FROM personal WHERE cedula = :cedula";
+                $stmt = parent::conectar()->prepare($sql);
+                $stmt->bindParam(":cedula", $this->cedula, PDO::PARAM_INT);
+            }
+            $stmt->execute();
+            return $stmt->rowCount() > 0;
+        } catch (Exception $e) {
+            return false;
+        }
     }
 
-    public function editar($data) {
-        $conexion = Conexion::conectar();
-        $stmt = $conexion->prepare("UPDATE personal SET cedula=?, nombre=?, apellido=?, telefono=?, id_tipo_personal=?, status=? WHERE id=?");
-        return $stmt->execute([$data['cedula'], $data['nombre'], $data['apellido'], $data['telefono'], $data['id_tipo_personal'], $data['status'], $data['id']]);
+    public function crear() {
+        try {
+            $sql = "INSERT INTO personal (cedula, nombre, apellido, telefono, id_tipo_personal, status) 
+                    VALUES (:cedula, :nombre, :apellido, :telefono, :id_tipo_personal, :status)";
+            $stmt = parent::conectar()->prepare($sql);
+            $stmt->bindParam(":cedula", $this->cedula, PDO::PARAM_INT);
+            $stmt->bindParam(":nombre", $this->nombre, PDO::PARAM_STR);
+            $stmt->bindParam(":apellido", $this->apellido, PDO::PARAM_STR);
+            $stmt->bindParam(":telefono", $this->telefono, PDO::PARAM_STR);
+            $stmt->bindParam(":id_tipo_personal", $this->id_tipo_personal, PDO::PARAM_INT);
+            $stmt->bindParam(":status", $this->status, PDO::PARAM_INT);
+            $stmt->execute();
+            return array('success' => true);
+        } catch (Exception $e) {
+            return array('success' => false, 'error' => $e->getMessage());
+        }
     }
 
-    public function eliminar($id) {
-        $conexion = Conexion::conectar();
-        $stmt = $conexion->prepare("DELETE FROM personal WHERE id=?");
-        return $stmt->execute([$id]);
+    public function editar() {
+        try {
+            $sql = "UPDATE personal 
+                    SET cedula=:cedula, nombre=:nombre, apellido=:apellido, telefono=:telefono, 
+                        id_tipo_personal=:id_tipo_personal, status=:status 
+                    WHERE id=:id";
+            $stmt = parent::conectar()->prepare($sql);
+            $stmt->bindParam(":cedula", $this->cedula, PDO::PARAM_INT);
+            $stmt->bindParam(":nombre", $this->nombre, PDO::PARAM_STR);
+            $stmt->bindParam(":apellido", $this->apellido, PDO::PARAM_STR);
+            $stmt->bindParam(":telefono", $this->telefono, PDO::PARAM_STR);
+            $stmt->bindParam(":id_tipo_personal", $this->id_tipo_personal, PDO::PARAM_INT);
+            $stmt->bindParam(":status", $this->status, PDO::PARAM_INT);
+            $stmt->bindParam(":id", $this->id, PDO::PARAM_INT);
+            $stmt->execute();
+            return array('success' => true);
+        } catch (Exception $e) {
+            return array('success' => false, 'error' => $e->getMessage());
+        }
     }
+
+    public function eliminar() {
+        try {
+            $sql = "DELETE FROM personal WHERE id=:id";
+            $stmt = parent::conectar()->prepare($sql);
+            $stmt->bindParam(":id", $this->id, PDO::PARAM_INT);
+            $stmt->execute();
+            return array('success' => true);
+        } catch (Exception $e) {
+            return array('success' => false, 'error' => $e->getMessage());
+        }
+    }
+
+    //Usuarios
 
     public function listarTiposPersonal() {
-        $conexion = Conexion::conectar();
-        $stmt = $conexion->prepare("SELECT id, nombre FROM tipo_personal");
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            $sql = "SELECT id, nombre FROM tipo_personal";
+            $stmt = parent::conectar()->prepare($sql);
+            $stmt->execute();
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return array('success' => true, 'datos' => $data);
+        } catch (Exception $e) {
+            return array('success' => false, 'error' => $e->getMessage());
+        }
     }
 
     public function listarRoles() {
-        $conexion = Conexion::conectar();
-        $stmt = $conexion->prepare("SELECT ID as id, nombre FROM roles");
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            $sql = "SELECT ID as id, nombre FROM roles";
+            $stmt = parent::conectar()->prepare($sql);
+            $stmt->execute();
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return array('success' => true, 'datos' => $data);
+        } catch (Exception $e) {
+            return array('success' => false, 'error' => $e->getMessage());
+        }
     }
 
     public function listarPersonalSinUsuario() {
-        $conexion = Conexion::conectar();
-        // Filtramos al personal que no tiene un registro asociado en la tabla usuario
-        $stmt = $conexion->prepare(
-            "SELECT p.id, p.cedula, p.nombre, p.apellido 
-             FROM personal p 
-             LEFT JOIN usuario u ON p.id = u.id_personal 
-             WHERE u.id IS NULL AND p.status = 1"
-        );
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            $sql = "SELECT p.id, p.cedula, p.nombre, p.apellido 
+                    FROM personal p 
+                    LEFT JOIN usuario u ON p.id = u.id_personal 
+                    WHERE u.id IS NULL AND p.status = 1";
+            $stmt = parent::conectar()->prepare($sql);
+            $stmt->execute();
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return array('success' => true, 'datos' => $data);
+        } catch (Exception $e) {
+            return array('success' => false, 'error' => $e->getMessage());
+        }
     }
 
-    public function crearUsuario($data) {
+    public function crearUsuario() {
         try {
-            $conexion = Conexion::conectar();
-            $stmt = $conexion->prepare("INSERT INTO usuario (id_personal, username, password, cod_rol, status) VALUES (?, ?, ?, ?, ?)");
-            $stmt->execute([$data['id_personal'], $data['username'], $data['password'], $data['cod_rol'], $data['status']]);
-            return 'exito';
+            $sql = "INSERT INTO usuario (id_personal, username, password, cod_rol, status) 
+                    VALUES (:id_personal, :username, :password, :cod_rol, :status)";
+            $stmt = parent::conectar()->prepare($sql);
+            $stmt->bindParam(":id_personal", $this->id, PDO::PARAM_INT);
+            $stmt->bindParam(":username", $this->username, PDO::PARAM_STR);
+            $stmt->bindParam(":password", $this->password, PDO::PARAM_STR);
+            $stmt->bindParam(":cod_rol", $this->cod_rol, PDO::PARAM_INT);
+            $stmt->bindParam(":status", $this->status, PDO::PARAM_INT);
+            $stmt->execute();
+            return array('success' => true, 'resultado' => 'exito');
         } catch (PDOException $e) {
-            if ($e->getCode() == 23000 || $e->errorInfo[1] == 1062) {
-                return 'duplicado';
+            if ($e->getCode() == 23000 || isset($e->errorInfo[1]) && $e->errorInfo[1] == 1062) {
+                return array('success' => true, 'resultado' => 'duplicado');
             }
-            return 'error';
+            return array('success' => false, 'error' => $e->getMessage());
         }
     }
 
     public function listarUsuarios() {
-        $conexion = Conexion::conectar();
-        $stmt = $conexion->prepare(
-            "SELECT u.id, u.username, u.password, u.cod_rol, u.status, u.id_personal, 
-                    p.nombre, p.apellido, r.nombre as nombre_rol 
-             FROM usuario u 
-             INNER JOIN personal p ON u.id_personal = p.id 
-             LEFT JOIN roles r ON u.cod_rol = r.ID 
-             ORDER BY u.id DESC"
-        );
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public function editarUsuario($data) {
-        $conexion = Conexion::conectar();
-        $stmt = $conexion->prepare("UPDATE usuario SET username=?, password=?, cod_rol=?, status=? WHERE id=?");
-        return $stmt->execute([
-            $data['username'], 
-            $data['password'], 
-            $data['cod_rol'], 
-            $data['status'], 
-            $data['id_usuario']
-        ]);
-    }
-
-    public function eliminarUsuario($id) {
-        $conexion = Conexion::conectar();
-        $stmt = $conexion->prepare("DELETE FROM usuario WHERE id=?");
-        return $stmt->execute([$id]);
-    }
-
-    public function crearTipoPersonal($nombre) {
-        $conexion = Conexion::conectar();
-        $stmt = $conexion->prepare("INSERT INTO tipo_personal (nombre) VALUES (?)");
-        return $stmt->execute([$nombre]);
-    }
-
-    public function editarTipoPersonal($id, $nombre) {
-        $conexion = Conexion::conectar();
-        $stmt = $conexion->prepare("UPDATE tipo_personal SET nombre=? WHERE id=?");
-        return $stmt->execute([$nombre, $id]);
-    }
-
-    public function eliminarTipoPersonal($id) {
         try {
-            $conexion = Conexion::conectar();
-            $stmt = $conexion->prepare("DELETE FROM tipo_personal WHERE id=?");
-            return $stmt->execute([$id]);
+            $sql = "SELECT u.id, u.username, u.password, u.cod_rol, u.status, u.id_personal, 
+                           p.nombre, p.apellido, r.nombre as nombre_rol 
+                    FROM usuario u 
+                    INNER JOIN personal p ON u.id_personal = p.id 
+                    LEFT JOIN roles r ON u.cod_rol = r.ID 
+                    ORDER BY u.id DESC";
+            $stmt = parent::conectar()->prepare($sql);
+            $stmt->execute();
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return array('success' => true, 'datos' => $data);
+        } catch (Exception $e) {
+            return array('success' => false, 'error' => $e->getMessage());
+        }
+    }
+
+    public function editarUsuario() {
+        try {
+            $sql = "UPDATE usuario 
+                    SET username=:username, password=:password, cod_rol=:cod_rol, status=:status 
+                    WHERE id=:id";
+            $stmt = parent::conectar()->prepare($sql);
+            $stmt->bindParam(":username", $this->username, PDO::PARAM_STR);
+            $stmt->bindParam(":password", $this->password, PDO::PARAM_STR);
+            $stmt->bindParam(":cod_rol", $this->cod_rol, PDO::PARAM_INT);
+            $stmt->bindParam(":status", $this->status, PDO::PARAM_INT);
+            $stmt->bindParam(":id", $this->id_usuario, PDO::PARAM_INT);
+            $stmt->execute();
+            return array('success' => true);
+        } catch (Exception $e) {
+            return array('success' => false, 'error' => $e->getMessage());
+        }
+    }
+
+    public function eliminarUsuario() {
+        try {
+            $sql = "DELETE FROM usuario WHERE id=:id";
+            $stmt = parent::conectar()->prepare($sql);
+            $stmt->bindParam(":id", $this->id_usuario, PDO::PARAM_INT);
+            $stmt->execute();
+            return array('success' => true);
+        } catch (Exception $e) {
+            return array('success' => false, 'error' => $e->getMessage());
+        }
+    }
+
+    //Tipo Personal
+
+    public function crearTipoPersonal() {
+        try {
+            $sql = "INSERT INTO tipo_personal (nombre) VALUES (:nombre)";
+            $stmt = parent::conectar()->prepare($sql);
+            $stmt->bindParam(":nombre", $this->nombre, PDO::PARAM_STR);
+            $stmt->execute();
+            return array('success' => true);
+        } catch (Exception $e) {
+            return array('success' => false, 'error' => $e->getMessage());
+        }
+    }
+
+    public function editarTipoPersonal() {
+        try {
+            $sql = "UPDATE tipo_personal SET nombre=:nombre WHERE id=:id";
+            $stmt = parent::conectar()->prepare($sql);
+            $stmt->bindParam(":nombre", $this->nombre, PDO::PARAM_STR);
+            $stmt->bindParam(":id", $this->id, PDO::PARAM_INT);
+            $stmt->execute();
+            return array('success' => true);
+        } catch (Exception $e) {
+            return array('success' => false, 'error' => $e->getMessage());
+        }
+    }
+
+    public function eliminarTipoPersonal() {
+        try {
+            $sql = "DELETE FROM tipo_personal WHERE id=:id";
+            $stmt = parent::conectar()->prepare($sql);
+            $stmt->bindParam(":id", $this->id, PDO::PARAM_INT);
+            $stmt->execute();
+            return array('success' => true);
         } catch (PDOException $e) {
-            return false; // Falla si el cargo ya está asignado a un empleado
+            return array('success' => false, 'error' => $e->getMessage());
         }
     }
 }

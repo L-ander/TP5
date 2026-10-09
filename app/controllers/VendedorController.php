@@ -1,32 +1,40 @@
 <?php
+require_once __DIR__ . '/../core/BaseController.php';
 require_once __DIR__ . '/../models/VendedorModel.php';
 
-class VendedorController {
+class VendedorController extends BaseController {
     
-    // Función auxiliar privada para limpiar código
+    //Funcion central
+    public function ejecutar($accion, $datos) {
+        $method = lcfirst($accion);
+
+        if (method_exists($this, $method)) {
+            return $this->$method($datos);
+        } else {
+            return $this->jsonResponse(['success' => false, 'message' => 'Acción no reconocida'], 404);
+        }
+    }
+
+    //Funcion auxiliar para validaciones
     private function validarDatos($datos, $modelo, $esEdicion = false) {
-        // Validar Cedula
         if (!is_numeric($datos['cedula']) || $datos['cedula'] < 5000000) {
             return "La cédula debe contener un mínimo de siete dígitos";
         }
         
-        // Validar duplicado
+        $modelo->setCedula($datos['cedula']);
         $idAExcluir = $esEdicion ? $datos['id'] : null;
-        if ($modelo->existeCedula($datos['cedula'], $idAExcluir)) {
+        if ($modelo->existeCedula($idAExcluir)) {
             return "La cédula {$datos['cedula']} ya se encuentra registrada en el sistema.";
         }
 
-        // Validar Nombre (Sin acentos, ni numeros, ni simbolos)
         if (!preg_match('/^[a-zA-Z\s]+$/', $datos['nombre'])) {
             return "El nombre solo puede contener letras (sin acentos).";
         }
 
-        // Validar Apellido (Acentos permitidos, pero sin numeros ni simbolos)
         if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $datos['apellido'])) {
             return "El apellido contiene caracteres no válidos.";
         }
 
-        // Validar Telefono (+58 o 0, prefijo valido, 7 dígitos)
         if (!preg_match('/^(?:\+58|0)(?:412|414|424|416|426|422|251)\d{7}$/', $datos['telefono'])) {
             return "El teléfono no cumple con los formatos de operadoras válidas en el país.";
         }
@@ -34,82 +42,207 @@ class VendedorController {
         return null;
     }
 
-    public function ejecutar($accion, $datos) {
+    protected function listar($datos) {
         $modelo = new VendedorModel();
-        switch ($accion) {
-            case 'listar':
-                return json_encode(['success' => true, 'data' => $modelo->listar()]);
-            
-            case 'crear':
-                $errorValidacion = $this->validarDatos($datos, $modelo, false);
-                if ($errorValidacion) {
-                    return json_encode(['success' => false, 'message' => $errorValidacion]);
-                }
-                $ok = $modelo->crear($datos);
-                return json_encode(['success' => $ok, 'message' => $ok ? 'Personal creado exitosamente' : 'Error al crear en BD']);
-            
-            case 'editar':
-                $errorValidacion = $this->validarDatos($datos, $modelo, true);
-                if ($errorValidacion) {
-                    return json_encode(['success' => false, 'message' => $errorValidacion]);
-                }
-                $ok = $modelo->editar($datos);
-                return json_encode(['success' => $ok, 'message' => $ok ? 'Personal actualizado exitosamente' : 'Error al actualizar en BD']);
-            
-            case 'eliminar':
-                $ok = $modelo->eliminar($datos['id']);
-                return json_encode(['success' => $ok, 'message' => $ok ? 'Personal eliminado exitosamente' : 'Error al eliminar']);
-                                
-            case 'tipos_personal':
-                return json_encode(['success' => true, 'data' => $modelo->listarTiposPersonal()]);
-                
-            case 'roles':
-                return json_encode(['success' => true, 'data' => $modelo->listarRoles()]);
-                
-            case 'personal_sin_usuario':
-                return json_encode(['success' => true, 'data' => $modelo->listarPersonalSinUsuario()]);
-                
-            case 'crear_usuario':
-                $resultado = $modelo->crearUsuario($datos);
-                if ($resultado === 'exito') {
-                    return json_encode(['success' => true, 'message' => 'Usuario registrado']);
-                } elseif ($resultado === 'duplicado') {
-                    return json_encode(['success' => false, 'message' => 'Usuario ya existe']); // ¡Aquí cumples el diagrama!
-                } else {
-                    return json_encode(['success' => false, 'message' => 'Error en el sistema']);
-                }
+        $res = $modelo->listar();
 
-            case 'listar_usuarios':
-                return json_encode(['success' => true, 'data' => $modelo->listarUsuarios()]);
-                
-            case 'editar_usuario':
-                $ok = $modelo->editarUsuario($datos);
-                return json_encode(['success' => $ok, 'message' => $ok ? 'Usuario actualizado exitosamente' : 'Error al actualizar usuario']);
-                
-            case 'eliminar_usuario':
-                $ok = $modelo->eliminarUsuario($datos['id']);
-                return json_encode(['success' => $ok, 'message' => $ok ? 'Usuario eliminado (El personal sigue intacto)' : 'Error al eliminar usuario']);
-            
-            case 'crear_tipo_personal':
-                $ok = $modelo->crearTipoPersonal($datos['nombre']);
-                return json_encode(['success' => $ok, 'message' => $ok ? 'Cargo registrado exitosamente' : 'Error al registrar']);
-                
-            case 'editar_tipo_personal':
-                $ok = $modelo->editarTipoPersonal($datos['id'], $datos['nombre']);
-                return json_encode(['success' => $ok, 'message' => $ok ? 'Cargo actualizado exitosamente' : 'Error al actualizar']);
-                
-            case 'eliminar_tipo_personal':
-                $ok = $modelo->eliminarTipoPersonal($datos['id']);
-                return json_encode(['success' => $ok, 'message' => $ok ? 'Cargo eliminado' : 'No se puede eliminar: el cargo está siendo usado por personal registrado']);
-                
-            default:
-                return json_encode(['success' => false, 'message' => 'Acción no reconocida']);
+        if ($res['success']) {
+            return $this->jsonResponse(['success' => true, 'data' => $res['datos']]);
         }
+        return $this->jsonResponse(['success' => false, 'message' => 'Error al obtener la información']);
+    }
+
+    protected function crear($datos) {
+        $modelo = new VendedorModel();
+        
+        $errorValidacion = $this->validarDatos($datos, $modelo, false);
+        if ($errorValidacion) {
+            return $this->jsonResponse(['success' => false, 'message' => $errorValidacion]);
+        }
+
+        $modelo->setCedula($datos['cedula']);
+        $modelo->setNombre($datos['nombre']);
+        $modelo->setApellido($datos['apellido']);
+        $modelo->setTelefono($datos['telefono']);
+        $modelo->setIdTipoPersonal($datos['id_tipo_personal']);
+        $modelo->setStatus($datos['status']);
+
+        $res = $modelo->crear();
+
+        if ($res['success']) {
+            return $this->jsonResponse(['success' => true, 'message' => 'Personal creado exitosamente']);
+        }
+        return $this->jsonResponse(['success' => false, 'message' => 'Error al crear en BD']);
+    }
+
+    protected function editar($datos) {
+        $modelo = new VendedorModel();
+        
+        $errorValidacion = $this->validarDatos($datos, $modelo, true);
+        if ($errorValidacion) {
+            return $this->jsonResponse(['success' => false, 'message' => $errorValidacion]);
+        }
+
+        $modelo->setId($datos['id']);
+        $modelo->setCedula($datos['cedula']);
+        $modelo->setNombre($datos['nombre']);
+        $modelo->setApellido($datos['apellido']);
+        $modelo->setTelefono($datos['telefono']);
+        $modelo->setIdTipoPersonal($datos['id_tipo_personal']);
+        $modelo->setStatus($datos['status']);
+
+        $res = $modelo->editar();
+
+        if ($res['success']) {
+            return $this->jsonResponse(['success' => true, 'message' => 'Personal actualizado exitosamente']);
+        }
+        return $this->jsonResponse(['success' => false, 'message' => 'Error al actualizar en BD']);
+    }
+
+    protected function eliminar($datos) {
+        $modelo = new VendedorModel();
+        $modelo->setId($datos['id']);
+        
+        $res = $modelo->eliminar();
+
+        if ($res['success']) {
+            return $this->jsonResponse(['success' => true, 'message' => 'Personal eliminado exitosamente']);
+        }
+        return $this->jsonResponse(['success' => false, 'message' => 'Error al eliminar']);
+    }
+
+    protected function tipos_personal($datos) {
+        $modelo = new VendedorModel();
+        $res = $modelo->listarTiposPersonal();
+        
+        if ($res['success']) {
+            return $this->jsonResponse(['success' => true, 'data' => $res['datos']]);
+        }
+        return $this->jsonResponse(['success' => false, 'message' => 'Error al listar cargos']);
+    }
+
+    protected function roles($datos) {
+        $modelo = new VendedorModel();
+        $res = $modelo->listarRoles();
+        
+        if ($res['success']) {
+            return $this->jsonResponse(['success' => true, 'data' => $res['datos']]);
+        }
+        return $this->jsonResponse(['success' => false, 'message' => 'Error al listar roles']);
+    }
+
+    protected function personal_sin_usuario($datos) {
+        $modelo = new VendedorModel();
+        $res = $modelo->listarPersonalSinUsuario();
+        
+        if ($res['success']) {
+            return $this->jsonResponse(['success' => true, 'data' => $res['datos']]);
+        }
+        return $this->jsonResponse(['success' => false, 'message' => 'Error al listar personal sin usuario']);
+    }
+
+    protected function crear_usuario($datos) {
+        $modelo = new VendedorModel();
+        
+        // Uso de setters en usuario
+        $modelo->setId($datos['id_personal']);
+        $modelo->setUsername($datos['username']);
+        $modelo->setPassword($datos['password']);
+        $modelo->setCodRol($datos['cod_rol']);
+        $modelo->setStatus($datos['status']);
+
+        $res = $modelo->crearUsuario();
+
+        if ($res['success']) {
+            if ($res['resultado'] === 'exito') {
+                return $this->jsonResponse(['success' => true, 'message' => 'Usuario registrado']);
+            } elseif ($res['resultado'] === 'duplicado') {
+                return $this->jsonResponse(['success' => false, 'message' => 'El Username ya existe en el sistema.']);
+            }
+        }
+        return $this->jsonResponse(['success' => false, 'message' => 'Error en el sistema']);
+    }
+
+    protected function listar_usuarios($datos) {
+        $modelo = new VendedorModel();
+        $res = $modelo->listarUsuarios();
+        
+        if ($res['success']) {
+            return $this->jsonResponse(['success' => true, 'data' => $res['datos']]);
+        }
+        return $this->jsonResponse(['success' => false, 'message' => 'Error al listar usuarios']);
+    }
+
+    protected function editar_usuario($datos) {
+        $modelo = new VendedorModel();
+        
+        $modelo->setIdUsuario($datos['id_usuario']);
+        $modelo->setUsername($datos['username']);
+        $modelo->setPassword($datos['password']);
+        $modelo->setCodRol($datos['cod_rol']);
+        $modelo->setStatus($datos['status']);
+
+        $res = $modelo->editarUsuario();
+        
+        if ($res['success']) {
+            return $this->jsonResponse(['success' => true, 'message' => 'Usuario actualizado exitosamente']);
+        }
+        return $this->jsonResponse(['success' => false, 'message' => 'Error al actualizar usuario']);
+    }
+
+    protected function eliminar_usuario($datos) {
+        $modelo = new VendedorModel();
+        $modelo->setIdUsuario($datos['id']);
+        
+        $res = $modelo->eliminarUsuario();
+        
+        if ($res['success']) {
+            return $this->jsonResponse(['success' => true, 'message' => 'Usuario eliminado (El personal sigue intacto)']);
+        }
+        return $this->jsonResponse(['success' => false, 'message' => 'Error al eliminar usuario']);
+    }
+
+    protected function crear_tipo_personal($datos) {
+        $modelo = new VendedorModel();
+        $modelo->setNombre($datos['nombre']);
+        
+        $res = $modelo->crearTipoPersonal();
+        
+        if ($res['success']) {
+            return $this->jsonResponse(['success' => true, 'message' => 'Cargo registrado exitosamente']);
+        }
+        return $this->jsonResponse(['success' => false, 'message' => 'Error al registrar']);
+    }
+
+    protected function editar_tipo_personal($datos) {
+        $modelo = new VendedorModel();
+        $modelo->setId($datos['id']);
+        $modelo->setNombre($datos['nombre']); 
+        
+        $res = $modelo->editarTipoPersonal();
+        
+        if ($res['success']) {
+            return $this->jsonResponse(['success' => true, 'message' => 'Cargo actualizado exitosamente']);
+        }
+        return $this->jsonResponse(['success' => false, 'message' => 'Error al actualizar']);
+    }
+
+    protected function eliminar_tipo_personal($datos) {
+        $modelo = new VendedorModel();
+        $modelo->setId($datos['id']);
+        
+        $res = $modelo->eliminarTipoPersonal();
+        
+        if ($res['success']) {
+            return $this->jsonResponse(['success' => true, 'message' => 'Cargo eliminado']);
+        }
+        return $this->jsonResponse(['success' => false, 'message' => 'No se puede eliminar: el cargo está siendo usado por personal registrado']);
     }
 }
 
+// Punto de Entrada de las peticiones AJAX
 if (isset($_POST['action'])) {
     $controller = new VendedorController();
-    echo $controller->ejecutar($_POST['action'], $_POST);
+    $controller->ejecutar($_POST['action'], $_POST);
 }
 ?>

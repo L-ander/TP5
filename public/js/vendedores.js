@@ -25,8 +25,8 @@ const cargarCombos = () => api({ action: 'tipos_personal' }, res => {
 });
 
 function listarPersonal() {
-    $.post('app/controllers/VendedorController.php', { action: 'listar' }, function(response) {
-        const res = JSON.parse(response);
+
+    api({ action: 'listar' }, function(res) {
         if (res.success) {
             let htmlTodos = '';
             let htmlStaff = '';
@@ -49,10 +49,10 @@ function listarPersonal() {
                     <td>${tipoPersonal}</td>
                     <td>${estado}</td>
                     <td>
-                        <button class="btn btn-warning btn-xs waves-effect" title="Editar" onclick="editarPersonal(${p.id})">
+                        <button class="btn btn-warning btn-xs waves-effect" title="Editar" onclick="abrirModalEditar(${JSON.stringify(p).replace(/"/g, '&quot;')})">
                             <i class="material-icons">edit</i>
                         </button>
-                        <button class="btn btn-danger btn-xs waves-effect" title="Eliminar" onclick="eliminarPersonal(${p.id})">
+                        <button class="btn btn-danger btn-xs waves-effect" title="Eliminar" onclick="eliminarPersonal(${p.id}, '${p.nombre}', '${p.cedula}')">
                             <i class="material-icons">delete</i>
                         </button>
                     </td>
@@ -82,7 +82,6 @@ function iniciarValidacionesEnTiempoReal() {
             let valor = $(this).val().trim();
             
             if (valor === "") {
-                // Solo pinta rojo si está vacio, desenfocado y si fue tocado por el usuario
                 if ((e.type === 'blur' || e.type === 'change') && $(this).data('tocado')) {
                     estadoFormulario[id] = false;
                     toggleError(this, false, `error-${id}`);
@@ -105,8 +104,7 @@ function iniciarValidacionesEnTiempoReal() {
 const verificarFormularioCompleto = () => $('#btnGuardarPersonal').prop('disabled', !Object.values(estadoFormulario).every(v => v));
 
 const resetearValidaciones = () => {
-    $('.form-control').removeClass('input-error input-success').data('tocado', false);
-    $('.error-msg').hide();
+    $('.form-control').removeClass('input-error input-success').data('tocado', false);$('.error-msg').hide();
     Object.keys(estadoFormulario).forEach(k => estadoFormulario[k] = false);
     $('#btnGuardarPersonal').prop('disabled', true);
 };
@@ -131,7 +129,6 @@ const abrirModalEditar = (p) => {
     
     $('#modalPersonal').modal('show');
 
-    // Retraso de seguridad para que la ventana abra antes de inyectar el verde
     setTimeout(() => {
         ['cedula', 'nombre', 'apellido', 'telefono', 'id_tipo_personal'].forEach(id => $(`#${id}`).data('tocado', true));
         $('#cedula, #nombre, #apellido, #telefono').trigger('input');
@@ -152,21 +149,14 @@ const eliminarPersonal = (id, nombre, cedula) => confirmReq(`¿Eliminar a ${nomb
 
 //Apartado de usuarios
 function iniciarValidacionesUsuario() {
-
-    $('#username, #password_usuario, #edit_username, #edit_password').on('focus', function() { $(this).data('tocado', true); });
-
-    $('#username, #password_usuario').on('blur input', function(e) { validarCampoUsuario($(this), e.type, false); });
-    $('#usuario_id_personal, #usuario_cod_rol').on('change', function() { $(this).data('tocado', true); validarCampoUsuario($(this), 'change', false); });
-    
-    $('#edit_username, #edit_password').on('blur input', function(e) { validarCampoUsuario($(this), e.type, true); });
-    $('#edit_usuario_cod_rol').on('change', function() { $(this).data('tocado', true); validarCampoUsuario($(this), 'change', true); });
+    $('#username, #password_usuario, #edit_username, #edit_password').on('focus', function() { $(this).data('tocado', true); });$('#username, #password_usuario').on('blur input', function(e) { validarCampoUsuario($(this), e.type, false); });
+    $('#usuario_id_personal, #usuario_cod_rol').on('change', function() { $(this).data('tocado', true); validarCampoUsuario($(this), 'change', false); });$('#edit_username, #edit_password').on('blur input', function(e) { validarCampoUsuario($(this), e.type, true); });$('#edit_usuario_cod_rol').on('change', function() { $(this).data('tocado', true); validarCampoUsuario($(this), 'change', true); });
 }
 
 function validarCampoUsuario(campoObj, evento, isEdit) {
     let id = campoObj.attr('id'), valor = campoObj.val().trim(), esValido = false, mensaje = "";
 
     if (valor === "") {
-        // Validación limpia: solo muestra error si el campo está vacio y si el usuario lo clickeo previamente
         if ((evento === 'blur' || evento === 'change') && campoObj.data('tocado')) { 
             esValido = false; 
             mensaje = "Por favor, introduzca este dato."; 
@@ -186,7 +176,6 @@ function validarCampoUsuario(campoObj, evento, isEdit) {
     }
 
     let errorSpan = campoObj.closest('.form-group').find('.error-msg');
-    
     let keyEstado = id.replace('edit_', ''); 
     if (keyEstado === 'usuario_id_personal') keyEstado = 'personal';
     if (keyEstado === 'usuario_cod_rol') keyEstado = 'rol';
@@ -266,7 +255,6 @@ const abrirModalEditarUsuario = (u) => {
         
         $('#modalEditarUsuario').modal('show');
 
-        
         setTimeout(() => {
             $('#edit_username, #edit_password, #edit_usuario_cod_rol').data('tocado', true);
             $('#edit_username, #edit_password').trigger('input');

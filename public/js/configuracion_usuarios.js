@@ -15,8 +15,7 @@ $(document).ready(function() {
 // Carga Selects dinámicos
 function cargarCombos() {
     // 1. Cargar Personal que aún no tiene usuario
-    $.post('app/controllers/VendedorController.php', { action: 'personal_sin_usuario' }, function(response) {
-        const res = JSON.parse(response);
+    $.post('app/controllers/VendedorController.php', { action: 'personal_sin_usuario' }, function(res) {
         if (res.success) {
             let html = '<option value="">-- Seleccione Personal --</option>';
             res.data.forEach(p => {
@@ -29,11 +28,10 @@ function cargarCombos() {
                 $('#usuario_id_personal').selectpicker('refresh');
             }
         }
-    });
+    }, 'json');
 
     // 2. Cargar Roles disponibles
-    $.post('app/controllers/VendedorController.php', { action: 'roles' }, function(response) {
-        const res = JSON.parse(response);
+    $.post('app/controllers/VendedorController.php', { action: 'roles' }, function(res) {
         if (res.success) {
             let html = '<option value="">-- Seleccione Rol --</option>';
             res.data.forEach(r => {
@@ -46,13 +44,12 @@ function cargarCombos() {
                 $('#usuario_cod_rol, #edit_usuario_cod_rol').selectpicker('refresh');
             }
         }
-    });
+    }, 'json');
 }
 
 // Pintar la tabla de usuarios registrados
 function listarUsuarios() {
-    $.post('app/controllers/VendedorController.php', { action: 'listar_usuarios' }, function(response) {
-        const res = JSON.parse(response);
+    $.post('app/controllers/VendedorController.php', { action: 'listar_usuarios' }, function(res) {
         if (res.success) {
             let html = '';
             res.data.forEach(u => {
@@ -79,7 +76,7 @@ function listarUsuarios() {
             });
             $('#tablaUsuariosRegistrados').html(html);
         }
-    });
+    }, 'json');
 }
 
 // Guardar nuevo usuario
@@ -98,15 +95,14 @@ function guardarUsuario() {
         return;
     }
 
-    $.post('app/controllers/VendedorController.php', datos, function(response) {
-        const res = JSON.parse(response);
+    $.post('app/controllers/VendedorController.php', datos, function(res) {
         alert(res.message);
         if (res.success) {
             $('#formUsuario')[0].reset();
             cargarCombos(); 
             listarUsuarios();
         }
-    });
+    }, 'json');
 }
 
 // Abrir el modal para modificar
@@ -131,33 +127,30 @@ function actualizarUsuario() {
         status: $('#edit_usuario_status').val()
     };
 
-    $.post('app/controllers/VendedorController.php', datos, function(response) {
-        const res = JSON.parse(response);
+    $.post('app/controllers/VendedorController.php', datos, function(res) {
         alert(res.message);
         if (res.success) {
             $('#modalEditarUsuario').modal('hide');
             listarUsuarios();
         }
-    });
+    }, 'json');
 }
 
 // Eliminar (revocar) usuario
 function eliminarUsuario(id) {
     if(confirm('¿Está seguro que desea revocar el acceso a este usuario? (El personal seguirá registrado en el sistema)')) {
-        $.post('app/controllers/VendedorController.php', { action: 'eliminar_usuario', id: id }, function(response) {
-            const res = JSON.parse(response);
+        $.post('app/controllers/VendedorController.php', { action: 'eliminar_usuario', id: id }, function(res) {
             alert(res.message);
             if (res.success) {
                 listarUsuarios();
                 cargarCombos();
             }
-        });
+        }, 'json');
     }
 }
 
 function listarTiposPersonal() {
-    $.post('app/controllers/VendedorController.php', { action: 'tipos_personal' }, function(response) {
-        const res = JSON.parse(response);
+    $.post('app/controllers/VendedorController.php', { action: 'tipos_personal' }, function(res) {
         if (res.success) {
             let html = '';
             res.data.forEach(t => {
@@ -178,7 +171,7 @@ function listarTiposPersonal() {
             });
             $('#tablaTiposPersonal').html(html);
         }
-    });
+    }, 'json');
 }
 
 function abrirModalTipoPersonal() {
@@ -206,24 +199,22 @@ function guardarTipoPersonal() {
 
     const accion = id ? 'editar_tipo_personal' : 'crear_tipo_personal';
 
-    $.post('app/controllers/VendedorController.php', { action: accion, id: id, nombre: nombre }, function(response) {
-        const res = JSON.parse(response);
+    $.post('app/controllers/VendedorController.php', { action: accion, id: id, nombre: nombre }, function(res) {
         alert(res.message);
         if (res.success) {
             $('#modalTipoPersonal').modal('hide');
             listarTiposPersonal();
         }
-    });
+    }, 'json');
 }
 
 function eliminarTipoPersonal(id) {
     if (confirm('¿Está seguro de eliminar este cargo?')) {
-        $.post('app/controllers/VendedorController.php', { action: 'eliminar_tipo_personal', id: id }, function(response) {
-            const res = JSON.parse(response);
+        $.post('app/controllers/VendedorController.php', { action: 'eliminar_tipo_personal', id: id }, function(res) {
             alert(res.message);
             if (res.success) {
                 listarTiposPersonal();
             }
-        });
+        }, 'json');
     }
 }
