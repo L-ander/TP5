@@ -53,7 +53,7 @@ class PedidoModel extends Conexion {
 
             $stmt = $conexion->prepare(
                 "SELECT p.id,
-                        COALESCE(lp.nombre, p.nombre) AS nombre,
+                        COALESCE( p.nombre) AS nombre,
                         p.precio,
                         0 AS stock
                  FROM producto p

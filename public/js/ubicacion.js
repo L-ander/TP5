@@ -2,6 +2,7 @@ $(document).ready(function() {
     
     listarCiudadesModulo();
     cargarEstadosModulo();
+
     $('#btnGuardarEstadoExpress').click(function() {
         var nombre = $('#nombre_estado_nuevo').val().trim();
 
@@ -27,7 +28,6 @@ $(document).ready(function() {
         });
     });
 
-    
     $('#btnGuardarMunicipioExpress').click(function() {
         var id_estado = $('#id_estado_muni_nuevo').val();
         var nombre = $('#nombre_municipio_nuevo').val().trim();
@@ -48,7 +48,6 @@ $(document).ready(function() {
                 $('#nombre_municipio_nuevo').val('');
                 $('#modalMunicipio').modal('hide');  
                 
-                
                 var estadoActualCiudad = $('#id_estado_mod').val();
                 if(estadoActualCiudad == id_estado) {
                     cargarMunicipiosModulo(id_estado, '#id_municipio_mod');
@@ -59,7 +58,6 @@ $(document).ready(function() {
         });
     });
 
-   
     $('#id_estado_mod').change(function() {
         var id_estado = $(this).val();
         if(id_estado !== "") {
@@ -69,7 +67,6 @@ $(document).ready(function() {
         }
     });
 
-    
     $('#id_estado_edit_mod').change(function() {
         var id_estado = $(this).val();
         if(id_estado !== "") {
@@ -77,7 +74,6 @@ $(document).ready(function() {
         }
     });
 
-    
     $('#btnGuardarCiudad').click(function() {
         var nombre = $('#nombre_ciudad_mod').val();
         var id_municipio = $('#id_municipio_mod').val();
@@ -95,7 +91,7 @@ $(document).ready(function() {
             data: { action: 'guardarCiudad', nombre: nombre, id_municipio: id_municipio, id_estado: id_estado }
         }).done(function(data) {
             if(data.success) {
-                alert("Ciudad registrada con éxito");
+                alert("Parroquia registrada con éxito");
                 $('#formCiudad')[0].reset();
                 $('#btnCerrarModCiudad').click();
                 listarCiudadesModulo();
@@ -105,7 +101,6 @@ $(document).ready(function() {
             }
         });
     });
-
 
     $('#btnActualizarCiudad').click(function() {
         var id = $('#idCiudadEdit').val();
@@ -120,7 +115,7 @@ $(document).ready(function() {
             data: { action: 'modificarCiudad', id: id, nombre: nombre, id_municipio: id_municipio, id_estado: id_estado }
         }).done(function(data) {
             if(data.success) {
-                alert("Ciudad actualizada correctamente");
+                alert("Parroquia actualizada correctamente");
                 $('#btnCerrarEditModCiudad').click();
                 listarCiudadesModulo();
                 if (typeof cargarCiudades === "function") { cargarCiudades(); }
@@ -130,7 +125,6 @@ $(document).ready(function() {
         });
     });
 });
-
 
 function listarCiudadesModulo() {
     $.ajax({
@@ -143,13 +137,13 @@ function listarCiudadesModulo() {
             var filas = "";
             data.datos.forEach(function(item) {
                 filas += `<tr>
-                    <td>${item.id_ciudad}</td>
-                    <td>${item.nombre_ciudad}</td>
+                    <td>${item.id_parroquia || item.id_ciudad}</td>
+                    <td>${item.nombre_parroquia || item.nombre_ciudad}</td>
                     <td>${item.municipio}</td>
                     <td>${item.estado}</td>
                     <td>
-                        <button type="button" class="btn btn-warning waves-effect" onclick="abrirEditarCiudad(${item.id_ciudad}, '${item.nombre_ciudad}', ${item.id_estado}, ${item.id_municipio})"><i class="material-icons">edit</i></button>
-                        <button type="button" class="btn btn-danger waves-effect" onclick="eliminarCiudadModulo(${item.id_ciudad})"><i class="material-icons">delete</i></button>
+                        <button type="button" class="btn btn-warning waves-effect" onclick="abrirEditarCiudad(${item.id_parroquia || item.id_ciudad}, '${item.nombre_parroquia || item.nombre_ciudad}', ${item.id_estado}, ${item.id_municipio})"><i class="material-icons">edit</i></button>
+                        <button type="button" class="btn btn-danger waves-effect" onclick="eliminarCiudadModulo(${item.id_parroquia || item.id_ciudad})"><i class="material-icons">delete</i></button>
                     </td>
                 </tr>`;
             });
@@ -157,7 +151,6 @@ function listarCiudadesModulo() {
         }
     });
 }
-
 
 function cargarEstadosModulo() {
     $.ajax({
@@ -168,13 +161,11 @@ function cargarEstadosModulo() {
     }).done(function(data) {
         if(data.success || data) { 
             var opciones = '<option value="">-- Seleccione Estado --</option>';
-            
             var lista = data.datos ? data.datos : data;
             
             lista.forEach(function(item) {
                 opciones += `<option value="${item.id}">${item.nombre}</option>`;
             });
-            
             
             $('#id_estado_mod').html(opciones);
             $('#id_estado_edit_mod').html(opciones);
@@ -182,7 +173,6 @@ function cargarEstadosModulo() {
         }
     });
 }
-
 
 function cargarMunicipiosModulo(id_estado, selectorDestino, idMunicipioSeleccionar = null) {
     $.ajax({
@@ -205,21 +195,18 @@ function cargarMunicipiosModulo(id_estado, selectorDestino, idMunicipioSeleccion
     });
 }
 
-
 function abrirEditarCiudad(id, nombre, id_estado, id_municipio) {
     $('#idCiudadEdit').val(id);
     $('#nombre_ciudad_edit_mod').val(nombre);
     $('#id_estado_edit_mod').val(id_estado);
-    
     
     cargarMunicipiosModulo(id_estado, '#id_municipio_edit_mod', id_municipio);
     
     $('#modalEditarCiudad').modal('show');
 }
 
-
 function eliminarCiudadModulo(id) {
-    if(confirm("¿Seguro que deseas eliminar esta ciudad?")) {
+    if(confirm("¿Seguro que deseas eliminar esta parroquia?")) {
         $.ajax({
             url: 'app/controllers/UbicacionController.php',
             type: 'POST',
@@ -227,7 +214,7 @@ function eliminarCiudadModulo(id) {
             data: { action: 'borrarCiudad', id: id }
         }).done(function(data) {
             if(data.success) {
-                alert("Ciudad eliminada con éxito");
+                alert("Parroquia eliminada con éxito");
                 listarCiudadesModulo();
                 if (typeof cargarCiudades === "function") { cargarCiudades(); }
             } else {

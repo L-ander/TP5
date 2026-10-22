@@ -37,15 +37,23 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="material-icons">credit_card</i></span>
+                                <div class="form-line">
+                                    <input type="number" class="form-control" placeholder="Cédula" id="cedula">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
-                   <div class="row">
+                    <div class="row">
                         <div class="col-md-6">
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="material-icons">location_city</i></span>
                                 <div class="form-line">
-                                    <select class="form-control" id="id_ciudad">
-                                        <option value="">-- Seleccione Ciudad --</option>
+                                    <select class="form-control" id="id_parroquia">
+                                        <option value="">-- Seleccione Parroquia --</option>
                                     </select>
                                 </div>
                             </div>
@@ -58,7 +66,7 @@
                                 </div>
                             </div>
                         </div>
-                        </div></div>
+                    </div>
 
                     <div class="row" id="slots_geograficos" style="display: none;">
                         <div class="col-md-6">
@@ -128,6 +136,14 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="material-icons">credit_card</i></span>
+                                <div class="form-line">
+                                    <input type="number" class="form-control" placeholder="Cédula" id="cedulaEditar">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="row">
@@ -135,8 +151,8 @@
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="material-icons">location_city</i></span>
                                 <div class="form-line">
-                                    <select class="form-control" id="id_ciudadEditar">
-                                        <option value="">-- Seleccione Ciudad --</option>
+                                    <select class="form-control" id="id_parroquiaEditar">
+                                        <option value="">-- Seleccione Parroquia --</option>
                                     </select>
                                 </div>
                             </div>
@@ -149,7 +165,7 @@
                                 </div>
                             </div>
                         </div>
-                        </div>
+                    </div>
 
                     <div class="row" id="slots_geograficos_editar" style="display: none;">
                         <div class="col-md-6">
@@ -178,11 +194,12 @@
         </div>
     </div>
 </div>
+
 <div class="modal fade" id="modalCiudad" tabindex="-1" role="dialog" style="display: none;">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header modal-col-blue-grey">
-                <h4 class="modal-title">Agregar Nueva Ciudad</h4>
+                <h4 class="modal-title">Agregar Nueva Parroquia</h4>
             </div>
             <div class="modal-body">
                 <form id="formCiudad">
@@ -203,9 +220,9 @@
                         </button>
                     </div>
                     <div class="form-group">
-                        <label>Nombre de la Ciudad</label>
+                        <label>Nombre de la Parroquia</label>
                         <div class="form-line">
-                            <input type="text" class="form-control" id="nombre_ciudad_mod" placeholder="Ej. Barquisimeto">
+                            <input type="text" class="form-control" id="nombre_ciudad_mod" placeholder="Ej. Catedral">
                         </div>
                     </div>
                 </form>
@@ -222,7 +239,7 @@
     <div class="modal-dialog" role="document"> 
         <div class="modal-content">
             <div class="modal-header modal-col-blue-grey">
-                <h4 class="modal-title">Editar Ciudad</h4>
+                <h4 class="modal-title">Editar Parroquia</h4>
             </div>
             <div class="modal-body">
                 <form id="formEditarCiudad">
@@ -238,7 +255,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Nombre de la Ciudad</label>
+                        <label>Nombre de la Parroquia</label>
                         <div class="form-line">
                             <input type="text" class="form-control" id="nombre_ciudad_edit_mod">
                         </div>

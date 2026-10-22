@@ -46,9 +46,11 @@ return [
     
     'configuracion' => [
         'vista' => 'configuracion/configuracion.php',
-        'menu'  => true,
+        'menu'  => false,
         'roles' => [1]
     ],
+
+    
     
     'configuracion_usuarios' => [
         'vista' => 'vendedores/configuracion_usuarios.php',
