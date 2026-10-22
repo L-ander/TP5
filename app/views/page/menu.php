@@ -6,33 +6,33 @@ require_once 'app/core/Router.php';
 $routerMenu = new Router();
 $todasLasRutas = $routerMenu->getRoutes();
 ?>
-<link rel="stylesheet" href="public/css/custom.css">
+<link rel="stylesheet" href="public/css/custom.css?v=2">
 
-<div class="overlay"></div>
+<div class="overlay" aria-hidden="true"></div>
 
 <nav class="navbar">
     <div class="container-fluid">
         <div class="navbar-header" style="display: flex; align-items: center;">
-            <a href="javascript:void(0);" class="bars">
+            <button type="button" class="bars" aria-label="Mostrar u ocultar menú" aria-expanded="true" aria-controls="leftsidebar">
                 <i class="material-icons">menu</i>
-            </a>
+            </button>
             <a class="navbar-brand" href="home">
-                <img src="public/img/logo/logos.png" alt="Logo" />
+                <img src="public/img/logo/logos.png" alt="Distribuidora de Alimentos" />
             </a>
         </div>
     </div>
 </nav>
 
 <section style="position: relative; z-index: 9999;">
-    <aside id="leftsidebar" class="sidebar">
+    <aside id="leftsidebar" class="sidebar" aria-label="Menú principal">
     <div class="sidebar-header-mobile">
         <div class="user-greeting">
             <i class="material-icons">account_circle</i>
             <span>Hola, <?php echo $nombreUsuario; ?></span>
         </div>
-        <a href="javascript:void(0);" class="close-sidebar">
+        <button type="button" class="close-sidebar" aria-label="Cerrar menú">
             <i class="material-icons">close</i>
-        </a>
+        </button>
     </div>
 
     <div class="menu">
@@ -53,7 +53,7 @@ $todasLasRutas = $routerMenu->getRoutes();
                             continue;
                         }
 
-                        if ($accion === 'configuracion_usuarios') {
+                        if (in_array($accion, ['configuracion', 'configuracion_usuarios'], true)) {
                             continue;
                         }
 

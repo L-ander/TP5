@@ -36,20 +36,54 @@ body {
 
 
 .navbar-header{
-    justify-content:first baseline;
-    width: 180px;
+    align-items: center;
+    gap: 24px;
+    width: 100%;
     height: 80px;
+    padding: 0 15px;
+}
+
+.navbar .navbar-header .navbar-brand {
+    align-items: center;
+    flex: 0 0 auto;
+    width: auto;
+    height: 80px;
+    margin: 0;
     padding: 0;
-    object-fit:cover;
+    overflow: visible;
 }
 
-.navbar-header img{
-     display: flex;
-    object-fit:cover;
-    margin-top: 0px;
-    
+.navbar .navbar-brand img {
+    display: block;
+    width: auto;
+    max-width: min(calc(100vw - 100px), 360px);
+    height: auto;
+    max-height: 70px;
+    object-fit: contain;
 }
 
+.navbar .navbar-header .bars {
+    display: flex;
+    flex: 0 0 40px;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 44px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--naranja-main);
+    cursor: pointer;
+    font: inherit;
+    text-decoration: none;
+}
+
+.navbar .navbar-header .bars i {
+    margin: 0;
+    font-size: 30px;
+    line-height: 1;
+}
 
 
 
@@ -58,16 +92,16 @@ body {
 
 .sidebar {
     width: 280px;
-    height: calc(100vh - 60px);
+    height: calc(100vh - 85px);
     position: fixed;
-    top: 60px;
+    top: 85px;
     left: 0;
     background-color: #ffffff;
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.05);
     display: flex;
     flex-direction: column;
     z-index: 1020;
-    overflow-y: auto;
+    overflow: hidden;
 }
 
 /* Información de Usuario */
@@ -117,7 +151,14 @@ body {
     padding: 15px 0;
 }
 
-.menu .list {
+.sidebar .menu {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    overflow-y: auto;
+}
+
+.sidebar .menu .list {
     list-style: none;
     padding: 0;
     margin: 0;
@@ -132,10 +173,13 @@ body {
     letter-spacing: 1px;
 }
 
-.menu .list li a {
+.sidebar .menu .list li a {
     display: flex;
     align-items: center;
-    padding: 14px 25px;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 48px;
+    padding: 10px 20px;
     color: var(--text-main);
     text-decoration: none;
     font-weight: 500;
@@ -144,26 +188,38 @@ body {
 }
 
 /* Iconos de Material Icons */
-.menu .list li a i {
-    margin-right: 15px;
+.sidebar .menu .list li a i.material-icons {
+    flex: 0 0 24px;
+    line-height: 24px;
+    margin: 0 12px 0 0;
     color: var(--text-muted);
     transition: var(--transition);
 }
 
 /* Efectos Hover y Activo en el Menú */
-.menu .list li a:hover {
+.sidebar .menu .list li a:hover {
     background-color: var(--celeste-light);
     color: var(--celeste-dark);
     border-left-color: var(--naranja-main);
 }
 
-.menu .list li a:hover i {
+.sidebar .menu .list li a span {
+    margin: 0;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.sidebar .menu .list li a:hover i {
     color: var(--naranja-main);
     transform: translateX(3px);
 }
 
 /* Footer del Sidebar (Legal) */
-.legal {
+.sidebar .legal {
+    position: static;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    width: auto;
     padding: 20px 25px;
     background-color: var(--bg-dark);
     color: #94a3b8;
@@ -230,8 +286,7 @@ body {
 }
 
 
-.overlay, 
-.bars, 
+.overlay,
 .sidebar-header-mobile {
     display: none !important;
 }
@@ -241,20 +296,20 @@ body {
     transition: left 0.3s ease, margin-left 0.3s ease;
 }
 
-@media (max-width: 991px) {
-    
-    /* Mostrar botón hamburguesa naranja */
-    .bars {
-        display: block !important;
-        color: #ff9800; 
-        text-decoration: none;
-        cursor: pointer;
-    }
-    .bars i {
-        font-size: 32px;
-        margin-top: 5px;
-    }
+body.sidebar-collapsed .sidebar {
+    left: -280px;
+}
 
+body.sidebar-collapsed section.content {
+    margin-left: 15px;
+}
+
+body.sidebar-collapsed .contenedor-principal {
+    margin-left: 0;
+}
+
+@media (max-width: 992px) {
+    
     /* Configurar el Fondo Oscuro (Overlay) */
     .overlay {
         position: fixed;
@@ -308,8 +363,13 @@ body {
     
     /* Botón X de cerrar */
     .sidebar-header-mobile .close-sidebar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border: 0;
+        background: transparent;
         color: #ffffff;
-        text-decoration: none;
         cursor: pointer;
     }
     .sidebar-header-mobile .close-sidebar i {
@@ -319,5 +379,97 @@ body {
     /* Expandir el contenido principal para que no quede un espacio en blanco */
     .content, .contenedor-principal {
         margin-left: 0 !important;
+    }
+
+    body.sidebar-collapsed .sidebar {
+        left: -320px;
+    }
+
+    body.sidebar-collapsed section.content {
+        margin-left: 0 !important;
+    }
+}
+
+.card .header > .nav.nav-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.card .header .nav-tabs > li {
+    position: static;
+    top: auto;
+    left: auto;
+    flex: 0 0 auto;
+    margin: 0;
+}
+
+.card .header .nav-tabs > li > a,
+.card .header .nav-tabs > li.active > a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 10px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.48) !important;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #fff !important;
+    font-weight: 600;
+    line-height: 1.35;
+    text-decoration: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card .header .nav-tabs > li > a::before {
+    display: none;
+}
+
+.card .header .nav-tabs > li > a .material-icons {
+    position: static;
+    top: auto;
+    margin: 0;
+    font-size: 20px;
+    line-height: 1;
+}
+
+.card .header .nav-tabs > li > a:hover,
+.card .header .nav-tabs > li > a:focus {
+    border-color: rgba(255, 255, 255, 0.8) !important;
+    background: rgba(255, 255, 255, 0.24) !important;
+    color: #fff !important;
+}
+
+.card .header .nav-tabs > li.active > a,
+.card .header .nav-tabs > li.active > a:hover,
+.card .header .nav-tabs > li.active > a:focus {
+    border-color: #f57c00 !important;
+    background: #f57c00 !important;
+    box-shadow: 0 3px 8px rgba(111, 58, 0, 0.24);
+    color: #fff !important;
+    cursor: pointer;
+}
+
+.card .header .nav-tabs > li > a:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+    .card .header > .nav.nav-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding: 2px 2px 6px;
+        scrollbar-width: thin;
+    }
+
+    .card .header .nav-tabs > li > a,
+    .card .header .nav-tabs > li.active > a {
+        padding: 9px 12px;
+        white-space: nowrap;
     }
 }

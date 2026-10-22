@@ -1,12 +1,5 @@
 <link rel="stylesheet" href="public/css/home.css">
 <style>
-    .content .container-fluid {
-        padding-left: 10px;
-        padding-right: 10px;
-    }
-    .bloque-encabezado {
-        margin-bottom: 10px;
-    }
     .card {
         margin-bottom: 15px;
     }
@@ -18,6 +11,21 @@
     }
     .pedido-actions {
         white-space: nowrap;
+    }
+    #cantidad.input-error {
+        border-bottom: 2px solid #f44336 !important;
+        box-shadow: 0 1px 0 0 #f44336 !important;
+    }
+    #cantidad.input-success {
+        border-bottom: 2px solid #4caf50 !important;
+        box-shadow: 0 1px 0 0 #4caf50 !important;
+    }
+    #error-cantidad {
+        display: none;
+        color: #f44336;
+        font-size: 12px;
+        margin-top: 5px;
+        font-weight: 500;
     }
 </style>
 <section class="content">
@@ -34,7 +42,7 @@
                 <div class="col-lg-5">
                 <div class="card">
                     <div class="header">
-                        <h2>Encabezado del pedido</h2>
+                        <h2 id="tituloFormularioPedido">Encabezado del pedido</h2>
                     </div>
                     <div class="body">
                         <form id="formPedido">
@@ -59,11 +67,10 @@
                                 <input type="date" class="form-control" name="fecha" id="fecha" required>
                             </div>
 
+                            <input type="hidden" id="id_estatus" name="id_estatus" value="1">
                             <div class="form-group">
-                                <label for="id_estatus">Estatus</label>
-                                <select class="form-control show-tick" name="id_estatus" id="id_estatus" required>
-                                    <option value="">Seleccione estatus</option>
-                                </select>
+                                <label>Estatus</label>
+                                <p class="form-control-static" id="estatusPedidoTexto">Pendiente</p>
                             </div>
 
                             <div class="form-group">
@@ -81,25 +88,28 @@
                         <h2>Detalle del pedido</h2>
                     </div>
                     <div class="body">
-                        <div class="row clearfix">
-                            <div class="col-sm-6">
-                                <label for="id_producto">Producto</label>
-                                <select class="form-control show-tick" id="id_producto" required>
-                                    <option value="">Seleccione un producto</option>
-                                </select>
+                        <div id="controlesDetallePedido">
+                            <div class="row clearfix">
+                                <div class="col-sm-6">
+                                    <label for="id_producto">Producto</label>
+                                    <select class="form-control show-tick" id="id_producto" required>
+                                        <option value="">Seleccione un producto</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-3">
+                                    <label for="cantidad">Cantidad</label>
+                                    <input type="number" class="form-control" id="cantidad" min="1" step="1" value="1" required>
+                                    <span class="error-msg" id="error-cantidad">La cantidad debe ser un número entero mayor que cero.</span>
+                                </div>
+                                <div class="col-sm-3">
+                                    <label for="precio_unitario">Precio</label>
+                                    <input type="number" class="form-control" id="precio_unitario" min="0" step="any" readonly>
+                                </div>
                             </div>
-                            <div class="col-sm-3">
-                                <label for="cantidad">Cantidad</label>
-                                <input type="number" class="form-control" id="cantidad" min="1" value="1" required>
-                            </div>
-                            <div class="col-sm-3">
-                                <label for="precio_unitario">Precio</label>
-                                <input type="number" class="form-control" id="precio_unitario" min="0" step="any" readonly>
-                            </div>
-                        </div>
 
-                        <div class="form-group" style="margin-top:10px;">
-                            <button type="button" id="btnAgregarItem" class="btn btn-primary">Agregar al pedido</button>
+                            <div class="form-group" style="margin-top:10px;">
+                                <button type="button" id="btnAgregarItem" class="btn btn-primary">Agregar al pedido</button>
+                            </div>
                         </div>
 
                         <div class="table-responsive">
@@ -122,7 +132,6 @@
         </div>
 
             </div>
-        </div>
 
         <div class="row clearfix">
             <div class="col-lg-12">
@@ -153,4 +162,4 @@
     </div>
 </section>
 
-<script src="public/js/pedidos.js?v=2"></script>
+<script src="public/js/pedidos.js?v=8"></script>

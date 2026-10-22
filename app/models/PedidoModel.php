@@ -53,12 +53,15 @@ class PedidoModel extends Conexion {
 
             $stmt = $conexion->prepare(
                 "SELECT p.id,
-                        COALESCE( p.nombre) AS nombre,
+                        p.nombre AS nombre,
+                        pr.contenido AS presentacion,
+                        um.medida AS medida,
                         p.precio,
                         0 AS stock
                  FROM producto p
-                 LEFT JOIN linea_producto lp ON p.id_linea = lp.id
-                 ORDER BY nombre ASC"
+                 LEFT JOIN presentacion pr ON p.presentacion = pr.id
+                 LEFT JOIN unidad_medida um ON p.id_medida = um.id
+                 ORDER BY p.nombre ASC, pr.contenido ASC"
             );
             $stmt->execute();
             return array('success' => true, 'datos' => $stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -74,10 +77,13 @@ class PedidoModel extends Conexion {
             $stmt = $conexion->prepare(
                 "SELECT dp.id, dp.id_pedido, dp.id_producto, dp.cantidad, dp.precio_unitario,
                         (dp.cantidad * dp.precio_unitario) AS subtotal,
-                        COALESCE(lp.nombre, pr.nombre, dp.id_producto) AS producto
+                        COALESCE(NULLIF(pr.nombre, ''), CAST(dp.id_producto AS CHAR)) AS producto,
+                        presentacion.contenido AS presentacion,
+                        medida.medida AS medida
                  FROM detalle_pedido dp
                  LEFT JOIN producto pr ON dp.id_producto = pr.id
-                 LEFT JOIN linea_producto lp ON pr.id_linea = lp.id
+                 LEFT JOIN presentacion ON pr.presentacion = presentacion.id
+                 LEFT JOIN unidad_medida medida ON pr.id_medida = medida.id
                  WHERE dp.id_pedido = :id_pedido
                  ORDER BY dp.id ASC"
             );
@@ -90,6 +96,17 @@ class PedidoModel extends Conexion {
     }
 
     public function guardarPedido() {
+        if (!is_array($this->detalle) || empty($this->detalle)) {
+            return array('success' => false, 'validation' => true, 'error' => 'Agregue al menos un producto al pedido');
+        }
+
+        foreach ($this->detalle as $item) {
+            $cantidad = is_array($item) ? filter_var($item['cantidad'] ?? null, FILTER_VALIDATE_INT) : false;
+            if ($cantidad === false || $cantidad <= 0) {
+                return array('success' => false, 'validation' => true, 'error' => 'Cada producto debe tener una cantidad entera mayor que cero');
+            }
+        }
+
         try {
             $conexion = parent::conectar();
 
@@ -99,13 +116,37 @@ class PedidoModel extends Conexion {
             $conexion->beginTransaction();
 
             if (!empty($this->id)) {
+                $bloquearPedido = $conexion->prepare(
+                    "SELECT id_estatus FROM pedido WHERE id = :id FOR UPDATE"
+                );
+                $bloquearPedido->bindParam(':id', $idPedido, PDO::PARAM_INT);
+                $bloquearPedido->execute();
+                $estatusActual = $bloquearPedido->fetchColumn();
+
+                if ($estatusActual === false) {
+                    $conexion->rollBack();
+                    return array(
+                        'success' => false,
+                        'conflict' => true,
+                        'error' => 'El pedido ya no existe.'
+                    );
+                }
+
+                if ((int)$estatusActual !== 1) {
+                    $conexion->rollBack();
+                    return array(
+                        'success' => false,
+                        'conflict' => true,
+                        'error' => 'Solo se pueden modificar pedidos pendientes.'
+                    );
+                }
+
                 $sql = "UPDATE pedido SET id_cliente = :id_cliente, id_vendedor = :id_vendedor,
-                        fecha = :fecha, id_estatus = :id_estatus WHERE id = :id";
+                        fecha = :fecha WHERE id = :id";
                 $stmt = $conexion->prepare($sql);
                 $stmt->bindParam(':id_cliente', $this->id_cliente, PDO::PARAM_INT);
                 $stmt->bindParam(':id_vendedor', $this->id_vendedor, PDO::PARAM_INT);
                 $stmt->bindParam(':fecha', $fecha, PDO::PARAM_STR);
-                $stmt->bindParam(':id_estatus', $this->id_estatus, PDO::PARAM_INT);
                 $stmt->bindParam(':id', $idPedido, PDO::PARAM_INT);
                 $ok = $stmt->execute();
             } else {
@@ -113,7 +154,7 @@ class PedidoModel extends Conexion {
                         VALUES (:id_cliente, :id_vendedor, :fecha, :total, :id_estatus)";
                 $stmt = $conexion->prepare($sql);
                 $totalInicial = 0;
-                $estatus = $this->id_estatus ?: 1;
+                $estatus = 1;
                 $stmt->bindParam(':id_cliente', $this->id_cliente, PDO::PARAM_INT);
                 $stmt->bindParam(':id_vendedor', $this->id_vendedor, PDO::PARAM_INT);
                 $stmt->bindParam(':fecha', $fecha, PDO::PARAM_STR);
@@ -137,7 +178,7 @@ class PedidoModel extends Conexion {
                 $cantidad = (int)($item['cantidad'] ?? 0);
                 $precio = (float)($item['precio_unitario'] ?? 0);
 
-                if (empty($idProducto) || $cantidad <= 0) {
+                if (empty($idProducto)) {
                     continue;
                 }
 
@@ -166,11 +207,69 @@ class PedidoModel extends Conexion {
         }
     }
 
+    public function cambiarEstatusPedido($idPedido, $idEstatus) {
+        if (!in_array($idEstatus, [2, 3], true)) {
+            return array(
+                'success' => false,
+                'validation' => true,
+                'error' => 'El estatus debe ser Entregado/Listo o Cancelado.'
+            );
+        }
+
+        try {
+            $conexion = parent::conectar();
+            $stmt = $conexion->prepare(
+                "UPDATE pedido SET id_estatus = :id_estatus
+                 WHERE id = :id AND id_estatus = 1"
+            );
+            $stmt->bindParam(':id_estatus', $idEstatus, PDO::PARAM_INT);
+            $stmt->bindParam(':id', $idPedido, PDO::PARAM_INT);
+            $stmt->execute();
+
+            if ($stmt->rowCount() !== 1) {
+                return array(
+                    'success' => false,
+                    'conflict' => true,
+                    'error' => 'Solo se puede cambiar el estatus de un pedido pendiente.'
+                );
+            }
+
+            return array('success' => true);
+        } catch (Exception $e) {
+            return array('success' => false, 'error' => $e->getMessage());
+        }
+    }
+
     public function eliminarPedido($idPedido) {
         try {
             $conexion = parent::conectar();
 
             $conexion->beginTransaction();
+            $bloquearPedido = $conexion->prepare(
+                "SELECT id_estatus FROM pedido WHERE id = :id FOR UPDATE"
+            );
+            $bloquearPedido->bindValue(':id', (int)$idPedido, PDO::PARAM_INT);
+            $bloquearPedido->execute();
+            $estatusActual = $bloquearPedido->fetchColumn();
+
+            if ($estatusActual === false) {
+                $conexion->rollBack();
+                return array(
+                    'success' => false,
+                    'conflict' => true,
+                    'error' => 'El pedido ya no existe.'
+                );
+            }
+
+            if ((int)$estatusActual !== 1) {
+                $conexion->rollBack();
+                return array(
+                    'success' => false,
+                    'conflict' => true,
+                    'error' => 'Solo se pueden eliminar pedidos pendientes.'
+                );
+            }
+
             $detalle = $conexion->prepare("DELETE FROM detalle_pedido WHERE id_pedido = :id_pedido");
             $detalle->bindParam(':id_pedido', $idPedido, PDO::PARAM_INT);
             $detalle->execute();

@@ -76,16 +76,15 @@ class ReportesModel extends Conexion {
     public function productosMasVendidos($desde, $hasta) {
         return $this->consultar(
             "SELECT pr.id,
-                    COALESCE(np.nombre, pr.nombre, dp.id_producto) AS nombre,
+                    COALESCE(NULLIF(pr.nombre, ''), CAST(dp.id_producto AS CHAR)) AS nombre,
                     SUM(dp.cantidad) AS cantidad,
                     COALESCE(SUM(dp.cantidad * dp.precio_unitario), 0) AS total
              FROM detalle_pedido dp
              INNER JOIN pedido p ON dp.id_pedido = p.id
              LEFT JOIN producto pr ON dp.id_producto = pr.id
-             LEFT JOIN nombre_producto np ON pr.nombre = np.id
              WHERE p.fecha BETWEEN ? AND ?
                AND p.id_estatus <> 3
-             GROUP BY pr.id, np.nombre, pr.nombre, dp.id_producto
+             GROUP BY pr.id, pr.nombre, dp.id_producto
              ORDER BY cantidad DESC, total DESC",
             $desde,
             $hasta

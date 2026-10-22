@@ -4,7 +4,7 @@ $(document).ready(function(){
 
 	cargarCiudades();
 
-	$('#id_parroquia').change(function() {
+	$('#id_ciudad').change(function() {
 		var opcionSeleccionada = $(this).find('option:selected');
 		var municipio = opcionSeleccionada.data('municipio');
 		var estado = opcionSeleccionada.data('estado');
@@ -18,7 +18,7 @@ $(document).ready(function(){
 		}
 	});
 
-	$('#id_parroquiaEditar').change(function() {
+	$('#id_ciudadEditar').change(function() {
 		var opcionSeleccionada = $(this).find('option:selected');
 		var municipio = opcionSeleccionada.data('municipio');
 		var estado = opcionSeleccionada.data('estado');
@@ -31,7 +31,7 @@ $(document).ready(function(){
 			$('#slots_geograficos_editar').slideUp(200);
 		}
 	});
-});
+})
 
 // -------------------------------------------------------------------------------------------------
 //				listar
@@ -47,40 +47,40 @@ function listar(){
 	})
 	.done(function(data) {
 
+		console.log( data )
+
 		if ( data.success ) {
 
 			let html = '';
 
-			$.each(data.data.datos, function(index, val) {
-				html += `
-				  <tr>
-					<td> ${val.id}</td>
-					<td> ${val.nombre}</td>
-					<td> ${val.apellido}</td>
-					<td> ${val.cedula}</td>
-					<td> ${val.sexo}</td>
-					<td> ${val.nombre_parroquia || ''}</td>
-					<td> ${val.municipio || ''}</td> 
-					<td> ${val.estado || ''}</td>    
-					<td> ${val.direccion}</td>
-					<td> ${val.fecha_creacion}</td>
-					  <td>
-						<div class="d-flex gap-2">
-							<button type="button" class="btn bg-deep-orange btn-circle waves-effect waves-circle waves-float boton-update" id="${val.id}">
-								<i class="material-icons">mode_edit</i>
-							</button>
-							<button type="button" class="btn bg-red btn-circle waves-effect waves-circle waves-float boton-borrar" id="${val.id}">
-								<i class="material-icons">delete</i>
-							</button>
-						</div>
-					  </td>
-				  </tr>
-				`;
-			});
+				$.each(data.data.datos, function(index, val) {
+    html += `
+      <tr>
+        <td> ${val.id}</td>
+        <td> ${val.nombre}</td>
+        <td> ${val.apellido}</td>
+        <td> ${val.sexo}</td>
+        <td> ${val.nombre_ciudad}</td>
+        <td> ${val.municipio}</td> <td> ${val.estado}</td>    <td> ${val.direccion}</td>
+        <td> ${val.fecha_creacion}</td>
+          <td>
+            <div class=\"d-flex gap-2\">
+                <button type=\"button\" class=\"btn bg-deep-orange btn-circle waves-effect waves-circle waves-float boton-update\" id=\"${val.id}\">
+                    <i class=\"material-icons\">mode_edit</i>
+                </button>
+                <button type=\"button\" class=\"btn bg-red btn-circle waves-effect waves-circle waves-float boton-borrar\" id=\"${val.id}\">
+                <i class=\"material-icons\">delete</i>
+                </button>
+            </div>
+          </td>
+      </tr>
+    `;
+});
 
 	      $('#tablaclientes tbody').html(html);
 
 		} else {
+			console.log( data )
 			alert( data.msj )
 		}
 	})
@@ -90,20 +90,41 @@ function listar(){
 //				Crear
 //--------------------------------------------------------------------------------------------------
 
+function validarDatosCliente(nombre, apellido, direccion) {
+	nombre = $.trim(nombre);
+	apellido = $.trim(apellido);
+	var patronNombre = /^\p{L}[\p{L}\p{M}]*(?: +\p{L}[\p{L}\p{M}]*)*$/u;
+
+	if (!patronNombre.test(nombre)) {
+		alert('El nombre solo debe contener letras y espacios.');
+		return false;
+	}
+
+	if (!patronNombre.test(apellido)) {
+		alert('El apellido solo debe contener letras y espacios.');
+		return false;
+	}
+
+	if (Array.from(direccion).length > 100) {
+		alert('La dirección no debe exceder los 100 caracteres.');
+		return false;
+	}
+
+	return true;
+}
+
 $('#guardar').click(function() {
 	crear();
-});
+})
 
-function crear() {
-	var nombre = $('#nombre').val();
-	var apellido = $('#apellido').val();
-	var cedula = $('#cedula').val();
-	var sexo = $('#sexo').val();
-	var id_parroquia = $('#id_parroquia').val(); 
-	var direccion = $('#direccion').val();
+function crear(event) {
+	var nombre = $.trim($('#nombre').val())
+	var apellido = $.trim($('#apellido').val())
+	var sexo = $('#sexo').val()
+	var id_ciudad = $('#id_ciudad').val() 
+	var direccion = $('#direccion').val()
 
-	if(nombre == "" || apellido == "" || cedula == "" || id_parroquia == "") {
-		alert("Por favor complete los campos obligatorios");
+	if (!validarDatosCliente(nombre, apellido, direccion)) {
 		return;
 	}
 	
@@ -111,15 +132,13 @@ function crear() {
 		url: 'app/controllers/ClienteController.php',
 		type: 'POST',
 		dataType: 'json',
-		data: {
-			action: 'crear',
-			nombre: nombre,
-			apellido: apellido,
-			cedula: cedula,
-			sexo: sexo,
-			id_parroquia: id_parroquia,
-			direccion: direccion
-		},
+		data: {action: 'crear',
+				nombre: nombre,
+				apellido: apellido,
+				sexo: sexo,
+				id_ciudad: id_ciudad,
+				direccion: direccion
+            },
 	})
 	.done(function(data) {
 
@@ -129,20 +148,25 @@ function crear() {
 			$('#cerrar').click();
 			$('#nombre').val("");
 			$('#apellido').val("");
-			$('#cedula').val("");
 			$('#sexo').val("");
-			$('#id_parroquia').val("").change();
+			$('#id_ciudad').val("").change();
 			$('#direccion').val("");
+			$('#fecha_creacion').val("");
 
-			alert( 'Su registro ha sido guardado con éxito' );
+			alert( 'Su registro ha sido guardado con exito' )
 		} else {
-			alert( data.msj );
+
+			alert( data.msj )
 		}
-	});
+	})
+	.fail(function(xhr) {
+		var respuesta = xhr.responseJSON || {};
+		alert(respuesta.msj || 'No se pudo guardar el cliente.');
+	})
 }
 
 // -------------------------------------------------------------------------------------------------
-//				Funciones de Carga (Parroquias)
+//				Funciones de Carga (Líneas, Medidas y Ciudades)
 //--------------------------------------------------------------------------------------------------
 
 function cargarCiudades() {
@@ -152,22 +176,46 @@ function cargarCiudades() {
 		data: { action: 'listarCiudades' },
 		dataType: 'json',
 		success: function(data) {
-			var opciones = '<option value="">Seleccione una parroquia</option>';
+			var opciones = '<option value="">Seleccione una ciudad</option>';
 			
 			if(data && data.length > 0) {
 				data.forEach(function(item) {
-					opciones += `<option value="${item.id_parroquia}" data-municipio="${item.municipio}" data-estado="${item.estado}">${item.nombre_parroquia}</option>`;
+					opciones += `<option value="${item.id_ciudad}" data-municipio="${item.municipio}" data-estado="${item.estado}">${item.nombre_ciudad}</option>`;
 				});
 				
-				$('#id_parroquia').html(opciones);
-				$('#id_parroquiaEditar').html(opciones);
+				$('#id_ciudad').html(opciones);
+				$('#id_ciudadEditar').html(opciones);
 			}
 		},
 		error: function() {
-			console.error("Error cargando parroquias");
+			console.error("Error");
 		}
 	});
 }
+
+function cargarLineas(){
+	$.ajax({
+        url: 'app/controllers/ClienteController.php',
+        type: 'POST',
+        data: { action: 'cargarLineas' }, 
+        dataType: 'json',
+    })
+    .done(function(data) {
+        if (data.success) {
+            let options = '<option value="">-- Seleccione Línea --</option>';
+            
+            $.each(data.datos, function(index, val) {
+                options += `<option value="${val.id}">${val.nombre}</option>`;
+            });
+
+            
+        } else {
+            console.error("Error cargando líneas: " + data.msj);
+        }
+    });
+}
+
+
 
 // -------------------------------------------------------------------------------------------------
 //				Modificar
@@ -175,64 +223,67 @@ function cargarCiudades() {
 
 $("body").on("click","button.boton-update",function(){
 
-	var id = $(this).attr("id");
+	var id = $(this).attr("id")
 
 	$.ajax({
 		url: 'app/controllers/ClienteController.php',
 		type: 'POST',
 		dataType: 'json',
-		data: {
-			action: 'consultar',
-			id: id
-		},
+		data: {action: 'consultar',
+				id: id,},
 	})
 	.done(function(data) {
 
+		console.log( data.data.datos )
+
 		if (data.success == true) {
 
-			$('#idEditar').val( data.data.datos[0].id );
-			$('#nombreEditar').val( data.data.datos[0].nombre );
-			$('#apellidoEditar').val( data.data.datos[0].apellido );
-			$('#cedulaEditar').val( data.data.datos[0].cedula );
-			$('#sexoEditar').val( data.data.datos[0].sexo );
-			$('#id_parroquiaEditar').val( data.data.datos[0].id_parroquia ).change();
-			$('#direccionEditar').val( data.data.datos[0].direccion );
+			$('#idEditar').val( data.data.datos[0].id ) 
+			$('#nombreEditar').val( data.data.datos[0].nombre )
+			$('#apellidoEditar').val( data.data.datos[0].apellido )
+			$('#sexoEditar').val( data.data.datos[0].sexo )
+			$('#id_ciudadEditar').val( data.data.datos[0].id_ciudad ).change()
+			
+			$('#direccionEditar').val( data.data.datos[0].direccion )
 
 			$('#modalEditar').modal('show'); 
 
 		} else {
-			alert( data.msj );
+
+			alert( data.msj )
 		}
-	});
-});
+	})
+})
+
 
 $('#editar').click(function() {
 	editar();
-});
+})
 
 function editar() {
-	var id = $('#idEditar').val(); 
-	var nombre = $('#nombreEditar').val();
-	var apellido = $('#apellidoEditar').val();
-	var cedula = $('#cedulaEditar').val();
-	var sexo = $('#sexoEditar').val();
-	var id_parroquia = $('#id_parroquiaEditar').val();
-	var direccion = $('#direccionEditar').val();
+	var id = $('#idEditar').val() 
+	var nombre = $.trim($('#nombreEditar').val())
+	var apellido = $.trim($('#apellidoEditar').val())
+	var sexo = $('#sexoEditar').val()
+	var id_ciudad = $('#id_ciudadEditar').val()
+	var direccion = $('#direccionEditar').val()
+
+	if (!validarDatosCliente(nombre, apellido, direccion)) {
+		return;
+	}
 	
 	$.ajax({
 		url: 'app/controllers/ClienteController.php',
 		type: 'POST',
 		dataType: 'json',
-		data: {
-			action: 'editar',
-			id: id,
-			nombre: nombre,
-			apellido: apellido,
-			cedula: cedula,
-			sexo: sexo,
-			id_parroquia: id_parroquia,
-			direccion: direccion
-		},
+		data: {action: 'editar',
+				id:id,
+				nombre: nombre,
+				apellido: apellido,
+				sexo: sexo,
+				id_ciudad: id_ciudad,
+				direccion: direccion
+			},
 	})
 	.done(function(data) {
 
@@ -241,30 +292,36 @@ function editar() {
 			listar();
 			$('#cerrarEditar').click();
 
-			alert( 'Su registro ha sido actualizado con éxito' );
+			alert( 'Su registro ha sido actualizado con exito' )
 
 		} else {
-			alert( data.msj );
-		}
-	});
-}
 
+			alert( data.msj )
+		}
+	})
+	.fail(function(xhr) {
+		var respuesta = xhr.responseJSON || {};
+		alert(respuesta.msj || 'No se pudo actualizar el cliente.');
+	})
+}
 // -------------------------------------------------------------------------------------------------
 //				Eliminar
 //--------------------------------------------------------------------------------------------------
 
 $("body").on("click","button.boton-borrar",function(){
 
-    var id = $(this).attr("id");
+    var id = $(this).attr("id")
 
-	let resultado = confirm("¿Estás seguro de eliminar este cliente?");
+	let resultado = confirm("¿Estás seguro de eliminar este usuario?");
 
 	if (resultado) {
-		eliminar(id);
+
+		eliminar(id)
 	} else {
+
 		alert("Operación cancelada.");
 	}
-});
+})
 
 function eliminar(id) {
 
@@ -272,18 +329,19 @@ function eliminar(id) {
 		url: 'app/controllers/ClienteController.php',
 		type: 'POST',
 		dataType: 'json',
-		data: {
-			action: 'eliminar',
-			id: id
-		},
+		data: {action: 'eliminar',
+				id: id},
 	})
 	.done(function(data) {
 
-		if ( data.success ) {
-			listar();
-			alert( 'Cliente eliminado' );
-		} else {
-			alert( data.msj );
-		}
-	});
+			if ( data.success ) {
+
+				listar();
+
+				alert( 'Usuario eliminado' )
+			} else {
+
+				alert( data.msj )
+			}
+	})
 }

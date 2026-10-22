@@ -35,12 +35,75 @@ class PedidoController extends BaseController {
 
     protected function guardar($data) {
         $this->cargarModelo($data);
-        return $this->respuesta($this->modelo->guardarPedido(), 'Error al guardar el pedido', 'Pedido guardado correctamente');
+        $resultado = $this->modelo->guardarPedido();
+        if (!empty($resultado['validation'])) {
+            return $this->jsonResponse(['success' => false, 'message' => $resultado['error']], 422);
+        }
+
+        if (!empty($resultado['conflict'])) {
+            return $this->jsonResponse(['success' => false, 'message' => $resultado['error']], 409);
+        }
+
+        return $this->respuesta($resultado, 'Error al guardar el pedido', 'Pedido guardado correctamente');
+    }
+
+    protected function cambiarEstatus($data) {
+        $idPedido = filter_var($data['id'] ?? null, FILTER_VALIDATE_INT);
+        $idEstatus = filter_var($data['id_estatus'] ?? null, FILTER_VALIDATE_INT);
+
+        if ($idPedido === false || $idPedido <= 0 || !in_array($idEstatus, [2, 3], true)) {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => 'Selecciona un pedido y un estatus válido.'
+            ], 422);
+        }
+
+        $resultado = $this->modelo->cambiarEstatusPedido($idPedido, $idEstatus);
+        if (!empty($resultado['validation'])) {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => $resultado['error']
+            ], 422);
+        }
+
+        if (!empty($resultado['conflict'])) {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => $resultado['error']
+            ], 409);
+        }
+
+        if (!$resultado['success']) {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => 'No se pudo cambiar el estatus del pedido.'
+            ], 500);
+        }
+
+        return $this->jsonResponse([
+            'success' => true,
+            'message' => 'Estatus del pedido actualizado correctamente.'
+        ]);
     }
 
     protected function eliminar($data) {
-        $idPedido = $data['id'] ?? 0;
-        return $this->respuesta($this->modelo->eliminarPedido($idPedido), 'Error al eliminar el pedido', 'Pedido eliminado correctamente');
+        $idPedido = filter_var($data['id'] ?? null, FILTER_VALIDATE_INT);
+        if ($idPedido === false || $idPedido <= 0) {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => 'Selecciona un pedido válido.'
+            ], 422);
+        }
+
+        $resultado = $this->modelo->eliminarPedido($idPedido);
+        if (!empty($resultado['conflict'])) {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => $resultado['error']
+            ], 409);
+        }
+
+        return $this->respuesta($resultado, 'Error al eliminar el pedido', 'Pedido eliminado correctamente');
     }
 
     private function cargarModelo($data) {
