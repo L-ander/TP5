@@ -23,7 +23,7 @@ $todasLasRutas = $routerMenu->getRoutes();
     </div>
 </nav>
 
-<section style="position: relative; z-index: 9999;">
+<section>
     <aside id="leftsidebar" class="sidebar" aria-label="Menú principal">
     <div class="sidebar-header-mobile">
         <div class="user-greeting">

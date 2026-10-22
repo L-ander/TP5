@@ -318,7 +318,7 @@ body.sidebar-collapsed .contenedor-principal {
         width: 100vw;
         height: 100vh;
         background-color: rgba(0, 0, 0, 0.6); /* Sombra oscura */
-        z-index: 9998;
+        z-index: 1025;
     }
     
     /* Mostrar el fondo oscuro SOLO cuando el menú está abierto */
@@ -333,7 +333,7 @@ body.sidebar-collapsed .contenedor-principal {
         left: -320px; /* Escondido totalmente a la izquierda */
         width: 280px;
         height: 100vh !important;
-        z-index: 9999; /* Sobre el fondo oscuro */
+        z-index: 1030;
         box-shadow: none;
         background-color: #fff;
     }
