@@ -1,0 +1,41 @@
+/* Archivo: public/css/vendedores.css */
+
+.vendedores-header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-listado-usuarios {
+    color: white !important;
+}
+
+/* public/css/vendedores.css */
+.vendedores-header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-listado-usuarios {
+    color: white !important;
+}
+
+/* --- ESTILOS DE VALIDACIÓN --- */
+.input-error {
+    border-bottom: 2px solid #f44336 !important; /* Rojo */
+    box-shadow: 0 1px 0 0 #f44336 !important;
+}
+
+.input-success {
+    border-bottom: 2px solid #4CAF50 !important; /* Verde */
+    box-shadow: 0 1px 0 0 #4CAF50 !important;
+}
+
+.error-msg {
+    display: none;
+    color: #f44336;
+    font-size: 12px;
+    margin-top: 5px;
+    font-weight: 500;
+}
