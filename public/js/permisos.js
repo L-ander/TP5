@@ -2,7 +2,8 @@ $(document).ready(function() {
     listar();
 
     $('#abrirModal').on('click', function() {
-        $('#nombre').val('');
+        $('#nombre').val('').prop('disabled', false);
+        $('#guardar').prop('disabled', false);
         $('#contenedorPermisosNuevo').hide();
         $('#listaModulosPilaNuevo').empty();
     });
@@ -67,7 +68,7 @@ $('#guardar').on('click', function() {
 function crear() {
     var nombre = $('#nombre').val();
 
-    if(!nombre.trim()) {
+    if (!nombre.trim()) {
         alert('Ingrese el nombre del rol');
         return;
     }
@@ -84,25 +85,20 @@ function crear() {
     .done(function(data) {
         if (data.success) {
             listar();
-            alert('Rol guardado con éxito. Ahora puedes asignarle sus permisos.');
-            
-            $.ajax({
-                url: 'app/controllers/rolController.php',
-                type: 'POST',
-                dataType: 'json',
-                data: { action: 'listar' }
-            }).done(function(resList) {
-                if(resList.success && resList.data.datos.length > 0) {
-                    var roles = resList.data.datos;
-                    var ultimoRol = roles[roles.length - 1];
-                    $('#idRolReciente').val(ultimoRol.id);
-                    
-                    $('#listaModulosPilaNuevo').empty();
-                    cargarSelectModulos('#selectModuloNuevo', ultimoRol.id, '#listaModulosPilaNuevo');
-                    $('#contenedorPermisosNuevo').show();
-                }
-            });
 
+            // El controlador devuelve el id del rol recién creado
+            var idNuevo = data.data.id;
+            $('#idRolReciente').val(idNuevo);
+
+            // Evita crear el mismo rol dos veces
+            $('#nombre').prop('disabled', true);
+            $('#guardar').prop('disabled', true);
+
+            $('#listaModulosPilaNuevo').empty();
+            cargarSelectModulos('#selectModuloNuevo', idNuevo, '#listaModulosPilaNuevo');
+            $('#contenedorPermisosNuevo').show();
+
+            alert('Rol guardado con éxito. Ahora puedes asignarle sus permisos.');
         } else {
             alert(data.msj || 'Error al guardar el rol.');
         }
@@ -114,7 +110,7 @@ function crear() {
 }
 
 // -------------------------------------------------------------------------------------------------
-// Gestión de Pila de Permisos (Nuevo)
+// Gestión de Pila de Permisos
 // -------------------------------------------------------------------------------------------------
 $('#btnAgregarModuloNuevo').on('click', function() {
     agregarModuloAPila('#selectModuloNuevo', '#listaModulosPilaNuevo');
@@ -123,6 +119,15 @@ $('#btnAgregarModuloNuevo').on('click', function() {
 $('#btnAgregarModuloEditar').on('click', function() {
     agregarModuloAPila('#selectModuloEditar', '#listaModulosPilaEditar');
 });
+
+function itemPilaHtml(idModulo, nombreModulo) {
+    return '<li class="list-group-item d-flex justify-content-between align-items-center" data-id="' + idModulo + '" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; background: #f9f9f9; padding: 10px; border: 1px solid #ddd;">' +
+                '<span><b>' + nombreModulo + '</b></span>' +
+                '<button type="button" class="btn btn-danger btn-xs waves-effect btn-remover-modulo" title="Eliminar módulo">' +
+                    '<i class="material-icons" style="font-size: 16px;">delete</i>' +
+                '</button>' +
+            '</li>';
+}
 
 function agregarModuloAPila(selectId, contenedorPilaId) {
     var select = $(selectId);
@@ -134,7 +139,6 @@ function agregarModuloAPila(selectId, contenedorPilaId) {
         return;
     }
 
-    // Validar si ya está agregado en la pila
     var existe = false;
     $(contenedorPilaId + ' li').each(function() {
         if ($(this).data('id') == idModulo) {
@@ -147,19 +151,10 @@ function agregarModuloAPila(selectId, contenedorPilaId) {
         return;
     }
 
-    // Agregar elemento a la pila visual con su botón de eliminar
-    var itemHtml = '<li class="list-group-item d-flex justify-content-between align-items-center" data-id="' + idModulo + '" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; background: #f9f9f9; padding: 10px; border: 1px solid #ddd;">' +
-                        '<span><b>' + nombreModulo + '</b></span>' +
-                        '<button type="button" class="btn btn-danger btn-xs waves-effect btn-remover-modulo" title="Eliminar módulo">' +
-                            '<i class="material-icons" style="font-size: 16px;">delete</i>' +
-                        '</button>' +
-                    '</li>';
-
-    $(contenedorPilaId).append(itemHtml);
-    select.val(''); // Limpiar select
+    $(contenedorPilaId).append(itemPilaHtml(idModulo, nombreModulo));
+    select.val('');
 }
 
-// Remover elemento de la pila al hacer clic en su botón de eliminar
 $(document).on('click', '.btn-remover-modulo', function() {
     $(this).closest('li').remove();
 });
@@ -194,7 +189,7 @@ $('#guardarPermisosEditar').on('click', function() {
     });
 });
 
-// Función para cargar los modulos en el select y marcar/precargar los existentes en la pila
+// Carga los módulos en el select y precarga en la pila los que el rol ya tiene
 function cargarSelectModulos(selectorSelect, idRol, selectorPila) {
     $.ajax({
         url: 'app/controllers/rolController.php',
@@ -204,7 +199,7 @@ function cargarSelectModulos(selectorSelect, idRol, selectorPila) {
     }).done(function(resModulos) {
         if (resModulos.success) {
             var modulos = resModulos.data.datos;
-            
+
             $.ajax({
                 url: 'app/controllers/rolController.php',
                 type: 'POST',
@@ -213,27 +208,19 @@ function cargarSelectModulos(selectorSelect, idRol, selectorPila) {
             }).done(function(resPermisos) {
                 var permisosAsignados = [];
                 if (resPermisos.success) {
-                    permisosAsignados = resPermisos.data.datos.map(p => parseInt(p.cod_modulo));
+                    permisosAsignados = resPermisos.data.datos.map(function(p) { return parseInt(p.cod_modulo); });
                 }
 
-                // Llenar el select con todos los módulos disponibles
                 var htmlSelect = '<option value="">-- Seleccione Módulo --</option>';
                 $.each(modulos, function(i, mod) {
                     htmlSelect += '<option value="' + mod.id + '">' + mod.nombre + '</option>';
                 });
                 $(selectorSelect).html(htmlSelect);
 
-                // Llenar la pila con los permisos que ya tiene asignados el rol
                 $(selectorPila).empty();
                 $.each(modulos, function(i, mod) {
-                    if (permisosAsignados.includes(parseInt(mod.id))) {
-                        var itemHtml = '<li class="list-group-item d-flex justify-content-between align-items-center" data-id="' + mod.id + '" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; background: #f9f9f9; padding: 10px; border: 1px solid #ddd;">' +
-                                            '<span><b>' + mod.nombre + '</b></span>' +
-                                            '<button type="button" class="btn btn-danger btn-xs waves-effect btn-remover-modulo" title="Eliminar módulo">' +
-                                                '<i class="material-icons" style="font-size: 16px;">delete</i>' +
-                                            '</button>' +
-                                        '</li>';
-                        $(selectorPila).append(itemHtml);
+                    if (permisosAsignados.indexOf(parseInt(mod.id)) !== -1) {
+                        $(selectorPila).append(itemPilaHtml(mod.id, mod.nombre));
                     }
                 });
             });
@@ -241,7 +228,7 @@ function cargarSelectModulos(selectorSelect, idRol, selectorPila) {
     });
 }
 
-// Función auxiliar para enviar los permisos al backend
+// Envía los permisos al backend
 function guardarPermisosAjax(codRol, modulos, callback) {
     $.ajax({
         url: 'app/controllers/rolController.php',
@@ -279,7 +266,7 @@ $(document).on('click', 'button.boton-update', function() {
             var rol = data.data.datos[0];
             $('#idRol').val(rol.id);
             $('#nombreEditar').val(rol.nombre);
-            
+
             cargarSelectModulos('#selectModuloEditar', rol.id, '#listaModulosPilaEditar');
 
             $('#abrirModalEditar').click();
@@ -301,6 +288,11 @@ function editar() {
     var id = $('#idRol').val();
     var nombre = $('#nombreEditar').val();
 
+    if (!nombre.trim()) {
+        alert('Ingrese el nombre del rol');
+        return;
+    }
+
     $.ajax({
         url: 'app/controllers/rolController.php',
         type: 'POST',
@@ -314,8 +306,7 @@ function editar() {
     .done(function(data) {
         if (data.success) {
             listar();
-            $('#cerrarEditar').click();
-            alert('Su registro ha sido actualizado con éxito');
+            alert('Nombre del rol actualizado con éxito');
         } else {
             alert(data.msj || 'Error al actualizar el rol.');
         }

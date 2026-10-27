@@ -1,22 +1,22 @@
-<!-- modal.php -->
+<!-- ============================ MODAL: NUEVO ROL ============================ -->
 <div class="modal fade" id="modalRol" tabindex="-1" role="dialog" style="display: none;">
-    <div class="modal-dialog modal-lg" role="document"> 
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header modal-col-grey">
                 <h4 class="modal-title" id="defaultModalLabel"> Registrar Rol y Permisos </h4>
             </div>
             <div class="modal-body">
-                <!-- Formulario original de Rol -->
-                <form id="formulario">
+                <!-- Formulario de Rol -->
+                <form id="formulario" onsubmit="return false;">
                     <h5 style="margin-bottom: 10px; font-weight: bold; color: #333;">1. Datos del Rol</h5>
-                    <div class="row"> 
+                    <div class="row">
                         <div class="col-md-8">
                             <div class="input-group">
                                 <span class="input-group-addon">
                                     <i class="material-icons">shopping_basket</i>
                                 </span>
                                 <div class="form-line">
-                                    <input type="text" class="form-control" placeholder="Nombre del Rol" id="nombre">
+                                    <input type="text" class="form-control" placeholder="Nombre del Rol" id="nombre" maxlength="20">
                                 </div>
                             </div>
                         </div>
@@ -25,14 +25,15 @@
                         </div>
                     </div>
                 </form>
+                
 
                 <hr style="margin: 20px 0;">
 
-                <!-- Bloque Transaccional de Módulos / Permisos -->
+                <!-- Bloque de Módulos / Permisos (aparece al guardar el rol) -->
                 <div id="contenedorPermisosNuevo" style="display: none;">
                     <h5 style="margin-bottom: 10px; font-weight: bold; color: #333;">2. Asignar Módulos (Permisos)</h5>
                     <input type="hidden" id="idRolReciente">
-                    
+
                     <div class="row">
                         <div class="col-md-8">
                             <div class="form-group">
@@ -52,7 +53,6 @@
                     <div class="row" style="margin-top: 15px;">
                         <div class="col-md-12">
                             <ul class="list-group" id="listaModulosPilaNuevo" style="max-height: 200px; overflow-y: auto;">
-                                <!-- Se llenará dinámicamente en pila -->
                             </ul>
                         </div>
                     </div>
@@ -69,17 +69,16 @@
     </div>
 </div>
 
--- --------------------------------------------------------
-
+<!-- ============================ MODAL: EDITAR ROL ============================ -->
 <div class="modal fade" id="modalEditarRol" tabindex="-1" role="dialog" style="display: none;">
-    <div class="modal-dialog modal-lg" role="document"> 
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header modal-col-grey">
-                <h4 class="modal-title" id="defaultModalLabel"> Editar Rol y Permisos </h4>
+                <h4 class="modal-title" id="defaultModalLabelEditar"> Editar Rol y Permisos </h4>
             </div>
             <div class="modal-body">
-                <!-- Formulario original de Edición de Rol -->
-                <form id="formularioEditar">
+                <!-- Formulario de Edición de Rol -->
+                <form id="formularioEditar" onsubmit="return false;">
                     <input type="hidden" id="idRol">
                     <h5 style="margin-bottom: 10px; font-weight: bold; color: #333;">1. Datos del Rol</h5>
                     <div class="row">
@@ -89,7 +88,7 @@
                                     <i class="material-icons">shopping_basket</i>
                                 </span>
                                 <div class="form-line">
-                                    <input type="text" class="form-control" placeholder="Nombre del Rol" id="nombreEditar">
+                                    <input type="text" class="form-control" placeholder="Nombre del Rol" id="nombreEditar" maxlength="20">
                                 </div>
                             </div>
                         </div>
@@ -101,10 +100,10 @@
 
                 <hr style="margin: 20px 0;">
 
-                <!-- Bloque Transaccional de Módulos / Permisos en Edición -->
+                <!-- Bloque de Módulos / Permisos en Edición -->
                 <div>
                     <h5 style="margin-bottom: 10px; font-weight: bold; color: #333;">2. Asignar Módulos (Permisos)</h5>
-                    
+
                     <div class="row">
                         <div class="col-md-8">
                             <div class="form-group">
@@ -124,7 +123,6 @@
                     <div class="row" style="margin-top: 15px;">
                         <div class="col-md-12">
                             <ul class="list-group" id="listaModulosPilaEditar" style="max-height: 200px; overflow-y: auto;">
-                                <!-- Se llenará dinámicamente en pila -->
                             </ul>
                         </div>
                     </div>

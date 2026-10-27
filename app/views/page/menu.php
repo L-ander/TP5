@@ -62,7 +62,7 @@ $todasLasRutas = $routerMenu->getRoutes();
                         switch ($accion) {
                             case 'home': $icono = 'home'; break;
                             case 'clientes': $icono = 'people'; break;
-                            case 'vendedores': $icono = 'badge'; break;
+                            case 'personal': $icono = 'badge'; break;
                             case 'producto': $icono = 'shopping_cart'; break; 
                             case 'pedidos': $icono = 'playlist_add'; break;
                             case 'reportes': $icono = 'insert_chart'; break;
@@ -72,7 +72,7 @@ $todasLasRutas = $routerMenu->getRoutes();
 
                         // Formateamos el nombre del menú de la primera letra en mayúscula
                         $nombreModulo = ucfirst($accion);
-                        if ($accion === 'vendedores') $nombreModulo = 'Personal';
+                        if ($accion === 'personal') $nombreModulo = 'Personal';
                         if ($accion === 'pedido' || $accion === 'pedidos') $nombreModulo = 'Pedidos';
                         if ($accion === 'roles') $nombreModulo = 'Permisos';
                     ?>

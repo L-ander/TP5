@@ -1,179 +1,110 @@
 <?php
 
-    // define('DEBUG', true);
-    // error_reporting(E_ALL);
-    // ini_set('display_errors', DEBUG ? 'On' : 'Off');
-
     require_once '../core/BaseController.php';
     require_once '../models/rolModel.php';
 
-    class LoginAjaxController extends BaseController {
+    class RolAjaxController extends BaseController {
+
+        // Solo estas acciones se pueden llamar desde fuera
+        private $accionesPermitidas = [
+            'listar', 'consultar', 'crear', 'editar', 'eliminar',
+            'listarModulos', 'obtenerPermisosRol', 'guardarPermisosRol'
+        ];
 
         public function ejecutar($action, $data) {
-            $method = lcfirst($action);
-
-            if (method_exists($this, $method)) {
-                return $this->$method($data);
-            } else {
-                return $this->jsonResponse(['success' => false, 'message' => 'Acción no reconocida'], 404);
+            if (session_status() !== PHP_SESSION_ACTIVE) {
+                $this->startSession();
             }
+
+            // Solo el administrador (rol 1) puede gestionar roles y permisos
+            if (empty($_SESSION['session']) || (int)($_SESSION['codrol'] ?? 0) !== 1) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'No tienes permiso para esta acción.'], 403);
+            }
+
+            if (!in_array($action, $this->accionesPermitidas, true)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'Acción no reconocida.'], 404);
+            }
+
+            return $this->$action($data);
+        }
+
+        // Convierte la respuesta del modelo al formato que espera permisos.js
+        private function responder($r) {
+            if (!empty($r['success'])) {
+                return $this->jsonResponse(['success' => true, 'data' => $r]);
+            }
+            if (isset($r['error'])) {
+                error_log('rolController: ' . $r['error']);
+            }
+            return $this->jsonResponse([
+                'success' => false,
+                'msj'     => $r['msj'] ?? 'Ocurrió un error en el servidor.'
+            ]);
         }
 
         protected function listar($data) {
+            return $this->responder((new rolModel())->listar());
+        }
 
-            $roles = new rolModel();
-            $user = $roles->listar();
-
-            // var_dump( $user['success'] );
-            // exit();
-
-            if ( $user['success'] ) {
-
-                return $this->jsonResponse([
-                    'success' => true,
-                    'data' => $user
-                ]);
-            } else {
-
-                return $this->jsonResponse(['success' => false, 'error' => 3, 'msj' => 'Error Al Obtener la Informacion']);
-            }
+        protected function consultar($data) {
+            $rol = new rolModel();
+            $rol->setId((int)($data['id'] ?? 0));
+            return $this->responder($rol->consultar());
         }
 
         protected function crear($data) {
-
-            // var_dump( $data );
-            // exit;
-
-            $roles = new rolModel();
-            $roles->setNombre($data["nombre"]);
-
-            $user = $roles->crear();
-
-            // var_dump( $user['success'] );
-            // exit();
-
-            if ( $user['success'] ) {
-
-                return $this->jsonResponse([
-                    'success' => true
-                ]);
-            } else {
-
-                return $this->jsonResponse(['success' => false, 'error' => 3, 'msj' => 'Error Al Guardar la Informacion']);
+            $nombre = trim($data['nombre'] ?? '');
+            if ($nombre === '' || mb_strlen($nombre) > 20) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'El nombre es obligatorio (máximo 20 caracteres).']);
             }
-        }
-
-
-
-
-
-        protected function consultar($data) {
-
-            $roles = new rolModel();
-            $roles->setId($data["id"]);
-            $user = $roles->consultar();
-
-            if ( $user['success'] ) {
-
-                return $this->jsonResponse([
-                    'success' => true,
-                    'data' => $user
-                ]);
-            } else {
-
-                return $this->jsonResponse(['success' => false, 'error' => 3, 'msj' => 'Error Al Obtener la Informacion']);
-            }
+            $rol = new rolModel();
+            $rol->setNombre($nombre);
+            return $this->responder($rol->crear());
         }
 
         protected function editar($data) {
-
-            // var_dump( $data );
-            // exit;
-
-            $roles = new rolModel();
-            $roles->setId($data["id"]);
-            $roles->setNombre($data["nombre"]);
-            $user = $roles->editar();
-
-            // var_dump( $user['success'] );
-            // exit();
-
-            if ( $user['success'] ) {
-
-                return $this->jsonResponse([
-                    'success' => true
-                ]);
-            } else {
-
-                return $this->jsonResponse(['success' => false, 'error' => 3, 'msj' => 'Error Al Guardar la Informacion']);
+            $nombre = trim($data['nombre'] ?? '');
+            if ($nombre === '' || mb_strlen($nombre) > 20) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'El nombre es obligatorio (máximo 20 caracteres).']);
             }
+            $rol = new rolModel();
+            $rol->setId((int)($data['id'] ?? 0));
+            $rol->setNombre($nombre);
+            return $this->responder($rol->editar());
         }
 
         protected function eliminar($data) {
-
-            // var_dump( $data );
-            // exit;
-
-            $roles = new rolModel();
-            $roles->setId($data["id"]);
-            $user = $roles->eliminar();
-
-            // var_dump( $user['success'] );
-            // exit();
-
-            if ( $user['success'] ) {
-
-                return $this->jsonResponse([
-                    'success' => true
-                ]);
-            } else {
-
-                return $this->jsonResponse(['success' => false, 'error' => 3, 'msj' => 'Error Al Guardar la Informacion']);
-            }
+            $rol = new rolModel();
+            $rol->setId((int)($data['id'] ?? 0));
+            return $this->responder($rol->eliminar());
         }
 
         protected function listarModulos($data) {
-            require_once '../models/permisoModel.php';
-            $permisoModel = new permisoModel();
-            $res = $permisoModel->listarModulos();
-            if ($res['success']) {
-                return $this->jsonResponse(['success' => true, 'data' => $res]);
-            }
-            return $this->jsonResponse(['success' => false, 'msj' => 'Error al obtener los módulos']);
+            return $this->responder((new rolModel())->listarModulos());
         }
 
         protected function obtenerPermisosRol($data) {
-            require_once '../models/permisoModel.php';
-            $permisoModel = new permisoModel();
-            $permisoModel->setCodRol($data['cod_rol']);
-            $res = $permisoModel->obtenerPermisosPorRol();
-            if ($res['success']) {
-                return $this->jsonResponse(['success' => true, 'data' => $res]);
-            }
-            return $this->jsonResponse(['success' => false, 'msj' => 'Error al obtener permisos']);
+            $rol = new rolModel();
+            $rol->setId((int)($data['cod_rol'] ?? 0));
+            return $this->responder($rol->obtenerPermisosRol());
         }
 
         protected function guardarPermisosRol($data) {
-            require_once '../models/permisoModel.php';
-            $permisoModel = new permisoModel();
-            $permisoModel->setCodRol($data['cod_rol']);
-            
-            // Recibe el array de IDs de módulos desde el frontend (la pila)
-            $modulos = isset($data['modulos']) ? $data['modulos'] : [];
-            $res = $permisoModel->guardarPermisos($modulos);
-
-            if ($res['success']) {
-                return $this->jsonResponse(['success' => true]);
+            $idRol = (int)($data['cod_rol'] ?? 0);
+            if ($idRol <= 0) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'Rol no válido.']);
             }
-            return $this->jsonResponse(['success' => false, 'msj' => 'Error al guardar los permisos']);
+            // Si se quitan todos los módulos, jQuery no envía "modulos": se toma como lista vacía
+            $modulos = (isset($data['modulos']) && is_array($data['modulos'])) ? $data['modulos'] : [];
+
+            $rol = new rolModel();
+            $rol->setId($idRol);
+            return $this->responder($rol->guardarPermisosRol($modulos));
         }
-
-
-        
     }
 
     if (isset($_POST['action'])) {
-        $controller = new LoginAjaxController();
+        $controller = new RolAjaxController();
         $controller->ejecutar($_POST['action'], $_POST);
     }
 ?>
