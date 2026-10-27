@@ -11,6 +11,7 @@ $(document).ready(function () {
         $usuario.add($password).attr('aria-invalid', 'false');
     }
 
+    
     function mostrarError(mensaje, campo) {
         limpiarError();
         $error.text(mensaje).prop('hidden', false);
