@@ -11,6 +11,8 @@ function mostrarExitoProducto(mensaje) {
     });
 }
 
+
+
 function confirmarEliminacion(id, nombreProducto, appInstance, tabla) {
     Swal.fire({
         title: '¿Eliminar a ' + nombreProducto + '?',

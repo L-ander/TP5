@@ -320,3 +320,31 @@ function eliminar(id) {
         alert('Error al eliminar el producto.');
     });
 }
+
+
+function validarInput(selector, patron, mensaje) {
+    $(document).on('keyup', selector, function() {
+        var valor = $(this).val();
+        var linea = $(this).closest('.form-line');
+        
+        if (patron.test(valor) || valor === "") {
+            linea.css("border-bottom", "2px solid #4CAF50"); 
+            $(this).parent().find('.txt-error').remove();
+        } else {
+            linea.css("border-bottom", "2px solid #F44336"); 
+            if (!$(this).parent().find('.txt-error').length) {
+                $(this).parent().after('<small class="txt-error" style="color: #F44336; display: block; margin-top: 5px;">' + mensaje + '</small>');
+            }
+        }
+    });
+}
+
+$(document).ready(function() {
+    var patronTexto = /^[A-Za-z0-9 .,\/_-]*$/;
+    
+
+    var patronPrecio = /^[0-9.]*$/;
+
+    validarInput('#nombre, #nombreEditar', patronTexto, 'Solo letras, números y signos permitidos.');
+    validarInput('#precio, #precioEditar', patronPrecio, 'Ingrese un precio válido.');
+});
