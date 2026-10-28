@@ -92,7 +92,15 @@ function confirmarEliminacion(id, nombreProducto) {
     });
 }
 
-
+function mostrarErrorProducto(mensaje) {
+    Swal.fire({
+        icon: 'error',
+        title: '¡Ops!',
+        text: mensaje,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Entendido'
+    });
+}
 
 
 
@@ -104,11 +112,44 @@ $('#guardar').on('click', function() {
 });
 
 function crear() {
-    var nombre = $('#nombre').val();
+    var nombre = $('#nombre').val().trim();
     var id_linea = $('#id_linea').val();
     var presentacion = $('#presentacion').val();
     var id_medida = $('#id_medida').val();
-    var precio = $('#precio').val();
+    var precio = $('#precio').val().trim();
+
+    if (nombre === '') {
+        mostrarErrorProducto('El campo nombre del producto no puede estar vacío.');
+        $('#nombre').focus();
+        return;
+    }
+    if (id_linea === '') {
+        mostrarErrorProducto('Debe seleccionar una línea de producto.');
+        $('#id_linea').focus();
+        return;
+    }
+    if (presentacion === '') {
+        mostrarErrorProducto('Debe seleccionar una presentación.');
+        $('#presentacion').focus();
+        return;
+    }
+    if (id_medida === '') {
+        mostrarErrorProducto('Debe seleccionar una unidad de medida.');
+        $('#id_medida').focus();
+        return;
+    }
+    if (precio === '') {
+        mostrarErrorProducto('El precio del producto no puede estar vacío.');
+        $('#precio').focus();
+        return;
+    }
+
+    var precioNum = parseFloat(precio);
+    if (isNaN(precioNum) || precioNum < 0) {
+        mostrarErrorProducto('El precio no puede ser un número negativo ni contener caracteres inválidos.');
+        $('#precio').focus();
+        return;
+    }
 
     $.ajax({
         url: 'app/controllers/ProductoController.php',
@@ -130,12 +171,12 @@ function crear() {
             limpiarFormularioNuevo();
             mostrarExitoProducto('Producto guardado con éxito');
         } else {
-            alert(data.msj || 'Error al guardar el producto.');
+            mostrarErrorProducto(data.msj || 'Error al guardar el producto.');
         }
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         console.error('AJAX error crear:', textStatus, errorThrown);
-        alert('Error al crear el producto.');
+        mostrarErrorProducto('Error al crear el producto.');
     });
 }
 
@@ -241,12 +282,12 @@ $(document).on('click', 'button.boton-update', function() {
             $('#precioEditar').val(product.precio);
             $('#abrirModalEditar').click();
         } else {
-            alert(data.msj || 'No se encontró el producto.');
+            mostrarErrorProducto(data.msj || 'No se encontró el producto.');
         }
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         console.error('AJAX error consultar:', textStatus, errorThrown);
-        alert('Error al consultar el producto.');
+        mostrarErrorProducto('Error al consultar el producto.');
     });
 });
 
@@ -282,12 +323,12 @@ function editar() {
             $('#cerrarEditar').click();
             mostrarExitoProducto('Registro actualizado con éxito');
         } else {
-            alert(data.msj || 'Error al actualizar el producto.');
+            mostrarErrorProducto(data.msj || 'Error al actualizar el producto.');
         }
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         console.error('AJAX error editar:', textStatus, errorThrown);
-        alert('Error al actualizar el producto.');
+        mostrarErrorProducto('Error al actualizar el producto.');
     });
 }
 
@@ -312,39 +353,79 @@ function eliminar(id) {
             listar();
             mostrarExitoProducto('Producto eliminado');
         } else {
-            alert(data.msj || 'Error al eliminar el producto.');
+            mostrarErrorProducto(data.msj || 'Error al eliminar el producto.');
         }
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         console.error('AJAX error eliminar:', textStatus, errorThrown);
-        alert('Error al eliminar el producto.');
+        mostrarErrorProducto('Error al eliminar el producto.');
     });
 }
 
 
 function validarInput(selector, patron, mensaje) {
-    $(document).on('keyup', selector, function() {
-        var valor = $(this).val();
-        var linea = $(this).closest('.form-line');
-        
+
+    $(document).off('input.validacion', selector);
+
+    $(document).on('input.validacion', selector, function () {
+
+        var input = $(this);
+        var valor = input.val();
+        var linea = input.closest('.form-line');
+
+        // Buscar el mensaje asociado a esta línea
+        var error = linea.next('.txt-error');
+
+        // Si el campo es válido, quitar el error
         if (patron.test(valor) || valor === "") {
-            linea.css("border-bottom", "2px solid #4CAF50"); 
-            $(this).parent().find('.txt-error').remove();
+
+            linea.css("border-bottom", "2px solid #4CAF50");
+
+            error.remove();
+
         } else {
-            linea.css("border-bottom", "2px solid #F44336"); 
-            if (!$(this).parent().find('.txt-error').length) {
-                $(this).parent().after('<small class="txt-error" style="color: #F44336; display: block; margin-top: 5px;">' + mensaje + '</small>');
+
+            // Marcar el campo en rojo
+            linea.css("border-bottom", "2px solid #F44336");
+
+            // Crear el mensaje solamente si no existe
+            if (error.length === 0) {
+
+                $('<small>')
+                    .addClass('txt-error')
+                    .css({
+                        color: '#F44336',
+                        display: 'block',
+                        marginTop: '5px'
+                    })
+                    .text(mensaje)
+                    .insertAfter(linea);
+
+            } else {
+
+                // Actualizar el mensaje existente sin crear otro
+                error.text(mensaje);
             }
         }
     });
 }
 
-$(document).ready(function() {
-    var patronTexto = /^[A-Za-z0-9 .,\/_-]*$/;
-    
+$(document).ready(function () {
+
+    var patronTexto = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9 .,/_-]*$/;
 
     var patronPrecio = /^[0-9.]*$/;
 
-    validarInput('#nombre, #nombreEditar', patronTexto, 'Solo letras, números y signos permitidos.');
-    validarInput('#precio, #precioEditar', patronPrecio, 'Ingrese un precio válido.');
+    validarInput(
+        '#nombre, #nombreEditar',
+        patronTexto,
+        'Solo letras, números y signos permitidos.'
+    );
+
+    validarInput(
+        '#precio, #precioEditar',
+        patronPrecio,
+        'Ingrese un precio válido.'
+    );
+
 });

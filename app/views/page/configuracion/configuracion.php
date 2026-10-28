@@ -16,13 +16,17 @@
             <div class="header">
                 <ul class="nav nav-tabs config-tabs" role="tablist">
 
-                    <li role="presentation"><a href="#configCategorias" data-toggle="tab"><i class="material-icons">category</i> Categorías</a></li>
+
+                    <li><a href="producto"><i class="material-icons" style="font-size: 24px;">arrow_back</i></a></li>
+                    <li role="presentation" class="active"><a href="#configCategorias" data-toggle="tab"><i class="material-icons">category</i> Categorías</a></li>
                     <li role="presentation"><a href="#configSubcategorias" data-toggle="tab"><i class="material-icons">account_tree</i> Subcategorías</a></li>
                     <li role="presentation"><a href="#tab_lineas" data-toggle="tab"><i class="material-icons">layers</i> Líneas de Producto</a></li>
                     <li role="presentation"><a href="#tab_presentaciones" data-toggle="tab"><i class="material-icons">style</i> Presentaciones</a></li>
-                    <li role="presentation" class="active"><a href="#configMedidas" data-toggle="tab"><i class="material-icons">straighten</i> Unidades de medida</a></li>
+                    <li role="presentation"><a href="#configMedidas" data-toggle="tab"><i class="material-icons">straighten</i> Und. de medida</a></li>
+                    
                     <!-- <li role="presentation"><a href="vendedores#usuarios"><i class="material-icons">manage_accounts</i> Usuario / Personal</a></li>  -->
                 </ul>
+                
             </div>
             <div class="body tab-content">
                 <div role="tabpanel" class="tab-pane fade in active" id="configMedidas">

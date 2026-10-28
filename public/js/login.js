@@ -10,7 +10,6 @@ $(document).ready(function () {
         $('#usuarioGroup, #passwordGroup').removeClass('has-error');
         $usuario.add($password).attr('aria-invalid', 'false');
     }
-
     
     function mostrarError(mensaje, campo) {
         limpiarError();

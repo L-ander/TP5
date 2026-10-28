@@ -133,6 +133,15 @@
 
 		public function eliminar() {
 			try {
+				$sql = "SELECT 1 FROM detalle_pedido WHERE id_producto = :id LIMIT 1";
+				$stmt = parent::conectar()->prepare($sql);
+				$stmt->bindParam(":id", $this->id, PDO::PARAM_INT);
+				$stmt->execute();
+
+				if ($stmt->fetchColumn()) {
+					return array('success' => false, 'referenced' => true);
+				}
+
 				$sql = "DELETE FROM producto WHERE id = :id";
 				$stmt = parent::conectar()->prepare($sql);
 				$stmt->bindParam(":id", $this->id, PDO::PARAM_INT);

@@ -187,6 +187,13 @@
                 ]);
             } else {
 
+                if (!empty($user['referenced'])) {
+                    return $this->jsonResponse([
+                        'success' => false,
+                        'msj' => 'No se puede eliminar el producto porque está asociado a un pedido activo o a su historial.'
+                    ]);
+                }
+
                 return $this->jsonResponse(['success' => false, 'error' => 3, 'msj' => 'Error Al Guardar la Informacion']);
             }
         }

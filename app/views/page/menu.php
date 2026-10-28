@@ -6,7 +6,7 @@ require_once 'app/core/Router.php';
 $routerMenu = new Router();
 $todasLasRutas = $routerMenu->getRoutes();
 ?>
-<link rel="stylesheet" href="public/css/custom.css?v=2">
+<link rel="stylesheet" href="public/css/custom.css?v=3">
 
 <div class="overlay" aria-hidden="true"></div>
 

@@ -310,21 +310,21 @@ body.sidebar-collapsed .contenedor-principal {
 
 @media (max-width: 992px) {
     
-    /* Configurar el Fondo Oscuro (Overlay) */
+    /* Configurar el Fondo Oscuro (Overlay) 
     .overlay {
         position: fixed;
         top: 0;
         left: 0;
         width: 100vw;
         height: 100vh;
-        background-color: rgba(0, 0, 0, 0.6); /* Sombra oscura */
+        background-color: rgba(0, 0, 0, 0.6); 
         z-index: 1025;
     }
     
-    /* Mostrar el fondo oscuro SOLO cuando el menú está abierto */
+
     body.sidebar-open .overlay {
         display: block !important;
-    }
+    } 
 
     /* Convertir el Sidebar en un Cajón Flotante (Tipo Amazon) */
     .sidebar {
@@ -341,6 +341,7 @@ body.sidebar-collapsed .contenedor-principal {
     /* Acción: Deslizar el menú hacia adentro cuando se abre */
     body.sidebar-open .sidebar {
         left: 0;
+        z-index: 1040;
         box-shadow: 5px 0 25px rgba(0,0,0,0.6);
     }
 
