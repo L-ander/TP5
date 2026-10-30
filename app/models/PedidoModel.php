@@ -97,13 +97,33 @@ class PedidoModel extends Conexion {
 
     public function guardarPedido() {
         if (!is_array($this->detalle) || empty($this->detalle)) {
-            return array('success' => false, 'validation' => true, 'error' => 'Agregue al menos un producto al pedido');
+            return array('success' => false, 'validation' => true, 'error' => 'Agrega al menos un producto antes de guardar el pedido.');
         }
 
-        foreach ($this->detalle as $item) {
+        $idCliente = filter_var($this->id_cliente, FILTER_VALIDATE_INT);
+        if ($idCliente === false || $idCliente <= 0) {
+            return array('success' => false, 'validation' => true, 'error' => 'Selecciona un cliente válido.');
+        }
+
+        $idVendedor = filter_var($this->id_vendedor, FILTER_VALIDATE_INT);
+        if ($idVendedor === false || $idVendedor <= 0) {
+            return array('success' => false, 'validation' => true, 'error' => 'Selecciona un vendedor válido.');
+        }
+
+        $fechaValida = DateTime::createFromFormat('!Y-m-d', (string)$this->fecha);
+        if (!$fechaValida || $fechaValida->format('Y-m-d') !== (string)$this->fecha) {
+            return array('success' => false, 'validation' => true, 'error' => 'Selecciona una fecha válida para el pedido.');
+        }
+
+        foreach ($this->detalle as $indice => $item) {
+            $numeroItem = (int)$indice + 1;
             $cantidad = is_array($item) ? filter_var($item['cantidad'] ?? null, FILTER_VALIDATE_INT) : false;
+            $idProducto = is_array($item) ? filter_var($item['id_producto'] ?? null, FILTER_VALIDATE_INT) : false;
+            if ($idProducto === false || $idProducto <= 0) {
+                return array('success' => false, 'validation' => true, 'error' => 'Selecciona un producto válido en el producto número ' . $numeroItem . '.');
+            }
             if ($cantidad === false || $cantidad <= 0) {
-                return array('success' => false, 'validation' => true, 'error' => 'Cada producto debe tener una cantidad entera mayor que cero');
+                return array('success' => false, 'validation' => true, 'error' => 'La cantidad del producto número ' . $numeroItem . ' debe ser un número entero mayor que cero.');
             }
         }
 
@@ -115,32 +135,46 @@ class PedidoModel extends Conexion {
 
             $conexion->beginTransaction();
 
+            $cliente = $conexion->prepare("SELECT id FROM cliente WHERE id = :id");
+            $cliente->bindValue(':id', $idCliente, PDO::PARAM_INT);
+            $cliente->execute();
+            if ($cliente->fetchColumn() === false) {
+                $conexion->rollBack();
+                return array('success' => false, 'validation' => true, 'error' => 'El cliente seleccionado ya no existe. Actualiza la lista y vuelve a seleccionarlo.');
+            }
+
+            $vendedor = $conexion->prepare("SELECT id FROM personal WHERE id = :id");
+            $vendedor->bindValue(':id', $idVendedor, PDO::PARAM_INT);
+            $vendedor->execute();
+            if ($vendedor->fetchColumn() === false) {
+                $conexion->rollBack();
+                return array('success' => false, 'validation' => true, 'error' => 'El vendedor seleccionado ya no existe. Actualiza la lista y vuelve a seleccionarlo.');
+            }
+
+            $productosValidados = [];
+            $buscarProducto = $conexion->prepare("SELECT precio FROM producto WHERE id = :id");
+            foreach ($this->detalle as $indice => $item) {
+                $idProducto = (int)$item['id_producto'];
+                $buscarProducto->bindValue(':id', $idProducto, PDO::PARAM_INT);
+                $buscarProducto->execute();
+                $precio = $buscarProducto->fetchColumn();
+                if ($precio === false) {
+                    $conexion->rollBack();
+                    return array(
+                        'success' => false,
+                        'validation' => true,
+                        'error' => 'El producto número ' . ((int)$indice + 1) . ' ya no está disponible. Actualiza la lista y vuelve a intentarlo.'
+                    );
+                }
+
+                $productosValidados[] = [
+                    'id_producto' => $idProducto,
+                    'cantidad' => (int)$item['cantidad'],
+                    'precio_unitario' => (float)$precio
+                ];
+            }
+
             if (!empty($this->id)) {
-                $bloquearPedido = $conexion->prepare(
-                    "SELECT id_estatus FROM pedido WHERE id = :id FOR UPDATE"
-                );
-                $bloquearPedido->bindParam(':id', $idPedido, PDO::PARAM_INT);
-                $bloquearPedido->execute();
-                $estatusActual = $bloquearPedido->fetchColumn();
-
-                if ($estatusActual === false) {
-                    $conexion->rollBack();
-                    return array(
-                        'success' => false,
-                        'conflict' => true,
-                        'error' => 'El pedido ya no existe.'
-                    );
-                }
-
-                if ((int)$estatusActual !== 1) {
-                    $conexion->rollBack();
-                    return array(
-                        'success' => false,
-                        'conflict' => true,
-                        'error' => 'Solo se pueden modificar pedidos pendientes.'
-                    );
-                }
-
                 $sql = "UPDATE pedido SET id_cliente = :id_cliente, id_vendedor = :id_vendedor,
                         fecha = :fecha WHERE id = :id";
                 $stmt = $conexion->prepare($sql);
@@ -173,14 +207,10 @@ class PedidoModel extends Conexion {
             $borrarDetalle->execute();
 
             $total = 0;
-            foreach ($this->detalle as $item) {
-                $idProducto = $item['id_producto'] ?? 0;
-                $cantidad = (int)($item['cantidad'] ?? 0);
-                $precio = (float)($item['precio_unitario'] ?? 0);
-
-                if (empty($idProducto)) {
-                    continue;
-                }
+            foreach ($productosValidados as $item) {
+                $idProducto = $item['id_producto'];
+                $cantidad = $item['cantidad'];
+                $precio = $item['precio_unitario'];
 
                 $sql = "INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad, precio_unitario)
                     VALUES (:id_pedido, :id_producto, :cantidad, :precio_unitario)";
@@ -243,33 +273,7 @@ class PedidoModel extends Conexion {
     public function eliminarPedido($idPedido) {
         try {
             $conexion = parent::conectar();
-
             $conexion->beginTransaction();
-            $bloquearPedido = $conexion->prepare(
-                "SELECT id_estatus FROM pedido WHERE id = :id FOR UPDATE"
-            );
-            $bloquearPedido->bindValue(':id', (int)$idPedido, PDO::PARAM_INT);
-            $bloquearPedido->execute();
-            $estatusActual = $bloquearPedido->fetchColumn();
-
-            if ($estatusActual === false) {
-                $conexion->rollBack();
-                return array(
-                    'success' => false,
-                    'conflict' => true,
-                    'error' => 'El pedido ya no existe.'
-                );
-            }
-
-            if ((int)$estatusActual !== 1) {
-                $conexion->rollBack();
-                return array(
-                    'success' => false,
-                    'conflict' => true,
-                    'error' => 'Solo se pueden eliminar pedidos pendientes.'
-                );
-            }
-
             $detalle = $conexion->prepare("DELETE FROM detalle_pedido WHERE id_pedido = :id_pedido");
             $detalle->bindParam(':id_pedido', $idPedido, PDO::PARAM_INT);
             $detalle->execute();
