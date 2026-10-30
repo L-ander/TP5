@@ -45,19 +45,35 @@ class OrdenModel extends Conexion {
     // Crea una orden nueva.
     // Siempre nace con total 0 y estatus 1 (Pendiente).
     public function crear() {
+        $idCliente = filter_var($this->id_cliente, FILTER_VALIDATE_INT);
+        if ($idCliente === false || $idCliente <= 0) {
+            return ['success' => false, 'validation' => true, 'error' => 'Selecciona un cliente válido.'];
+        }
+
+        $idVendedor = filter_var($this->id_vendedor, FILTER_VALIDATE_INT);
+        if ($idVendedor === false || $idVendedor <= 0) {
+            return ['success' => false, 'validation' => true, 'error' => 'Selecciona un vendedor válido.'];
+        }
+
+        $fechaValida = $this->fechaValida($this->fecha);
+        if (!$fechaValida) {
+            return ['success' => false, 'validation' => true, 'error' => 'Selecciona una fecha válida para la orden.'];
+        }
+
         try {
             $conexion = parent::conectar();
-            $fecha = !empty($this->fecha) ? $this->fecha : date('Y-m-d');
+            $errorRelacion = $this->validarRelaciones($conexion, $idCliente, $idVendedor, 1);
+            if ($errorRelacion !== null) {
+                return ['success' => false, 'validation' => true, 'error' => $errorRelacion];
+            }
 
-                $sql = "INSERT INTO pedido (id_cliente, id_vendedor, fecha, total, id_estatus)
-                    VALUES (:id_cliente, :id_vendedor, :fecha, 0, :id_estatus)";
-                $stmt = $conexion->prepare($sql);
-                $stmt->bindParam(':id_cliente', $this->id_cliente, PDO::PARAM_INT);
-                $stmt->bindParam(':id_vendedor', $this->id_vendedor, PDO::PARAM_INT);
-                $stmt->bindParam(':fecha', $fecha, PDO::PARAM_STR);
-                $estatus = $this->id_estatus ?: 1;
-                $stmt->bindParam(':id_estatus', $estatus, PDO::PARAM_INT);
-                $ok = $stmt->execute();
+            $sql = "INSERT INTO pedido (id_cliente, id_vendedor, fecha, total, id_estatus)
+                    VALUES (:id_cliente, :id_vendedor, :fecha, 0, 1)";
+            $stmt = $conexion->prepare($sql);
+            $stmt->bindValue(':id_cliente', $idCliente, PDO::PARAM_INT);
+            $stmt->bindValue(':id_vendedor', $idVendedor, PDO::PARAM_INT);
+            $stmt->bindValue(':fecha', $this->fecha, PDO::PARAM_STR);
+            $ok = $stmt->execute();
             return array(
                 'success' => $ok,
                 'datos' => array('id' => (int)$conexion->lastInsertId())
@@ -70,15 +86,52 @@ class OrdenModel extends Conexion {
     // Edita la cabecera de una orden.
     // Permite cambiar cliente, vendedor, fecha y estatus, pero no modifica el total.
     public function editar() {
+        $id = filter_var($this->id, FILTER_VALIDATE_INT);
+        if ($id === false || $id <= 0) {
+            return ['success' => false, 'validation' => true, 'error' => 'Selecciona una orden válida para actualizar.'];
+        }
+
+        $idCliente = filter_var($this->id_cliente, FILTER_VALIDATE_INT);
+        if ($idCliente === false || $idCliente <= 0) {
+            return ['success' => false, 'validation' => true, 'error' => 'Selecciona un cliente válido.'];
+        }
+
+        $idVendedor = filter_var($this->id_vendedor, FILTER_VALIDATE_INT);
+        if ($idVendedor === false || $idVendedor <= 0) {
+            return ['success' => false, 'validation' => true, 'error' => 'Selecciona un vendedor válido.'];
+        }
+
+        $idEstatus = filter_var($this->id_estatus, FILTER_VALIDATE_INT);
+        if ($idEstatus === false || $idEstatus <= 0) {
+            return ['success' => false, 'validation' => true, 'error' => 'Selecciona un estatus válido para la orden.'];
+        }
+
+        if (!$this->fechaValida($this->fecha)) {
+            return ['success' => false, 'validation' => true, 'error' => 'Selecciona una fecha válida para la orden.'];
+        }
+
         try {
+            $conexion = parent::conectar();
+            $errorRelacion = $this->validarRelaciones($conexion, $idCliente, $idVendedor, $idEstatus);
+            if ($errorRelacion !== null) {
+                return ['success' => false, 'validation' => true, 'error' => $errorRelacion];
+            }
+
+            $verificarOrden = $conexion->prepare("SELECT id FROM pedido WHERE id = :id");
+            $verificarOrden->bindValue(':id', $id, PDO::PARAM_INT);
+            $verificarOrden->execute();
+            if ($verificarOrden->fetchColumn() === false) {
+                return ['success' => false, 'validation' => true, 'error' => 'La orden que intentas actualizar ya no existe. Actualiza la lista e inténtalo nuevamente.'];
+            }
+
             $sql = "UPDATE pedido SET id_cliente = :id_cliente, id_vendedor = :id_vendedor,
                     fecha = :fecha, id_estatus = :id_estatus WHERE id = :id";
-            $stmt = parent::conectar()->prepare($sql);
-            $stmt->bindParam(':id_cliente', $this->id_cliente, PDO::PARAM_INT);
-            $stmt->bindParam(':id_vendedor', $this->id_vendedor, PDO::PARAM_INT);
-            $stmt->bindParam(':fecha', $this->fecha, PDO::PARAM_STR);
-            $stmt->bindParam(':id_estatus', $this->id_estatus, PDO::PARAM_INT);
-            $stmt->bindParam(':id', $this->id, PDO::PARAM_INT);
+            $stmt = $conexion->prepare($sql);
+            $stmt->bindValue(':id_cliente', $idCliente, PDO::PARAM_INT);
+            $stmt->bindValue(':id_vendedor', $idVendedor, PDO::PARAM_INT);
+            $stmt->bindValue(':fecha', $this->fecha, PDO::PARAM_STR);
+            $stmt->bindValue(':id_estatus', $idEstatus, PDO::PARAM_INT);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
             $ok = $stmt->execute();
             return array('success' => $ok);
         } catch (Exception $e) {
@@ -90,14 +143,32 @@ class OrdenModel extends Conexion {
     public function eliminar() {
         try {
             $conexion = parent::conectar();
+            $id = filter_var($this->id, FILTER_VALIDATE_INT);
+            if ($id === false || $id <= 0) {
+                return ['success' => false, 'validation' => true, 'error' => 'Selecciona una orden válida para eliminar.'];
+            }
+
+            $conexion->beginTransaction();
+            $existe = $conexion->prepare("SELECT id FROM pedido WHERE id = :id FOR UPDATE");
+            $existe->bindValue(':id', $id, PDO::PARAM_INT);
+            $existe->execute();
+            if ($existe->fetchColumn() === false) {
+                $conexion->rollBack();
+                return ['success' => false, 'validation' => true, 'error' => 'La orden ya no existe. Actualiza la lista e inténtalo nuevamente.'];
+            }
+
             $detalle = $conexion->prepare("DELETE FROM detalle_pedido WHERE id_pedido = :id_pedido");
-            $detalle->bindParam(':id_pedido', $this->id, PDO::PARAM_INT);
+            $detalle->bindValue(':id_pedido', $id, PDO::PARAM_INT);
             $detalle->execute();
             $stmt = $conexion->prepare("DELETE FROM pedido WHERE id = :id");
-            $stmt->bindParam(':id', $this->id, PDO::PARAM_INT);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
             $ok = $stmt->execute();
+            $conexion->commit();
             return array('success' => $ok);
         } catch (Exception $e) {
+            if (isset($conexion) && $conexion && $conexion->inTransaction()) {
+                $conexion->rollBack();
+            }
             return array('success' => false, 'error' => $e->getMessage());
         }
     }
@@ -137,5 +208,37 @@ class OrdenModel extends Conexion {
             return array('success' => false, 'error' => $e->getMessage());
         }
     }
+
+    private function fechaValida($fecha) {
+        if (!is_string($fecha) || $fecha === '') {
+            return false;
+        }
+
+        $fechaParseada = DateTime::createFromFormat('!Y-m-d', $fecha);
+        $errores = DateTime::getLastErrors();
+        return $fechaParseada &&
+            $fechaParseada->format('Y-m-d') === $fecha &&
+            ($errores === false || (!$errores['warning_count'] && !$errores['error_count']));
+    }
+
+    private function validarRelaciones($conexion, $idCliente, $idVendedor, $idEstatus) {
+        $relaciones = [
+            [$idCliente, 'cliente', 'El cliente seleccionado ya no existe. Actualiza la lista y vuelve a seleccionarlo.'],
+            [$idVendedor, 'personal', 'El vendedor seleccionado ya no existe. Actualiza la lista y vuelve a seleccionarlo.'],
+            [$idEstatus, 'estatus', 'El estatus seleccionado no es válido. Actualiza la lista y vuelve a seleccionarlo.']
+        ];
+
+        foreach ($relaciones as $relacion) {
+            $consulta = $conexion->prepare('SELECT id FROM ' . $relacion[1] . ' WHERE id = :id');
+            $consulta->bindValue(':id', $relacion[0], PDO::PARAM_INT);
+            $consulta->execute();
+            if ($consulta->fetchColumn() === false) {
+                return $relacion[2];
+            }
+        }
+
+        return null;
+    }
 }
 ?>
+
