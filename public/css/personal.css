@@ -1,17 +1,6 @@
-/* Archivo: public/css/vendedores.css */
+/* Archivo: public/css/personal.css */
 
-.vendedores-header-actions {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.btn-listado-usuarios {
-    color: white !important;
-}
-
-/* public/css/vendedores.css */
-.vendedores-header-actions {
+.personal-header-actions {
     display: flex;
     gap: 10px;
     align-items: center;

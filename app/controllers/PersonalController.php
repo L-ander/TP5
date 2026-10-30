@@ -1,10 +1,10 @@
 <?php
 require_once __DIR__ . '/../core/BaseController.php';
-require_once __DIR__ . '/../models/VendedorModel.php';
+require_once __DIR__ . '/../models/PersonalModel.php';
 
-class VendedorController extends BaseController {
+class PersonalController extends BaseController {
     
-    //Funcion central
+    // Funcion central
     public function ejecutar($accion, $datos) {
         $method = lcfirst($accion);
 
@@ -15,7 +15,7 @@ class VendedorController extends BaseController {
         }
     }
 
-    //Funcion auxiliar para validaciones
+    // Funcion auxiliar para validaciones
     private function validarDatos($datos, $modelo, $esEdicion = false) {
         if (!is_numeric($datos['cedula']) || $datos['cedula'] < 5000000) {
             return "La cédula debe contener un mínimo de siete dígitos";
@@ -43,7 +43,7 @@ class VendedorController extends BaseController {
     }
 
     protected function listar($datos) {
-        $modelo = new VendedorModel();
+        $modelo = new PersonalModel();
         $res = $modelo->listar();
 
         if ($res['success']) {
@@ -53,7 +53,7 @@ class VendedorController extends BaseController {
     }
 
     protected function crear($datos) {
-        $modelo = new VendedorModel();
+        $modelo = new PersonalModel();
         
         $errorValidacion = $this->validarDatos($datos, $modelo, false);
         if ($errorValidacion) {
@@ -76,7 +76,7 @@ class VendedorController extends BaseController {
     }
 
     protected function editar($datos) {
-        $modelo = new VendedorModel();
+        $modelo = new PersonalModel();
         
         $errorValidacion = $this->validarDatos($datos, $modelo, true);
         if ($errorValidacion) {
@@ -100,7 +100,7 @@ class VendedorController extends BaseController {
     }
 
     protected function eliminar($datos) {
-        $modelo = new VendedorModel();
+        $modelo = new PersonalModel();
         $modelo->setId($datos['id']);
         
         $res = $modelo->eliminar();
@@ -112,7 +112,7 @@ class VendedorController extends BaseController {
     }
 
     protected function tipos_personal($datos) {
-        $modelo = new VendedorModel();
+        $modelo = new PersonalModel();
         $res = $modelo->listarTiposPersonal();
         
         if ($res['success']) {
@@ -122,7 +122,7 @@ class VendedorController extends BaseController {
     }
 
     protected function roles($datos) {
-        $modelo = new VendedorModel();
+        $modelo = new PersonalModel();
         $res = $modelo->listarRoles();
         
         if ($res['success']) {
@@ -132,7 +132,7 @@ class VendedorController extends BaseController {
     }
 
     protected function personal_sin_usuario($datos) {
-        $modelo = new VendedorModel();
+        $modelo = new PersonalModel();
         $res = $modelo->listarPersonalSinUsuario();
         
         if ($res['success']) {
@@ -142,9 +142,8 @@ class VendedorController extends BaseController {
     }
 
     protected function crear_usuario($datos) {
-        $modelo = new VendedorModel();
+        $modelo = new PersonalModel();
         
-        // Uso de setters en usuario
         $modelo->setId($datos['id_personal']);
         $modelo->setUsername($datos['username']);
         $modelo->setPassword($datos['password']);
@@ -164,7 +163,7 @@ class VendedorController extends BaseController {
     }
 
     protected function listar_usuarios($datos) {
-        $modelo = new VendedorModel();
+        $modelo = new PersonalModel();
         $res = $modelo->listarUsuarios();
         
         if ($res['success']) {
@@ -174,7 +173,7 @@ class VendedorController extends BaseController {
     }
 
     protected function editar_usuario($datos) {
-        $modelo = new VendedorModel();
+        $modelo = new PersonalModel();
         
         $modelo->setIdUsuario($datos['id_usuario']);
         $modelo->setUsername($datos['username']);
@@ -191,7 +190,7 @@ class VendedorController extends BaseController {
     }
 
     protected function eliminar_usuario($datos) {
-        $modelo = new VendedorModel();
+        $modelo = new PersonalModel();
         $modelo->setIdUsuario($datos['id']);
         
         $res = $modelo->eliminarUsuario();
@@ -203,7 +202,7 @@ class VendedorController extends BaseController {
     }
 
     protected function crear_tipo_personal($datos) {
-        $modelo = new VendedorModel();
+        $modelo = new PersonalModel();
         $modelo->setNombre($datos['nombre']);
         
         $res = $modelo->crearTipoPersonal();
@@ -215,7 +214,7 @@ class VendedorController extends BaseController {
     }
 
     protected function editar_tipo_personal($datos) {
-        $modelo = new VendedorModel();
+        $modelo = new PersonalModel();
         $modelo->setId($datos['id']);
         $modelo->setNombre($datos['nombre']); 
         
@@ -228,7 +227,7 @@ class VendedorController extends BaseController {
     }
 
     protected function eliminar_tipo_personal($datos) {
-        $modelo = new VendedorModel();
+        $modelo = new PersonalModel();
         $modelo->setId($datos['id']);
         
         $res = $modelo->eliminarTipoPersonal();
@@ -242,7 +241,7 @@ class VendedorController extends BaseController {
 
 // Punto de Entrada de las peticiones AJAX
 if (isset($_POST['action'])) {
-    $controller = new VendedorController();
+    $controller = new PersonalController();
     $controller->ejecutar($_POST['action'], $_POST);
 }
 ?>

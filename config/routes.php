@@ -53,7 +53,7 @@ return [
         'roles' => $rolesDe('clientes')
     ],
     'personal' => [
-        'vista' => 'vendedores/vendedores.php',
+        'vista' => 'personal/personal.php',
         'menu'  => true,
         'roles' => $rolesDe('personal')
     ],
@@ -80,7 +80,7 @@ return [
         'roles' => [1]
     ],
     'configuracion_usuarios' => [
-        'vista' => 'vendedores/configuracion_usuarios.php',
+        'vista' => 'personal/configuracion_usuarios.php',
         'menu'  => true,
         'roles' => [1]
     ],

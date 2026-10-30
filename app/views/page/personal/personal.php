@@ -1,5 +1,5 @@
 <link rel="stylesheet" href="public/css/home.css">
-<link rel="stylesheet" href="public/css/vendedores.css"> 
+<link rel="stylesheet" href="public/css/personal.css"> 
 <section class="content">
     <div class="container-fluid">
         <div class="bloque-encabezado">
@@ -25,7 +25,7 @@
                         </ul>
                         
                         <div>
-                            <button type="button" class="btn btn-success btn-circle waves-effect" onclick="abrirModalCrear()" title="Nuevo Personal">
+                            <button type="button" class="btn btn-success btn-circle waves-effect" title="Nuevo Personal">
                                 <i class="material-icons">add</i>
                             </button> <b style="margin-left:10px; margin-right:20px;">Nuevo Personal</b>
 
@@ -82,6 +82,6 @@
     </div>
 </section>
 
-<?php include 'app/views/page/vendedores/modales.php'; ?>
+<?php include 'app/views/page/personal/modales.php'; ?>
 <script src="public/js/validaciones.js"></script>
-<script src="public/js/vendedores.js"></script>
+<script src="public/js/personal.js"></script>

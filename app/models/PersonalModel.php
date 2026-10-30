@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../../config/conex.php';
 
-class VendedorModel extends Conexion {
+class PersonalModel extends Conexion {
     
     private $id;
     private $cedula;

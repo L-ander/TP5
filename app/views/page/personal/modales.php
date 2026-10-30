@@ -11,7 +11,8 @@
                     <label for="cedula">Cédula</label>
                     <div class="form-group">
                         <div class="form-line">
-                            <input type="number" class="form-control" name="cedula" id="cedula" placeholder="Ej: 25123456" required>
+                            <!-- Cambiado a type="text" con maxlength="10" -->
+                            <input type="text" class="form-control" name="cedula" id="cedula" placeholder="Ej: 25123456" maxlength="10" required>
                         </div>
                         <span class="error-msg" id="error-cedula">La cédula debe contener un mínimo de siete dígitos</span>
                     </div>
@@ -19,23 +20,24 @@
                     <label for="nombre">Nombre</label>
                     <div class="form-group">
                         <div class="form-line">
-                            <input type="text" class="form-control" name="nombre" id="nombre" placeholder="Solo letras sin acentos" required>
+                            <input type="text" class="form-control" name="nombre" id="nombre" placeholder="Solo letras" maxlength="30" required>
                         </div>
-                        <span class="error-msg" id="error-nombre">Solo se permiten letras (sin acentos ni caracteres especiales)</span>
+                        <span class="error-msg" id="error-nombre">Solo se permiten letras (de 2 a 30 caracteres)</span>
                     </div>
 
                     <label for="apellido">Apellido</label>
                     <div class="form-group">
                         <div class="form-line">
-                            <input type="text" class="form-control" name="apellido" id="apellido" placeholder="Solo letras" required>
+                            <input type="text" class="form-control" name="apellido" id="apellido" placeholder="Solo letras" maxlength="30" required>
                         </div>
-                        <span class="error-msg" id="error-apellido">Solo se permiten letras (acentos permitidos)</span>
+                        <span class="error-msg" id="error-apellido">Solo se permiten letras (de 2 a 30 caracteres)</span>
                     </div>
 
                     <label for="telefono">Teléfono</label>
                     <div class="form-group">
                         <div class="form-line">
-                            <input type="text" class="form-control" name="telefono" id="telefono" placeholder="Ej: 04121234567 o +584141234567">
+                            <!-- Agregado maxlength="15" -->
+                            <input type="text" class="form-control" name="telefono" id="telefono" placeholder="Ej: 04121234567 o +584141234567" maxlength="15">
                         </div>
                         <span class="error-msg" id="error-telefono">Formato inválido. Debe iniciar con 04 o +58 y tener los dígitos correctos.</span>
                     </div>
@@ -56,7 +58,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success waves-effect" id="btnGuardarPersonal" disabled onclick="guardarPersonal()">GUARDAR</button>
+                <button type="button" class="btn btn-success waves-effect" id="btnGuardarPersonal" disabled>GUARDAR</button>
                 <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">CANCELAR</button>
             </div>
         </div>

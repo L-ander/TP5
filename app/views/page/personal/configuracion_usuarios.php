@@ -1,4 +1,5 @@
 <link rel="stylesheet" href="public/css/home.css">
+<link rel="stylesheet" href="public/css/personal.css">
 <style>
     .config-tabs { margin-bottom: 20px; }
     .config-tabs > li > a { font-weight: bold; color: #555; }
@@ -28,7 +29,7 @@
                     </div>
                     <div class="body tab-content">
 
-                        <!-- PESTAÑA: CREAR USUARIO -->
+                        <!--CREAR USUARIO -->
                         <div role="tabpanel" class="tab-pane fade in active" id="tabCrearUsuario">
                             <form id="formUsuario">
                                 <div class="row">
@@ -36,24 +37,32 @@
                                         <div class="form-group">
                                             <label>Seleccionar Personal (Sin Usuario Asignado)</label>
                                             <select class="form-control show-tick" name="id_personal" id="usuario_id_personal" required></select>
+                                            <span class="error-msg" id="error-personal">Debe seleccionar a un miembro del personal</span>
                                         </div>
                                         <div class="form-group">
                                             <label for="username">Usuario (Username)</label>
                                             <div class="form-line">
-                                                <input type="text" class="form-control" name="username" id="username" autocomplete="off" required>
+                                                <input type="text" class="form-control" name="username" id="username" autocomplete="off" maxlength="15" required>
                                             </div>
+                                            <span class="error-msg" id="error-username">Debe tener entre 4 y 15 caracteres (sin espacios)</span>
                                         </div>
                                         <div class="form-group">
                                             <label for="password_usuario">Contraseña</label>
-                                            <div class="form-line">
-                                                <input type="password" class="form-control" name="password" id="password_usuario" autocomplete="off" required>
+                                            <div class="form-line" style="display: flex; align-items: center;">
+                                                <input type="password" class="form-control" name="password" id="password_usuario" autocomplete="off" maxlength="16" required>
                                             </div>
+                                            <div style="margin-top: 5px;">
+                                                <input type="checkbox" id="mostrar_clave_crear" class="chk-col-teal">
+                                                <label for="mostrar_clave_crear" style="font-weight: normal; cursor: pointer; font-size: 13px;">Mostrar contraseña</label>
+                                            </div>
+                                            <span class="error-msg" id="error-password">Requiere 8-16 caract., 1 mayúscula, 1 minúscula, 1 número y 1 símbolo</span>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Rol del Sistema</label>
                                             <select class="form-control show-tick" name="cod_rol" id="usuario_cod_rol" required></select>
+                                            <span class="error-msg" id="error-rol">Debe seleccionar un rol para el sistema</span>
                                         </div>
                                         <div class="form-group">
                                             <label>Estado de la Cuenta</label>
@@ -65,12 +74,12 @@
                                     </div>
                                 </div>
                                 <div class="text-right" style="margin-top: 15px;">
-                                    <button type="button" class="btn btn-info waves-effect" id="btnGuardarUsuario">GUARDAR USUARIO</button>
+                                    <button type="button" class="btn btn-info waves-effect" id="btnGuardarUsuario" disabled>GUARDAR USUARIO</button>
                                 </div>
                             </form>
                         </div>
 
-                        <!-- PESTAÑA: LISTADO DE USUARIOS -->
+                        <!--LISTADO DE USUARIOS-->
                         <div role="tabpanel" class="tab-pane fade" id="tabListadoUsuarios">
                             <div class="table-responsive">
                                 <table class="table table-bordered table-striped table-hover">
@@ -88,10 +97,10 @@
                             </div>
                         </div>
 
-                        <!-- PESTAÑA: CARGOS DE PERSONAL -->
+                        <!--CARGOS DE PERSONAL-->
                         <div role="tabpanel" class="tab-pane fade" id="tabTiposPersonal">
                             <div style="margin-bottom: 15px;">
-                                <button type="button" class="btn btn-success waves-effect" onclick="abrirModalTipoPersonal()">
+                                <button type="button" class="btn btn-success waves-effect" id="btnNuevoTipoPersonal">
                                     <i class="material-icons">add</i> NUEVO CARGO
                                 </button>
                             </div>
@@ -116,7 +125,7 @@
     </div>
 </section>
 
-<!-- Modal Editar Usuario (Se queda como modal para no salir de la pestaña de listado) -->
+<!-- Modal Editar Usuario -->
 <div class="modal fade" id="modalEditarUsuario" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -135,18 +144,25 @@
                     <div class="form-group">
                         <label for="edit_username">Username</label>
                         <div class="form-line">
-                            <input type="text" class="form-control" id="edit_username" required>
+                            <input type="text" class="form-control" id="edit_username" maxlength="15" required>
                         </div>
+                        <span class="error-msg" id="error-edit_username">Debe tener entre 4 y 15 caracteres (sin espacios)</span>
                     </div>
                     <div class="form-group">
                         <label for="edit_password">Nueva Contraseña</label>
-                        <div class="form-line">
-                            <input type="text" class="form-control" id="edit_password" required>
+                        <div class="form-line" style="display: flex; align-items: center;">
+                            <input type="password" class="form-control" id="edit_password" maxlength="16" required>
                         </div>
+                        <div style="margin-top: 5px;">
+                            <input type="checkbox" id="mostrar_clave_editar" class="chk-col-teal">
+                            <label for="mostrar_clave_editar" style="font-weight: normal; cursor: pointer; font-size: 13px;">Mostrar contraseña</label>
+                        </div>
+                        <span class="error-msg" id="error-edit_password">Requiere 8-16 caract., 1 mayúscula, 1 minúscula, 1 número y 1 símbolo</span>
                     </div>
                     <div class="form-group">
                         <label>Rol</label>
                         <select class="form-control" id="edit_usuario_cod_rol" required></select>
+                        <span class="error-msg" id="error-edit_rol">Debe seleccionar un rol para el sistema</span>
                     </div>
                     <div class="form-group">
                         <label>Estado</label>
@@ -158,7 +174,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-warning waves-effect" id="btnActualizarUsuario">ACTUALIZAR</button>
+                <button type="button" class="btn btn-warning waves-effect" id="btnActualizarUsuario" disabled>ACTUALIZAR</button>
                 <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">CERRAR</button>
             </div>
         </div>
@@ -184,7 +200,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success waves-effect" onclick="guardarTipoPersonal()">GUARDAR</button>
+                <button type="button" class="btn btn-success waves-effect" id="btnGuardarTipoPersonal">GUARDAR</button>
                 <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">CERRAR</button>
             </div>
         </div>

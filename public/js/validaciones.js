@@ -1,21 +1,25 @@
 const Validaciones = {
     cedula: function(valor) {
+        // Solo numeros, longitud estricta de 7 a 10 dígitos.
         const num = parseInt(valor, 10);
-        return /^[0-9]+$/.test(valor) && num >= 5000000;
+        return /^[0-9]{7,10}$/.test(valor) && num >= 5000000;
     },
     nombre: function(valor) {
-        return /^[a-zA-Z\s]+$/.test(valor) && valor.trim().length > 0;
+        // Letras con acentos, de 2 a 25 caracteres
+        return /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,25}$/.test(valor) && valor.trim().length > 0;
     },
     apellido: function(valor) {
-        return /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(valor) && valor.trim().length > 0;
+        // Letras con acentos, de 2 a 25 caracteres
+        return /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,25}$/.test(valor) && valor.trim().length > 0;
     },
     telefono: function(valor) {
+        // El telefono (prefijo + exactamente 7 dígitos)
         const regex = /^(?:\+58|0)(?:412|414|424|416|426|422|251)\d{7}$/;
         return regex.test(valor);
     },
     
     username: function(valor) {
-        // Alfanumérico, entre 4 y 15 caracteres
+        // Alfanumerico, entre 4 y 15 caracteres
         return /^[a-zA-Z0-9_]{4,15}$/.test(valor);
     },
     password: function(valor) {
