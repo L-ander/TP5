@@ -16,6 +16,22 @@
     .card .body {
         padding: 12px 15px;
     }
+    .orden-error {
+        display: none;
+        color: #f44336;
+        font-size: 12px;
+        margin-top: 5px;
+        font-weight: 500;
+        animation: orden-error-entrada .2s ease-out;
+    }
+    .orden-input-error {
+        border-bottom: 2px solid #f44336 !important;
+        box-shadow: 0 1px 0 0 #f44336 !important;
+    }
+    @keyframes orden-error-entrada {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 </style>
 <section class="content">
     <div class="container-fluid">
@@ -71,6 +87,7 @@
                                 <option value="">Seleccione un cliente</option>
                             </select>
                         </div>
+                        <span class="orden-error" id="error-id_cliente" aria-live="polite"></span>
                     </div>
 
                     <label for="id_vendedor">Vendedor</label>
@@ -80,6 +97,7 @@
                                 <option value="">Seleccione un vendedor</option>
                             </select>
                         </div>
+                        <span class="orden-error" id="error-id_vendedor" aria-live="polite"></span>
                     </div>
 
                     <label for="fecha">Fecha</label>
@@ -87,6 +105,7 @@
                         <div class="form-line">
                             <input type="date" class="form-control" name="fecha" id="fecha" required>
                         </div>
+                        <span class="orden-error" id="error-fecha" aria-live="polite"></span>
                     </div>
 
                     <div id="grupo_estatus_orden" style="display:none;">
@@ -95,6 +114,7 @@
                             <select class="form-control show-tick" name="id_estatus" id="id_estatus">
                                 <option value="">Seleccione estatus</option>
                             </select>
+                            <span class="orden-error" id="error-id_estatus" aria-live="polite"></span>
                         </div>
                     </div>
 
@@ -109,4 +129,5 @@
 </div>
 
 <script src="resources/library/plugins/jquery/jquery.min.js"></script>
-<script src="public/js/ordenes.js"></script>
+<script src="public/js/ordenes.js?v=2"></script>
+
