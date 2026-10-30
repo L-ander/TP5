@@ -20,12 +20,21 @@
         border-bottom: 2px solid #4caf50 !important;
         box-shadow: 0 1px 0 0 #4caf50 !important;
     }
-    #error-cantidad {
+    .pedido-campo-error {
         display: none;
         color: #f44336;
         font-size: 12px;
         margin-top: 5px;
         font-weight: 500;
+        animation: pedido-error-entrada .2s ease-out;
+    }
+    .pedido-input-error {
+        border-bottom: 2px solid #f44336 !important;
+        box-shadow: 0 1px 0 0 #f44336 !important;
+    }
+    @keyframes pedido-error-entrada {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 </style>
 <section class="content">
@@ -53,6 +62,7 @@
                                 <select class="form-control show-tick" name="id_cliente" id="id_cliente" required>
                                     <option value="">Seleccione un cliente</option>
                                 </select>
+                                <span class="pedido-campo-error" id="error-id_cliente" aria-live="polite"></span>
                             </div>
 
                             <div class="form-group">
@@ -60,11 +70,13 @@
                                 <select class="form-control show-tick" name="id_vendedor" id="id_vendedor" required>
                                     <option value="">Seleccione un vendedor</option>
                                 </select>
+                                <span class="pedido-campo-error" id="error-id_vendedor" aria-live="polite"></span>
                             </div>
 
                             <div class="form-group">
                                 <label for="fecha">Fecha</label>
                                 <input type="date" class="form-control" name="fecha" id="fecha" required>
+                                <span class="pedido-campo-error" id="error-fecha" aria-live="polite"></span>
                             </div>
 
                             <input type="hidden" id="id_estatus" name="id_estatus" value="1">
@@ -95,11 +107,12 @@
                                     <select class="form-control show-tick" id="id_producto" required>
                                         <option value="">Seleccione un producto</option>
                                     </select>
+                                    <span class="pedido-campo-error" id="error-id_producto" aria-live="polite"></span>
                                 </div>
                                 <div class="col-sm-3">
                                     <label for="cantidad">Cantidad</label>
                                     <input type="number" class="form-control" id="cantidad" min="1" step="1" value="1" required>
-                                    <span class="error-msg" id="error-cantidad">La cantidad debe ser un número entero mayor que cero.</span>
+                                    <span class="pedido-campo-error" id="error-cantidad" aria-live="polite"></span>
                                 </div>
                                 <div class="col-sm-3">
                                     <label for="precio_unitario">Precio</label>
@@ -125,6 +138,7 @@
                                 </thead>
                                 <tbody id="tablaDetallePedido"></tbody>
                             </table>
+                            <span class="pedido-campo-error" id="error-detalle" aria-live="polite"></span>
                         </div>
                     </div>
                 </div>
@@ -162,4 +176,5 @@
     </div>
 </section>
 
-<script src="public/js/pedidos.js?v=8"></script>
+<script src="public/js/pedidos.js?v=9"></script>
+
