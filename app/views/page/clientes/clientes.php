@@ -1,4 +1,26 @@
 <link rel="stylesheet" href="public/css/home.css">
+<style>
+    .cliente-campo-error {
+        display: none;
+        color: #f44336;
+        font-size: 12px;
+        margin-top: 5px;
+        font-weight: 500;
+        animation: cliente-error-entrada .2s ease-out;
+    }
+    .cliente-input-error {
+        border-bottom: 2px solid #f44336 !important;
+        box-shadow: 0 1px 0 0 #f44336 !important;
+    }
+    .cliente-input-success {
+        border-bottom: 2px solid #4caf50 !important;
+        box-shadow: 0 1px 0 0 #4caf50 !important;
+    }
+    @keyframes cliente-error-entrada {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
 <section class="content">
     <div class="container-fluid">
         <div class="bloque-encabezado">
@@ -40,6 +62,7 @@
                                         <thead>
                                              <tr>
                                              <th>id</th>
+                                             <th>Cédula</th>
                                              <th>Nombre</th>
                                             <th>Apellido</th>
                                              <th>Sexo</th>
@@ -87,5 +110,5 @@
 
 <?php include 'app/views/page/clientes/modal.php'; ?>
 <script src="resources/library/plugins/jquery/jquery.min.js"></script>
-<script src="public/js/cliente.js?v=3"></script> 
+<script src="public/js/cliente.js?v=7"></script> 
 <script src="public/js/ubicacion.js"></script>

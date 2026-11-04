@@ -9,6 +9,14 @@
                     <div class="row"> 
                         <div class="col-md-6">
                             <div class="input-group">
+                                <span class="input-group-addon"><i class="material-icons">badge</i></span>
+                                <div class="form-line">
+                                    <input type="text" class="form-control" placeholder="Cédula" id="cedula" maxlength="20" inputmode="numeric" autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="input-group">
                                 <span class="input-group-addon"><i class="material-icons">person</i></span>
                                 <div class="form-line">
                                     <input type="text" class="form-control" placeholder="Nombre" id="nombre" autocomplete="given-name">
@@ -98,6 +106,14 @@
                 <form id="formularioEditar">
                     <input type="hidden" id="idEditar"> 
                     <div class="row"> 
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="material-icons">badge</i></span>
+                                <div class="form-line">
+                                    <input type="text" class="form-control" placeholder="Cédula" id="cedulaEditar" maxlength="20" inputmode="numeric" autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
                         <div class="col-md-6">
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="material-icons">person</i></span>

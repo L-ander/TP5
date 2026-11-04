@@ -43,6 +43,10 @@
         }
 
         $cliente = new clienteModel();
+        $cliente->setCedula(trim($data["cedula"]));
+        if ($cliente->cedulaExiste()) {
+            return $this->jsonResponse(['success' => false, 'msj' => 'La cédula ya está registrada.'], 422);
+        }
         $cliente->setNombre(trim($data["nombre"]));
         $cliente->setapellido(trim($data["apellido"]));
         $cliente->setsexo($data["sexo"] ?? '');
@@ -142,6 +146,10 @@
 
             $cliente = new clienteModel();
             $cliente->setId($data["id"] ?? 0);
+            $cliente->setCedula(trim($data["cedula"] ?? ''));
+            if ($cliente->cedulaExiste((int)$data["id"])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'La cédula ya está registrada en otro cliente.'], 422);
+            }
             $cliente->setNombre(trim($data["nombre"]));
             $cliente->setapellido(trim($data["apellido"]));
             $cliente->setsexo($data["sexo"] ?? '');
@@ -163,10 +171,15 @@
         }
 
         private function validarDatosCliente($data) {
+            $cedula = trim((string)($data['cedula'] ?? ''));
             $nombre = trim((string)($data['nombre'] ?? ''));
             $apellido = trim((string)($data['apellido'] ?? ''));
             $direccion = (string)($data['direccion'] ?? '');
             $patronNombre = '/^\p{L}[\p{L}\p{M}]*(?: +\p{L}[\p{L}\p{M}]*)*$/u';
+
+            if (!preg_match('/^[0-9]{5,20}$/', $cedula)) {
+                return 'La cédula debe contener entre 5 y 20 números.';
+            }
 
             if (!preg_match($patronNombre, $nombre)) {
                 return 'El nombre solo debe contener letras y espacios.';
@@ -186,6 +199,20 @@
             }
 
             return null;
+        }
+
+        protected function validarCedula($data) {
+            $cedula = trim((string)($data['cedula'] ?? ''));
+            if (!preg_match('/^[0-9]{5,20}$/', $cedula)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'La cédula debe contener entre 5 y 20 números.']);
+            }
+            $cliente = new clienteModel();
+            $cliente->setCedula($cedula);
+            $existe = $cliente->cedulaExiste((int)($data['id'] ?? 0));
+            return $this->jsonResponse([
+                'success' => !$existe,
+                'msj' => $existe ? 'La cédula ya está registrada.' : ''
+            ]);
         }
 
         protected function eliminar($data) {

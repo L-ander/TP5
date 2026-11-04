@@ -6,6 +6,7 @@
 	class clienteModel extends Conexion{
 
 		private $id;
+		private $cedula;
 		private $nombre;
 		private $apellido;
 		private $sexo;
@@ -15,6 +16,8 @@
 
 		public function setId($id){ $this->id = $id; }
 		public function getId(){ return $this->id; }
+		public function setCedula($cedula){ $this->cedula = $cedula; }
+		public function getCedula(){ return $this->cedula; }
 		public function setNombre($nombre){ $this->nombre = $nombre; }
 		public function getNombre(){ return $this->nombre; }
 		public function setapellido($apellido){ $this->apellido = $apellido; }
@@ -30,11 +33,21 @@
 		public function setfecha_creacion($fecha_creacion){ $this->fecha_creacion = $fecha_creacion; }
 		public function getfecha_creacion(){ return $this->fecha_creacion; }
 
+		private function asegurarCedula(){
+			$db = parent::conectar();
+			if (!$db) return;
+			$existe = $db->query("SHOW COLUMNS FROM cliente LIKE 'cedula'")->fetchColumn();
+			if (!$existe) {
+				$db->exec("ALTER TABLE cliente ADD COLUMN cedula varchar(20) NULL AFTER id");
+			}
+		}
+
 		public function listar(){
 
 			try {
+				$this->asegurarCedula();
 
-				$sql = ("SELECT c.id, c.nombre, c.apellido, c.sexo,
+				$sql = ("SELECT c.id, c.cedula, c.nombre, c.apellido, c.sexo,
 		 c.id_parroquia AS id_ciudad, c.direccion, c.fecha_creacion, c.fecha_modificacion,
 		 p.nombre AS nombre_ciudad, m.nombre AS municipio, e.nombre AS estado 
          FROM cliente c
@@ -65,6 +78,7 @@
 		public function consultar(){
 
 			try {
+				$this->asegurarCedula();
 
 				$sql = ("SELECT c.*, c.id_parroquia AS id_ciudad
 						FROM cliente c WHERE c.id = :id");
@@ -92,10 +106,12 @@
 
 		public function crear(){
     try {
+        $this->asegurarCedula();
         
-		$sql = ("INSERT INTO cliente (nombre, apellido, sexo, id_parroquia, direccion) VALUES (:nombre, :apellido, :sexo, :id_parroquia, :direccion)");
+			$sql = ("INSERT INTO cliente (cedula, nombre, apellido, sexo, id_parroquia, direccion) VALUES (:cedula, :nombre, :apellido, :sexo, :id_parroquia, :direccion)");
 
         $stmt = parent::conectar()->prepare($sql);
+        $stmt->bindparam(":cedula", $this->cedula, PDO::PARAM_STR);
         $stmt->bindparam(":nombre", $this->nombre, PDO::PARAM_STR);
         $stmt->bindparam(":apellido", $this->apellido, PDO::PARAM_STR);
         $stmt->bindparam(":sexo", $this->sexo, PDO::PARAM_STR);
@@ -175,14 +191,33 @@
     return $result;
 } #Fin Funcion
 
+		public function cedulaExiste($excluirId = 0){
+			try {
+				$sql = "SELECT id FROM cliente WHERE cedula = :cedula";
+				if ((int)$excluirId > 0) {
+					$sql .= " AND id <> :id";
+				}
+				$stmt = parent::conectar()->prepare($sql);
+				$stmt->bindparam(":cedula", $this->cedula, PDO::PARAM_STR);
+				if ((int)$excluirId > 0) {
+					$stmt->bindValue(":id", (int)$excluirId, PDO::PARAM_INT);
+				}
+				$stmt->execute();
+				return $stmt->fetchColumn() !== false;
+			} catch (Exception $e) {
+				return false;
+			}
+		}
 		
 		public function editar(){
 
 			try {
+				$this->asegurarCedula();
 
-				$sql = ("UPDATE cliente SET nombre=:nombre, apellido = :apellido, sexo = :sexo, id_parroquia = :id_parroquia, direccion = :direccion WHERE id = :id");
+				$sql = ("UPDATE cliente SET cedula = :cedula, nombre=:nombre, apellido = :apellido, sexo = :sexo, id_parroquia = :id_parroquia, direccion = :direccion WHERE id = :id");
 
 				$stmt = parent::conectar()->prepare($sql);
+				$stmt->bindparam(":cedula", $this->cedula, PDO::PARAM_STR);
 				$stmt->bindparam(":nombre", $this->nombre, PDO::PARAM_STR);
 				$stmt->bindparam(":apellido", $this->apellido, PDO::PARAM_STR);
 				$stmt->bindparam(":sexo", $this->sexo, PDO::PARAM_STR);
