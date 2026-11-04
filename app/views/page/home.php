@@ -1,12 +1,20 @@
 <?php
+// Usar rutas absolutas
 require_once __DIR__ . '/../../models/HomeModel.php';
 require_once __DIR__ . '/../../models/ReportesModel.php';
 
 $homeModel = new HomeModel();
 $indicadores = $homeModel->obtenerIndicadores();
 
-$reportesModel = new ReportesModel();
-$reportes = $reportesModel->obtenerReportes();
+// Envolviendo la creacion de ReportesModel en un try-catch para evitar un error
+// en la base de datos detenga toda la pagina home
+try {
+    $reportesModel = new ReportesModel();
+    $reportes = $reportesModel->obtenerReportes();
+} catch (Exception $e) {
+    // Si la tabla o la consulta falla, iniciamos un arreglo vacio
+    $reportes = [];
+}
 
 function homeNumero($valor) {
     return number_format((int)$valor, 0, ',', '.');

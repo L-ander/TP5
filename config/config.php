@@ -1,11 +1,11 @@
 <?php
 
-// Configuramos la cookie de sesión para que dure: (60 seg * 60 min * 24 horas)
+// Configuramos la cookie de sesion para que dure: (60 seg * 60 min * 24 horas)
 if (session_status() === PHP_SESSION_NONE) {
     session_set_cookie_params(60 * 60 * 24);
     session_start();
 }
-
+  //Para el uso por medio de Xampp
   $database = $_SESSION['database'] ?? getenv('DB_NAME') ?: 'prueba';
   $host = getenv('DB_HOST') ?: '127.0.0.1';
   $port = getenv('DB_PORT') ?: '3306';
@@ -13,6 +13,15 @@ if (session_status() === PHP_SESSION_NONE) {
   $password = getenv('DB_PASSWORD') ?: '';
 
 $databaseAnterior = getenv('DB_LEGACY_NAME') ?: 'baseAntigua';
+
+//Para el uso por medio del hosting InfinityFree
+/*$database = $_SESSION['database'] ?? getenv('DB_NAME') ?: 'if0_42325159_prueba';
+  $host = getenv('DB_HOST') ?: 'sql308.infinityfree.com';
+  $port = getenv('DB_PORT') ?: '3306';
+  $username = getenv('DB_USER') ?: 'if0_42325159';
+  $password = getenv('DB_PASSWORD') ?: 'Turbo029';
+
+$databaseAnterior = getenv('DB_LEGACY_NAME') ?: 'baseAntigua';*/
 
 $config = [
 

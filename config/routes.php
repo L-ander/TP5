@@ -74,6 +74,11 @@ return [
         'menu'  => true,
         'roles' => [1]
     ],
+    'reportes' => [
+        'vista' => 'reportes/reportes.php',
+        'menu'  => true,
+        'roles' => $rolesDe('reportes')
+    ],
     'configuracion' => [
         'vista' => 'configuracion/configuracion.php',
         'menu'  => true,

@@ -237,6 +237,45 @@ class PedidoModel extends Conexion {
         }
     }
 
+/* Esto es para cuando uses el hosting infinityFree
+    public function cambiarEstatusPedido($idPedido, $idEstatus) {
+        if (!in_array($idEstatus, [2, 3], true)) {
+            return array(
+                'success' => false,
+                'validation' => true,
+                'error' => 'El estatus debe ser Entregado/Listo o Cancelado.'
+            );
+        }
+
+        try {
+            $conexion = parent::conectar();
+            
+            // Si el nuevo estatus es 2 (Entregado), ponemos la fecha actual. Si no, NULL.
+            $fecha_entrega = ($idEstatus == 2) ? date('Y-m-d') : null;
+
+            $stmt = $conexion->prepare(
+                "UPDATE pedido SET id_estatus = :id_estatus, fecha_entrega = :fecha_entrega
+                 WHERE id = :id AND id_estatus = 1"
+            );
+            $stmt->bindParam(':id_estatus', $idEstatus, PDO::PARAM_INT);
+            $stmt->bindParam(':fecha_entrega', $fecha_entrega, PDO::PARAM_STR);
+            $stmt->bindParam(':id', $idPedido, PDO::PARAM_INT);
+            $stmt->execute();
+
+            if ($stmt->rowCount() !== 1) {
+                return array(
+                    'success' => false,
+                    'conflict' => true,
+                    'error' => 'Solo se puede cambiar el estatus de un pedido pendiente.'
+                );
+            }
+
+            return array('success' => true);
+        } catch (Exception $e) {
+            return array('success' => false, 'error' => $e->getMessage());
+        }
+    }*/
+    //Uso por medio de Xampp
     public function cambiarEstatusPedido($idPedido, $idEstatus) {
         if (!in_array($idEstatus, [2, 3], true)) {
             return array(
