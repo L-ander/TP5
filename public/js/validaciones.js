@@ -17,6 +17,12 @@ const Validaciones = {
         const regex = /^(?:\+58|0)(?:412|414|424|416|426|422|251)\d{7}$/;
         return regex.test(valor);
     },
+    numeroEnteroPositivo: function(valor) {
+        return /^[0-9]+$/.test(String(valor)) &&
+            Number.isSafeInteger(Number(valor)) &&
+            Number(valor) > 0 &&
+            Number(valor) <= 1000000;
+    },
     
     username: function(valor) {
         // Alfanumerico, entre 4 y 15 caracteres

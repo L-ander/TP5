@@ -115,6 +115,7 @@ class PedidoModel extends Conexion {
             return array('success' => false, 'validation' => true, 'error' => 'Selecciona una fecha válida para el pedido.');
         }
 
+        $cantidadesPorProducto = [];
         foreach ($this->detalle as $indice => $item) {
             $numeroItem = (int)$indice + 1;
             $cantidad = is_array($item) ? filter_var($item['cantidad'] ?? null, FILTER_VALIDATE_INT) : false;
@@ -125,6 +126,9 @@ class PedidoModel extends Conexion {
             if ($cantidad === false || $cantidad <= 0) {
                 return array('success' => false, 'validation' => true, 'error' => 'La cantidad del producto número ' . $numeroItem . ' debe ser un número entero mayor que cero.');
             }
+
+            $cantidadExistente = $cantidadesPorProducto[$idProducto] ?? 0;
+            $cantidadesPorProducto[$idProducto] = $cantidadExistente + $cantidad;
         }
 
         try {
@@ -153,8 +157,10 @@ class PedidoModel extends Conexion {
 
             $productosValidados = [];
             $buscarProducto = $conexion->prepare("SELECT precio FROM producto WHERE id = :id");
-            foreach ($this->detalle as $indice => $item) {
-                $idProducto = (int)$item['id_producto'];
+            $numeroProducto = 0;
+            foreach ($cantidadesPorProducto as $indice => $cantidad) {
+                $numeroProducto++;
+                $idProducto = (int)$indice;
                 $buscarProducto->bindValue(':id', $idProducto, PDO::PARAM_INT);
                 $buscarProducto->execute();
                 $precio = $buscarProducto->fetchColumn();
@@ -163,13 +169,13 @@ class PedidoModel extends Conexion {
                     return array(
                         'success' => false,
                         'validation' => true,
-                        'error' => 'El producto número ' . ((int)$indice + 1) . ' ya no está disponible. Actualiza la lista y vuelve a intentarlo.'
+                        'error' => 'El producto número ' . $numeroProducto . ' ya no está disponible. Actualiza la lista y vuelve a intentarlo.'
                     );
                 }
 
                 $productosValidados[] = [
                     'id_producto' => $idProducto,
-                    'cantidad' => (int)$item['cantidad'],
+                    'cantidad' => $cantidad,
                     'precio_unitario' => (float)$precio
                 ];
             }
@@ -237,45 +243,6 @@ class PedidoModel extends Conexion {
         }
     }
 
-/* Esto es para cuando uses el hosting infinityFree
-    public function cambiarEstatusPedido($idPedido, $idEstatus) {
-        if (!in_array($idEstatus, [2, 3], true)) {
-            return array(
-                'success' => false,
-                'validation' => true,
-                'error' => 'El estatus debe ser Entregado/Listo o Cancelado.'
-            );
-        }
-
-        try {
-            $conexion = parent::conectar();
-            
-            // Si el nuevo estatus es 2 (Entregado), ponemos la fecha actual. Si no, NULL.
-            $fecha_entrega = ($idEstatus == 2) ? date('Y-m-d') : null;
-
-            $stmt = $conexion->prepare(
-                "UPDATE pedido SET id_estatus = :id_estatus, fecha_entrega = :fecha_entrega
-                 WHERE id = :id AND id_estatus = 1"
-            );
-            $stmt->bindParam(':id_estatus', $idEstatus, PDO::PARAM_INT);
-            $stmt->bindParam(':fecha_entrega', $fecha_entrega, PDO::PARAM_STR);
-            $stmt->bindParam(':id', $idPedido, PDO::PARAM_INT);
-            $stmt->execute();
-
-            if ($stmt->rowCount() !== 1) {
-                return array(
-                    'success' => false,
-                    'conflict' => true,
-                    'error' => 'Solo se puede cambiar el estatus de un pedido pendiente.'
-                );
-            }
-
-            return array('success' => true);
-        } catch (Exception $e) {
-            return array('success' => false, 'error' => $e->getMessage());
-        }
-    }*/
-    //Uso por medio de Xampp
     public function cambiarEstatusPedido($idPedido, $idEstatus) {
         if (!in_array($idEstatus, [2, 3], true)) {
             return array(

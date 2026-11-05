@@ -282,14 +282,9 @@ function listarPedidos() {
 // Crear y limpiar pedido
 // -------------------------------------------------------------------------------------------------
 function abrirFormularioPedido() {
-    if ($('#contenedorPedido').is(':visible')) {
-        $('#contenedorPedido').hide();
-        return;
-    }
-
-    $('#contenedorPedido').show();
     resetPedido();
-    $('html, body').animate({ scrollTop: $('#contenedorPedido').offset().top - 80 }, 300);
+    $('#tituloFormularioPedido').text('Nuevo pedido');
+    $('#modalPedido').modal('show');
 }
 
 function resetPedido() {
@@ -318,11 +313,10 @@ function limpiarOCerrarPedido() {
 // Modificar pedido
 // -------------------------------------------------------------------------------------------------
 function cargarPedido(idPedido) {
-    $('#contenedorPedido').show();
     resetPedido();
     $('#id_pedido').val(idPedido);
     $('#tituloFormularioPedido').text('Editar pedido');
-    $('html, body').animate({ scrollTop: $('#contenedorPedido').offset().top - 80 }, 300);
+    $('#modalPedido').modal('show');
 
     $.ajax({
         url: 'app/controllers/PedidoController.php',
@@ -541,6 +535,7 @@ function guardarPedido() {
         dataType: 'json'
     }).done(function(res) {
         if (res && res.success) {
+            $('#modalPedido').modal('hide');
             resetPedido();
             listarPedidos();
             mostrarMensajePedido(res.message || 'Pedido guardado correctamente.', 'success');

@@ -104,10 +104,10 @@ class PedidoController extends BaseController {
                 ], 422);
             }
 
-            if ($cantidad === false || $cantidad <= 0) {
+            if ($cantidad === false || $cantidad <= 0 || $cantidad > 1000000) {
                 return $this->jsonResponse([
                     'success' => false,
-                    'message' => 'La cantidad del producto número ' . $numeroItem . ' debe ser un número entero mayor que cero.'
+                    'message' => 'La cantidad del producto número ' . $numeroItem . ' debe ser un número entero entre 1 y 1000000.'
                 ], 422);
             }
         }

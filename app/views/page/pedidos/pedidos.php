@@ -1,174 +1,46 @@
 <link rel="stylesheet" href="public/css/home.css">
-<style>
-    .card {
-        margin-bottom: 15px;
-    }
-    .card .header {
-        padding: 12px 15px;
-    }
-    .card .body {
-        padding: 12px 15px;
-    }
-    .pedido-actions {
-        white-space: nowrap;
-    }
-    #cantidad.input-error {
-        border-bottom: 2px solid #f44336 !important;
-        box-shadow: 0 1px 0 0 #f44336 !important;
-    }
-    #cantidad.input-success {
-        border-bottom: 2px solid #4caf50 !important;
-        box-shadow: 0 1px 0 0 #4caf50 !important;
-    }
-    .pedido-campo-error {
-        display: none;
-        color: #f44336;
-        font-size: 12px;
-        margin-top: 5px;
-        font-weight: 500;
-        animation: pedido-error-entrada .2s ease-out;
-    }
-    .pedido-input-error {
-        border-bottom: 2px solid #f44336 !important;
-        box-shadow: 0 1px 0 0 #f44336 !important;
-    }
-    @keyframes pedido-error-entrada {
-        from { opacity: 0; transform: translateY(-4px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-</style>
 <section class="content">
     <div class="container-fluid">
-        <div class="bloque-encabezado" style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="bloque-encabezado">
             <h2>Gestión de Pedidos</h2>
-            <button type="button" id="btnNuevoPedido" class="btn btn-primary">
-                <i class="material-icons">add</i> Nuevo pedido
-            </button>
         </div>
-
-        <div id="contenedorPedido" style="display:none;">
-            <div class="row clearfix">
-                <div class="col-lg-5">
-                <div class="card">
-                    <div class="header">
-                        <h2 id="tituloFormularioPedido">Encabezado del pedido</h2>
-                    </div>
-                    <div class="body">
-                        <form id="formPedido">
-                            <input type="hidden" id="id_pedido" name="id">
-
-                            <div class="form-group">
-                                <label for="id_cliente">Cliente</label>
-                                <select class="form-control show-tick" name="id_cliente" id="id_cliente" required>
-                                    <option value="">Seleccione un cliente</option>
-                                </select>
-                                <span class="pedido-campo-error" id="error-id_cliente" aria-live="polite"></span>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="id_vendedor">Vendedor</label>
-                                <select class="form-control show-tick" name="id_vendedor" id="id_vendedor" required>
-                                    <option value="">Seleccione un vendedor</option>
-                                </select>
-                                <span class="pedido-campo-error" id="error-id_vendedor" aria-live="polite"></span>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="fecha">Fecha</label>
-                                <input type="date" class="form-control" name="fecha" id="fecha" required>
-                                <span class="pedido-campo-error" id="error-fecha" aria-live="polite"></span>
-                            </div>
-
-                            <input type="hidden" id="id_estatus" name="id_estatus" value="1">
-                            <div class="form-group">
-                                <label>Estatus</label>
-                                <p class="form-control-static" id="estatusPedidoTexto">Pendiente</p>
-                            </div>
-
-                            <div class="form-group">
-                                <button type="button" id="btnGuardarPedido" class="btn btn-success">Guardar pedido</button>
-                                <button type="button" id="btnLimpiarPedido" class="btn btn-default">Nuevo</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-7">
-                <div class="card">
-                    <div class="header">
-                        <h2>Detalle del pedido</h2>
-                    </div>
-                    <div class="body">
-                        <div id="controlesDetallePedido">
-                            <div class="row clearfix">
-                                <div class="col-sm-6">
-                                    <label for="id_producto">Producto</label>
-                                    <select class="form-control show-tick" id="id_producto" required>
-                                        <option value="">Seleccione un producto</option>
-                                    </select>
-                                    <span class="pedido-campo-error" id="error-id_producto" aria-live="polite"></span>
-                                </div>
-                                <div class="col-sm-3">
-                                    <label for="cantidad">Cantidad</label>
-                                    <input type="number" class="form-control" id="cantidad" min="1" step="1" value="1" required>
-                                    <span class="pedido-campo-error" id="error-cantidad" aria-live="polite"></span>
-                                </div>
-                                <div class="col-sm-3">
-                                    <label for="precio_unitario">Precio</label>
-                                    <input type="number" class="form-control" id="precio_unitario" min="0" step="any" readonly>
-                                </div>
-                            </div>
-
-                            <div class="form-group" style="margin-top:10px;">
-                                <button type="button" id="btnAgregarItem" class="btn btn-primary">Agregar al pedido</button>
-                            </div>
-                        </div>
-
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Producto</th>
-                                        <th>Cantidad</th>
-                                        <th>Precio</th>
-                                        <th>Subtotal</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tablaDetallePedido"></tbody>
-                            </table>
-                            <span class="pedido-campo-error" id="error-detalle" aria-live="polite"></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-            </div>
 
         <div class="row clearfix">
-            <div class="col-lg-12">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="card">
-                    <div class="header">
-                        <h2>Pedidos registrados</h2>
+                    <div class="header" style="display:flex; justify-content:space-between; align-items:center; padding:15px 20px;">
+                        <ul class="nav nav-tabs tab-nav-right" role="tablist" style="border-bottom:none;">
+                            <li role="presentation" class="active">
+                                <a href="#tab_pedidos" data-toggle="tab" style="color:white; font-weight:bold;">
+                                    <i class="material-icons">receipt</i> PEDIDOS
+                                </a>
+                            </li>
+                        </ul>
+                        <button type="button" class="btn btn-success waves-effect" id="btnNuevoPedido">
+                            <i class="material-icons">add</i> Nuevo pedido
+                        </button>
                     </div>
-                    <div class="body table-responsive">
-                        <table class="table table-bordered table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th># Pedido</th>
-                                    <th>Cliente</th>
-                                    <th>Vendedor</th>
-                                    <th>Fecha</th>
-                                    <th>Productos</th>
-                                    <th>Total</th>
-                                    <th>Estatus</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tablaPedidos"></tbody>
-                        </table>
+
+                    <div class="body tab-content">
+                        <div role="tabpanel" class="tab-pane fade in active" id="tab_pedidos">
+                            <div class="body table-responsive">
+                                <table class="table" id="tablaPedidos">
+                                    <thead>
+                                        <tr>
+                                            <th>Codigo</th>
+                                            <th>Cliente</th>
+                                            <th>Vendedor</th>
+                                            <th>Fecha</th>
+                                            <th>Productos</th>
+                                            <th>Total</th>
+                                            <th>Estatus</th>
+                                            <th>Opciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -176,5 +48,99 @@
     </div>
 </section>
 
-<script src="public/js/pedidos.js?v=9"></script>
+<div class="modal fade" id="modalPedido" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header modal-col-grey">
+                <h4 class="modal-title" id="tituloFormularioPedido">Nuevo pedido</h4>
+            </div>
+            <div class="modal-body">
+                <form id="formPedido">
+                    <input type="hidden" id="id_pedido">
+                    <input type="hidden" id="id_estatus" value="1">
 
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="id_cliente">Cliente</label>
+                                <select class="form-control" id="id_cliente" required>
+                                    <option value="">Seleccione un cliente</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="id_vendedor">Vendedor</label>
+                                <select class="form-control" id="id_vendedor" required>
+                                    <option value="">Seleccione un vendedor</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="fecha">Fecha</label>
+                                <input type="date" class="form-control" id="fecha" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4>Detalle del pedido</h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_producto">Producto</label>
+                                <select class="form-control" id="id_producto">
+                                    <option value="">Seleccione un producto</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="cantidad">Cantidad</label>
+                                <div class="form-line">
+                                    <input type="number" class="form-control" id="cantidad" min="1" max="1000000" step="1" value="1">
+                                </div>
+                                <small id="error-cantidad" class="txt-error" style="display:none; color:#F44336; margin-top:5px;">
+                                    Ingrese una cantidad entera entre 1 y 1000000.
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="precio_unitario">Precio</label>
+                                <input type="number" class="form-control" id="precio_unitario" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="button" class="btn btn-primary" id="btnAgregarItem" disabled>Agregar producto</button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio</th>
+                                    <th>Subtotal</th>
+                                    <th>Opciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaDetallePedido"></tbody>
+                        </table>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success waves-effect" id="btnGuardarPedido">Guardar</button>
+                <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="resources/library/plugins/jquery/jquery.min.js"></script>
+<script src="public/js/validaciones.js"></script>
+<script src="public/js/pedidos.js?v=15"></script>
