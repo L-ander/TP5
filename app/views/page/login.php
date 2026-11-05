@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="resources/library/plugins/bootstrap/css/bootstrap.css" rel="stylesheet">
     <link href="public/css/login.css?v=2" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/jquery-toast-plugin@1.3.2/dist/jquery.toast.min.css" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
@@ -61,6 +62,9 @@
     </div>
 
     <script src="resources/library/plugins/jquery/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-toast-plugin@1.3.2/dist/jquery.toast.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/localization/messages_es.min.js"></script>
     <script src="public/js/login.js?v=5"></script>
 </body>
 </html>

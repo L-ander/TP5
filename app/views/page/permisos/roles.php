@@ -65,5 +65,4 @@
 </section>
 
 <?php include 'app/views/page/permisos/modal.php'; ?>
-<script src="resources/library/plugins/jquery/jquery.min.js"></script>
 <script src="public/js/permisos.js"></script>

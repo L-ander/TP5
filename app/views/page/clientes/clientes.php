@@ -109,6 +109,5 @@
 </section>
 
 <?php include 'app/views/page/clientes/modal.php'; ?>
-<script src="resources/library/plugins/jquery/jquery.min.js"></script>
 <script src="public/js/cliente.js?v=7"></script> 
 <script src="public/js/ubicacion.js"></script>

@@ -207,5 +207,4 @@
     </div>
 </div>
 
-<script src="resources/library/plugins/jquery/jquery.min.js"></script>
 <script src="public/js/configuracion_usuarios.js"></script>

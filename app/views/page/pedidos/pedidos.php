@@ -141,6 +141,5 @@
     </div>
 </div>
 
-<script src="resources/library/plugins/jquery/jquery.min.js"></script>
 <script src="public/js/validaciones.js"></script>
 <script src="public/js/pedidos.js?v=15"></script>
