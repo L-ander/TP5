@@ -7,8 +7,25 @@ $(document).ready(function () {
 
     //2. Utilidades Generales
     const api = (data, cb) => $.post('app/controllers/PersonalController.php', data, cb, 'json');
-    const alertOk = (msg) => Swal.fire({ icon: 'success', title: '¡Excelente!', text: msg, showConfirmButton: false, timer: 2000 });
-    const alertErr = (msg) => Swal.fire({ icon: 'error', title: 'Error', text: msg });
+    
+    //funcion Toast
+    const toast = (icon, title) => {
+        if (!window.Swal) return;
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: icon,
+            title: title,
+            showConfirmButton: false,
+            timer: 2500,
+            timerProgressBar: true
+        });
+    };
+
+    const alertOk = (msg) => toast('success', msg);
+    const alertErr = (msg) => toast('error', msg);
+    
+    // Mantenemos la alerta central
     const confirmReq = (titulo, texto, cb) => Swal.fire({ title: titulo, text: texto, icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí', cancelButtonText: 'Cancelar' }).then(r => r.isConfirmed && cb());
 
     //3. Inicialización
@@ -33,8 +50,9 @@ $(document).ready(function () {
     function listarPersonal() {
         api({ action: 'listar' }, function (res) {
             if (res.success) {
-                let htmlTodos = '';
-                let htmlStaff = '';
+                // Arrays para alimentar DataTables directamente
+                let datosTodos = [];
+                let datosStaff = [];
 
                 res.data.forEach(p => {
                     let estado = (p.status == 1)
@@ -45,31 +63,51 @@ $(document).ready(function () {
                         ? `<span class="label bg-blue">${p.tipo_personal}</span>`
                         : '<span class="label bg-grey">Sin Cargo</span>';
 
-                    // Se usan data-attributes y clases en lugar de eventos onclick directos
-                    let fila = `<tr>
-                        <td>${p.cedula}</td>
-                        <td>${p.nombre} ${p.apellido}</td>
-                        <td>${p.telefono || '-'}</td>
-                        <td>${tipoPersonal}</td>
-                        <td>${estado}</td>
-                        <td>
-                            <button class="btn btn-warning btn-xs waves-effect js-editar-personal" title="Editar" data-personal='${JSON.stringify(p).replace(/'/g, "&#39;")}'>
-                                <i class="material-icons">edit</i>
-                            </button>
-                            <button class="btn btn-danger btn-xs waves-effect js-eliminar-personal" title="Eliminar" data-id="${p.id}" data-nombre="${p.nombre}" data-cedula="${p.cedula}">
-                                <i class="material-icons">delete</i>
-                            </button>
-                        </td>
-                    </tr>`;
+                    let botones = `
+                        <button class="btn btn-warning btn-xs waves-effect js-editar-personal" title="Editar" data-personal='${JSON.stringify(p).replace(/'/g, "&#39;")}'>
+                            <i class="material-icons">edit</i>
+                        </button>
+                        <button class="btn btn-danger btn-xs waves-effect js-eliminar-personal" title="Eliminar" data-id="${p.id}" data-nombre="${p.nombre}" data-cedula="${p.cedula}">
+                            <i class="material-icons">delete</i>
+                        </button>`;
 
-                    htmlTodos += fila;
+                    // Crear un array representando la fila con exactamente 6 columnas
+                    let filaArray = [
+                        p.cedula,
+                        `${p.nombre} ${p.apellido}`,
+                        p.telefono || '-',
+                        tipoPersonal,
+                        estado,
+                        botones
+                    ];
+
+                    datosTodos.push(filaArray);
+                    
                     if (p.id_tipo_personal != 1) {
-                        htmlStaff += fila;
+                        datosStaff.push(filaArray);
                     }
                 });
 
-                $('#tablaPersonal').html(htmlTodos);
-                $('#tablaPersonalStaff').html(htmlStaff);
+                // Configuración base de DataTables
+                let dtConfig = {
+                    language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+                    responsive: true,
+                    pageLength: 10,
+                    destroy: true, // Permite reinicializar
+                    order: [[1, 'asc']]
+                };
+
+                // Inicializar y cargar datos en la tabla principal
+                let dtTodos = $('#tablaPersonal').DataTable(dtConfig);
+                dtTodos.clear(); // Limpiar datos viejos
+                dtTodos.rows.add(datosTodos); // Añadir filas nuevas
+                dtTodos.draw(); // Redibujar tabla
+
+                // Inicializar y cargar datos en la tabla staff
+                let dtStaff = $('#tablaPersonalStaff').DataTable(dtConfig);
+                dtStaff.clear();
+                dtStaff.rows.add(datosStaff);
+                dtStaff.draw();
             }
         });
     }

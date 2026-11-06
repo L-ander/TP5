@@ -41,7 +41,8 @@
                         
                         <div role="tabpanel" class="tab-pane fade in active" id="tab_todos">
                             <div class="table-responsive">
-                                <table class="table table-bordered table-striped table-hover">
+                                <!-- ID único en la tabla entera -->
+                                <table id="tablaPersonal" class="table table-bordered table-striped table-hover dataTable" style="width:100%">
                                     <thead>
                                         <tr>
                                             <th>Cédula</th>
@@ -52,14 +53,15 @@
                                             <th>Acciones</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="tablaPersonal"></tbody>
+                                    <tbody></tbody>
                                 </table>
                             </div>
                         </div>
 
                         <div role="tabpanel" class="tab-pane fade" id="tab_staff">
                             <div class="table-responsive">
-                                <table class="table table-bordered table-striped table-hover">
+                                <!-- ID único en la tabla entera -->
+                                <table id="tablaPersonalStaff" class="table table-bordered table-striped table-hover dataTable" style="width:100%">
                                     <thead>
                                         <tr>
                                             <th>Cédula</th>
@@ -70,7 +72,7 @@
                                             <th>Acciones</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="tablaPersonalStaff"></tbody>
+                                    <tbody></tbody>
                                 </table>
                             </div>
                         </div>
