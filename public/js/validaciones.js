@@ -43,4 +43,65 @@ function toggleError(input, isValid, errorId) {
         $(input).removeClass('input-success').addClass('input-error');
         $('#' + errorId).slideDown(200);
     }
+
+}
+
+if (typeof jQuery !== 'undefined' &&
+    jQuery.fn.validate &&
+    jQuery('#formPedido').length) {
+    jQuery('#formPedido').validate({
+        rules: {
+            id_cliente: {
+                required: true
+            },
+            id_vendedor: {
+                required: true
+            },
+            fecha_pedido: {
+                required: true,
+                date: true
+            },
+            id_producto: {
+                required: true
+            },
+            cantidad: {
+                required: true,
+                digits: true,
+                min: 1,
+                max: 1000000
+            }
+        },
+        messages: {
+            id_cliente: {
+                required: "Seleccione un cliente."
+            },
+            id_vendedor: {
+                required: "Seleccione un vendedor."
+            },
+            fecha_pedido: {
+                required: "Ingrese la fecha del pedido.",
+                date: "Ingrese una fecha válida."
+            },
+            id_producto: {
+                required: "Seleccione un producto."
+            },
+            cantidad: {
+                required: "Ingrese la cantidad.",
+                digits: "Ingrese un número entero.",
+                min: "La cantidad debe ser al menos 1.",
+                max: "La cantidad no puede exceder 1000000."
+            }  
+        },
+        submitHandler: function() {
+            if (!detallePedido.length) {
+                jQuery('#formPedido').validate().showErrors({
+                    id_producto: 'Agrega al menos un producto antes de guardar el pedido.'
+                });
+                return false;
+            }
+
+            guardarPedido();
+            return false;
+        }
+    });
 }

@@ -1,4 +1,5 @@
 <link rel="stylesheet" href="public/css/home.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap.min.css">
 <section class="content">
     <div class="container-fluid">
         <div class="bloque-encabezado">
@@ -63,7 +64,7 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label for="id_cliente">Cliente</label>
-                                <select class="form-control" id="id_cliente" required>
+                                <select class="form-control" name="id_cliente" id="id_cliente" >
                                     <option value="">Seleccione un cliente</option>
                                 </select>
                             </div>
@@ -71,7 +72,7 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label for="id_vendedor">Vendedor</label>
-                                <select class="form-control" id="id_vendedor" required>
+                                <select class="form-control" name="id_vendedor" id="id_vendedor" >
                                     <option value="">Seleccione un vendedor</option>
                                 </select>
                             </div>
@@ -79,7 +80,7 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label for="fecha">Fecha</label>
-                                <input type="date" class="form-control" id="fecha" required>
+                                <input type="date" class="form-control" name="fecha_pedido" id="fecha" >
                             </div>
                         </div>
                     </div>
@@ -89,7 +90,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="id_producto">Producto</label>
-                                <select class="form-control" id="id_producto">
+                                <select class="form-control" name="id_producto" id="id_producto">
                                     <option value="">Seleccione un producto</option>
                                 </select>
                             </div>
@@ -98,11 +99,9 @@
                             <div class="form-group">
                                 <label for="cantidad">Cantidad</label>
                                 <div class="form-line">
-                                    <input type="number" class="form-control" id="cantidad" min="1" max="1000000" step="1" value="1">
+                                    <input type="number" class="form-control" name="cantidad" id="cantidad" min="1" max="1000000" step="1" value="1">
                                 </div>
-                                <small id="error-cantidad" class="txt-error" style="display:none; color:#F44336; margin-top:5px;">
-                                    Ingrese una cantidad entera entre 1 y 1000000.
-                                </small>
+
                             </div>
                         </div>
                         <div class="col-md-3">
@@ -114,7 +113,7 @@
                     </div>
 
                     <div class="form-group">
-                        <button type="button" class="btn btn-primary" id="btnAgregarItem" disabled>Agregar producto</button>
+                        <button type="button" class="btn btn-primary" id="btnAgregarItem">Agregar producto</button>
                     </div>
 
                     <div class="table-responsive">
@@ -134,12 +133,18 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success waves-effect" id="btnGuardarPedido">Guardar</button>
+                <button type="submit" form="formPedido" class="btn btn-success waves-effect" id="btnGuardarPedido">Guardar</button>
                 <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">Cerrar</button>
             </div>
         </div>
     </div>
 </div>
+
+
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.22.1/jquery.validate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/toastjs-notifications@1.16.0/dist/toast-notifications.min.js"></script>
 
 <script src="public/js/validaciones.js"></script>
 <script src="public/js/pedidos.js?v=15"></script>

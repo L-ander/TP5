@@ -1,193 +1,106 @@
-let productosDisponibles = [];
-let detallePedido = [];
-
-// -------------------------------------------------------------------------------------------------
-// Inicializar y enlazar eventos
-// -------------------------------------------------------------------------------------------------
-enlazarEventos();
+var pedidos = [];
+var productosDisponibles = [];
+var detallePedido = [];
+var cantidadMaxima = 1000000;
 
 $(function() {
-    cargarCombos();
+    cargarClientes();
+    cargarVendedores();
     cargarProductos();
     listarPedidos();
-    resetPedido();
+
+    $('#btnNuevoPedido').on('click', nuevoPedido);
+    $('#btnAgregarItem').on('click', function() {
+        var productoValido = $('#id_producto').valid();
+        var cantidadValida = $('#cantidad').valid();
+
+        if (productoValido && cantidadValida) {
+            agregarItem();
+        }
+    });
+    $('#id_producto').on('change', function() {
+        actualizarPrecio();
+    });
+
+    $('#tablaPedidos').on('click', '.js-editar-pedido', function() {
+        editarPedido($(this).data('id'));
+    });
+    $('#tablaPedidos').on('click', '.js-eliminar-pedido', function() {
+        eliminarPedido($(this).data('id'));
+    });
+    $('#tablaPedidos').on('click', '.js-cambiar-estatus-pedido', function() {
+        cambiarEstatusPedido($(this).data('id'));
+    });
+    $('#tablaDetallePedido').on('click', '.js-eliminar-item', function() {
+        eliminarItem($(this).data('index'));
+    });
 });
 
-// -------------------------------------------------------------------------------------------------
-// Eventos del modulo
-// -------------------------------------------------------------------------------------------------
-function enlazarEventos() {
-    $(document).off('.pedidos');
+function escaparHtml(valor) {
+    return $('<div>').text(valor === null || valor === undefined ? '' : valor).html();
+}
 
-    $(document).on('click.pedidos', '#btnNuevoPedido', abrirFormularioPedido);
-    $(document).on('click.pedidos', '#btnGuardarPedido', guardarPedido);
-    $(document).on('click.pedidos', '#btnLimpiarPedido', limpiarOCerrarPedido);
-    $(document).on('click.pedidos', '#btnAgregarItem', agregarItem);
-    $(document).on('change.pedidos blur.pedidos', '#id_producto', function() {
-        $('#id_producto').data('pedido-tocado', true);
-        onProductoChange();
-    });
-    $(document).on('change.pedidos input.pedidos blur.pedidos', '#id_cliente, #id_vendedor, #fecha', function() {
-        validarCampoCabecera(this.id, true);
-    });
-    $(document).on('focus.pedidos', '#cantidad', function() {
-        $(this).data('tocado', true);
-    });
-    $(document).on('input.pedidos blur.pedidos', '#cantidad', function() {
-        validarCampoCantidad($(this));
-    });
-    $(document).on('click.pedidos', '.js-editar-pedido', function() {
-        cargarPedido(Number($(this).data('id')));
-    });
-    $(document).on('click.pedidos', '.js-eliminar-pedido', function() {
-        eliminarPedido(Number($(this).data('id')));
-    });
-    $(document).on('click.pedidos', '.js-eliminar-item', function() {
-        eliminarItem(Number($(this).data('index')));
-    });
-    $(document).on('click.pedidos', '.js-cambiar-estatus-pedido', function() {
-        cambiarEstatusPedido(Number($(this).data('id')));
+function mostrarToastErrorPedido(mensaje) {
+    showToast.error(mensaje || 'No se pudo completar la operación.', {
+        position: 'top-right',
+        duration: 4000
     });
 }
 
-// -------------------------------------------------------------------------------------------------
-// Funciones auxiliares y validaciones
-// -------------------------------------------------------------------------------------------------
-function money(valor) {
-    if (valor === null || valor === undefined || valor === '') {
-        return '$0';
-    }
-
-    return '$' + String(valor).replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
+function mostrarErrorAjax(xhr, mensaje) {
+    var respuesta = xhr.responseJSON || {};
+    mostrarToastErrorPedido(respuesta.message || mensaje);
 }
 
-function escapeHtml(valor) {
-    return String(valor).replace(/[&<>"']/g, function(caracter) {
-        return {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;'
-        }[caracter];
-    });
+function mostrarErrorValidacionPedido(campo, mensaje) {
+    var errores = {};
+    errores[campo] = mensaje;
+    $('#formPedido').validate().showErrors(errores);
 }
 
-function mostrarMensajePedido(mensaje, icono) {
-    Swal.fire({
-        toast: true,
-        position: 'top-end',
-        icon: icono,
-        title: mensaje,
-        showConfirmButton: false,
-        timer: icono === 'error' ? 3500 : 2200,
-        timerProgressBar: true,
-        showClass: { popup: 'swal2-show' },
-        hideClass: { popup: 'swal2-hide' }
-    });
-}
-
-function mostrarErrorCampo(campo, mensaje) {
-    const $campo = $('#' + campo);
-    if ($campo.length) {
-        $campo.addClass('pedido-input-error').attr('aria-invalid', 'true');
-    }
-    $('#error-' + campo).text(mensaje).stop(true, true).slideDown(180);
-}
-
-function limpiarErrorCampo(campo) {
-    const $campo = $('#' + campo);
-    if ($campo.length) {
-        $campo.removeClass('pedido-input-error').removeAttr('aria-invalid');
-    }
-    $('#error-' + campo).stop(true, true).slideUp(150).text('');
-}
-
-function validarCampoCabecera(campo, mostrarVacio) {
-    const valor = $('#' + campo).val();
-    const nombres = {
-        id_cliente: 'Selecciona un cliente.',
-        id_vendedor: 'Selecciona un vendedor.',
-        fecha: 'Selecciona la fecha del pedido.'
-    };
-    const esValido = typeof valor === 'string' && valor.trim() !== '';
-
-    if (esValido) {
-        limpiarErrorCampo(campo);
-    } else if (mostrarVacio) {
-        mostrarErrorCampo(campo, nombres[campo]);
-    }
-
-    return esValido;
-}
-
-function validarEncabezadoPedido(mostrarErrores) {
-    const campos = ['id_cliente', 'id_vendedor', 'fecha'];
-    const faltantes = [];
-    let primerCampo = null;
-
-    campos.forEach(function(campo) {
-        const valido = validarCampoCabecera(campo, mostrarErrores);
-        if (!valido) {
-            faltantes.push(campo === 'id_cliente' ? 'Cliente' : campo === 'id_vendedor' ? 'Vendedor' : 'Fecha');
-            primerCampo = primerCampo || campo;
-        }
-    });
-
-    return { valido: faltantes.length === 0, faltantes: faltantes, primerCampo: primerCampo };
-}
-
-function descripcionProducto(producto) {
-    const nombre = String(producto.nombre || producto.producto || '-');
-    const presentacion = [producto.presentacion, producto.medida]
-        .filter(function(valor) { return valor !== null && valor !== undefined && String(valor).trim() !== ''; })
-        .join(' ');
-
-    return presentacion ? nombre + ' (' + presentacion + ')' : nombre;
-}
-
-// -------------------------------------------------------------------------------------------------
-// Cargar datos para los selectores
-// -------------------------------------------------------------------------------------------------
-function cargarCombos() {
+function cargarClientes() {
     $.ajax({
         url: 'app/controllers/OrdenController.php',
         type: 'POST',
-        data: { action: 'clientes' },
-        dataType: 'json'
-    }).done(function(resp) {
-        if (resp && resp.success) {
-            let html = '<option value="">Seleccione un cliente</option>';
-            resp.data.forEach(function(c) {
-                html += '<option value="' + c.id + '">' + c.nombre + ' ' + c.apellido + '</option>';
-            });
-            $('#id_cliente').html(html);
-        } else {
-            mostrarMensajePedido(resp && resp.message ? resp.message : 'No se pudo cargar la lista de clientes.', 'error');
+        dataType: 'json',
+        data: { action: 'clientes' }
+    }).done(function(respuesta) {
+        if (!respuesta.success) {
+            mostrarToastErrorPedido(respuesta.message || 'No se pudieron cargar los clientes.');
+            return;
         }
-    }).fail(function(xhr, textStatus, errorThrown) {
-        console.error('AJAX error clientes:', textStatus, errorThrown);
-        mostrarMensajePedido('No se pudo conectar para cargar los clientes. Verifica tu conexión e inténtalo de nuevo.', 'error');
-    });
 
+        var opciones = '<option value="">Seleccione un cliente</option>';
+        $.each(respuesta.data, function(indice, cliente) {
+            opciones += '<option value="' + cliente.id + '">' +
+                escaparHtml(cliente.nombre + ' ' + cliente.apellido) + '</option>';
+        });
+        $('#id_cliente').html(opciones);
+    }).fail(function(xhr) {
+        mostrarErrorAjax(xhr, 'No se pudieron cargar los clientes.');
+    });
+}
+
+function cargarVendedores() {
     $.ajax({
         url: 'app/controllers/OrdenController.php',
         type: 'POST',
-        data: { action: 'vendedores' },
-        dataType: 'json'
-    }).done(function(resp) {
-        if (resp && resp.success) {
-            let html = '<option value="">Seleccione un vendedor</option>';
-            resp.data.forEach(function(v) {
-                html += '<option value="' + v.id + '">' + v.nombre + ' ' + v.apellido + '</option>';
-            });
-            $('#id_vendedor').html(html);
-        } else {
-            mostrarMensajePedido(resp && resp.message ? resp.message : 'No se pudo cargar la lista de vendedores.', 'error');
+        dataType: 'json',
+        data: { action: 'vendedores' }
+    }).done(function(respuesta) {
+        if (!respuesta.success) {
+            mostrarToastErrorPedido(respuesta.message || 'No se pudieron cargar los vendedores.');
+            return;
         }
-    }).fail(function(xhr, textStatus, errorThrown) {
-        console.error('AJAX error vendedores:', textStatus, errorThrown);
-        mostrarMensajePedido('No se pudo conectar para cargar los vendedores. Verifica tu conexión e inténtalo de nuevo.', 'error');
+
+        var opciones = '<option value="">Seleccione un vendedor</option>';
+        $.each(respuesta.data, function(indice, vendedor) {
+            opciones += '<option value="' + vendedor.id + '">' +
+                escaparHtml(vendedor.nombre + ' ' + vendedor.apellido) + '</option>';
+        });
+        $('#id_vendedor').html(opciones);
+    }).fail(function(xhr) {
+        mostrarErrorAjax(xhr, 'No se pudieron cargar los vendedores.');
     });
 }
 
@@ -195,373 +108,312 @@ function cargarProductos() {
     $.ajax({
         url: 'app/controllers/PedidoController.php',
         type: 'POST',
-        data: { action: 'productos' },
-        dataType: 'json'
-    }).done(function(resp) {
-        if (!resp || !resp.success) {
-            mostrarMensajePedido(resp && resp.message ? resp.message : 'No se pudo cargar la lista de productos.', 'error');
+        dataType: 'json',
+        data: { action: 'productos' }
+    }).done(function(respuesta) {
+        if (!respuesta.success) {
+            mostrarToastErrorPedido(respuesta.message || 'No se pudieron cargar los productos.');
             return;
         }
 
-        productosDisponibles = resp.data || [];
-        let html = '<option value="">Seleccione un producto</option>';
-        productosDisponibles.forEach(function(p) {
-            html += '<option value="' + p.id + '" data-precio="' + p.precio + '">' +
-                escapeHtml(descripcionProducto(p)) + '</option>';
+        productosDisponibles = respuesta.data;
+        var opciones = '<option value="">Seleccione un producto</option>';
+        $.each(productosDisponibles, function(indice, producto) {
+            var descripcion = producto.nombre;
+            if (producto.presentacion || producto.medida) {
+                descripcion += ' (' + [producto.presentacion, producto.medida].filter(Boolean).join(' ') + ')';
+            }
+            opciones += '<option value="' + producto.id + '">' + escaparHtml(descripcion) + '</option>';
         });
-        $('#id_producto').html(html);
-    }).fail(function(xhr, textStatus, errorThrown) {
-        console.error('AJAX error productos:', textStatus, errorThrown);
-        mostrarMensajePedido('No se pudo conectar para cargar los productos. Verifica tu conexión e inténtalo de nuevo.', 'error');
+        $('#id_producto').html(opciones);
+    }).fail(function(xhr) {
+        mostrarErrorAjax(xhr, 'No se pudieron cargar los productos.');
     });
 }
 
-function onProductoChange() {
-    const producto = productosDisponibles.find(function(p) {
-        return String(p.id) === String($('#id_producto').val());
-    });
-    $('#precio_unitario').val(producto ? producto.precio : 0);
-    if (producto) {
-        limpiarErrorCampo('id_producto');
-    } else if ($('#id_producto').data('pedido-tocado')) {
-        mostrarErrorCampo('id_producto', 'Selecciona el producto que deseas agregar.');
-    }
-}
-
-// -------------------------------------------------------------------------------------------------
-// Listar pedidos
-// -------------------------------------------------------------------------------------------------
 function listarPedidos() {
     $.ajax({
         url: 'app/controllers/PedidoController.php',
         type: 'POST',
-        data: { action: 'ordenes' },
-        dataType: 'json'
-    }).done(function(resp) {
-        if (!resp || !resp.success) {
-            $('#tablaPedidos').html('<tr><td colspan="8" style="text-align:center; color:#999">No se pudieron cargar los pedidos</td></tr>');
+        dataType: 'json',
+        data: { action: 'ordenes' }
+    }).done(function(respuesta) {
+        if (!respuesta.success) {
+            destruirTablaPedidos();
+            $('#tablaPedidos tbody').html('<tr><td colspan="8">No se pudieron cargar los pedidos.</td></tr>');
+            mostrarToastErrorPedido(respuesta.message || 'No se pudieron cargar los pedidos.');
             return;
         }
 
-        if (!resp.data || resp.data.length === 0) {
-            $('#tablaPedidos').html('<tr><td colspan="8" style="text-align:center; color:#999">No hay pedidos cargados aun</td></tr>');
-            return;
-        }
-
-        let html = '';
-        resp.data.forEach(function(p) {
-            const pendiente = Number(p.id_estatus) === 1;
-            const botonCambiarEstatus = pendiente
-                ? '<button class="btn btn-xs btn-success js-cambiar-estatus-pedido" title="Cambiar estatus" data-id="' + p.id + '"><i class="material-icons">sync_alt</i></button> '
+        pedidos = respuesta.data;
+        var filas = '';
+        $.each(pedidos, function(indice, pedido) {
+            var cambiarEstatus = Number(pedido.id_estatus) === 1
+                ? '<button type="button" class="btn bg-green btn-circle waves-effect waves-circle waves-float js-cambiar-estatus-pedido" title="Cambiar estatus" data-id="' + pedido.id + '">' +
+                    '<i class="material-icons">sync_alt</i></button> '
                 : '';
-            html += '<tr>' +
-                '<td>' + p.id + '</td>' +
-                '<td>' + (p.cliente || '-') + '</td>' +
-                '<td>' + (p.vendedor || '-') + '</td>' +
-                '<td>' + (p.fecha || '-') + '</td>' +
-                '<td>' + (p.productos || 0) + '</td>' +
-                '<td>' + money(p.total) + '</td>' +
-                '<td>' + (p.estatus || '-') + '</td>' +
-                '<td class="pedido-actions">' +
-                    botonCambiarEstatus +
-                    '<button class="btn btn-xs btn-warning js-editar-pedido" title="Editar pedido" data-id="' + p.id + '"><i class="material-icons">edit</i></button> ' +
-                    '<button class="btn btn-xs btn-danger js-eliminar-pedido" title="Eliminar" data-id="' + p.id + '"><i class="material-icons">delete</i></button>' +
-                '</td>' +
+
+            filas += '<tr>' +
+                '<td>' + escaparHtml(pedido.id) + '</td>' +
+                '<td>' + escaparHtml(pedido.cliente || '-') + '</td>' +
+                '<td>' + escaparHtml(pedido.vendedor || '-') + '</td>' +
+                '<td>' + escaparHtml(pedido.fecha || '-') + '</td>' +
+                '<td>' + escaparHtml(pedido.productos || 0) + '</td>' +
+                '<td>$' + escaparHtml(pedido.total || 0) + '</td>' +
+                '<td>' + escaparHtml(pedido.estatus || '-') + '</td>' +
+                '<td><div class="d-flex gap-2">' +
+                    cambiarEstatus +
+                    '<button type="button" class="btn bg-deep-orange btn-circle waves-effect waves-circle waves-float js-editar-pedido" title="Editar pedido" data-id="' + pedido.id + '">' +
+                        '<i class="material-icons">mode_edit</i></button> ' +
+                    '<button type="button" class="btn bg-red btn-circle waves-effect waves-circle waves-float js-eliminar-pedido" title="Eliminar pedido" data-id="' + pedido.id + '">' +
+                        '<i class="material-icons">delete</i></button>' +
+                '</div></td>' +
                 '</tr>';
         });
-        $('#tablaPedidos').html(html);
-    }).fail(function(xhr, textStatus, errorThrown) {
-        console.error('AJAX error listar pedidos:', textStatus, errorThrown);
-        const respuesta = xhr.responseJSON || {};
-        $('#tablaPedidos').html('<tr><td colspan="8" style="text-align:center; color:#999">No se pudieron cargar los pedidos.</td></tr>');
-        mostrarMensajePedido(respuesta.message || 'No se pudieron cargar los pedidos. Verifica tu conexión e inténtalo de nuevo.', 'error');
-    });
-}
-
-// -------------------------------------------------------------------------------------------------
-// Crear y limpiar pedido
-// -------------------------------------------------------------------------------------------------
-function abrirFormularioPedido() {
-    resetPedido();
-    $('#tituloFormularioPedido').text('Nuevo pedido');
-    $('#modalPedido').modal('show');
-}
-
-function resetPedido() {
-    $('#formPedido')[0].reset();
-    $('#id_pedido').val('');
-    $('#cantidad').val(1);
-    $('#precio_unitario').val(0);
-    $('#id_estatus').val('1');
-    $('#estatusPedidoTexto').text('Pendiente');
-    $('#fecha').val(new Date().toISOString().split('T')[0]);
-    $('#cantidad').removeClass('input-error input-success').data('tocado', false);
-    ['id_cliente', 'id_vendedor', 'fecha', 'id_producto', 'cantidad', 'detalle'].forEach(limpiarErrorCampo);
-    $('#id_producto').data('pedido-tocado', false);
-    $('#cantidad').removeAttr('aria-invalid');
-    $('#btnAgregarItem').prop('disabled', false);
-    detallePedido = [];
-    $('#tituloFormularioPedido').text('Encabezado del pedido');
-    renderDetalle();
-}
-
-function limpiarOCerrarPedido() {
-    resetPedido();
-}
-
-// -------------------------------------------------------------------------------------------------
-// Modificar pedido
-// -------------------------------------------------------------------------------------------------
-function cargarPedido(idPedido) {
-    resetPedido();
-    $('#id_pedido').val(idPedido);
-    $('#tituloFormularioPedido').text('Editar pedido');
-    $('#modalPedido').modal('show');
-
-    $.ajax({
-        url: 'app/controllers/PedidoController.php',
-        type: 'POST',
-        data: { action: 'ordenes' },
-        dataType: 'json'
-    }).done(function(resp) {
-        if (resp && resp.success && resp.data) {
-            const pedido = resp.data.find(function(item) { return String(item.id) === String(idPedido); });
-            if (pedido) {
-                $('#id_cliente').val(pedido.id_cliente || '');
-                $('#id_vendedor').val(pedido.id_vendedor || '');
-                $('#fecha').val(pedido.fecha || '');
-                $('#id_estatus').val(pedido.id_estatus || '1');
-                $('#estatusPedidoTexto').text(pedido.estatus || 'Pendiente');
+        destruirTablaPedidos();
+        $('#tablaPedidos tbody').html(filas);
+        $('#tablaPedidos').DataTable({
+            pageLength: 20,
+            order: [[0, 'desc']],
+            language: {
+                emptyTable: 'No hay pedidos registrados.',
+                info: 'Mostrando _START_ a _END_ de _TOTAL_ pedidos',
+                infoEmpty: 'Mostrando 0 a 0 de 0 pedidos',
+                infoFiltered: '(filtrado de _MAX_ pedidos en total)',
+                lengthMenu: 'Mostrar _MENU_ pedidos',
+                loadingRecords: 'Cargando...',
+                processing: 'Procesando...',
+                search: 'Buscar:',
+                zeroRecords: 'No se encontraron pedidos coincidentes',
+                paginate: {
+                    first: 'Primero',
+                    last: 'Último',
+                    next: 'Siguiente',
+                    previous: 'Anterior'
+                }
             }
-        }
-    }).fail(function(xhr, textStatus, errorThrown) {
-        console.error('AJAX error consultar pedido:', textStatus, errorThrown);
-        const respuesta = xhr.responseJSON || {};
-        mostrarMensajePedido(respuesta.message || 'No se pudo cargar el pedido seleccionado.', 'error');
+        });
+    }).fail(function(xhr) {
+        destruirTablaPedidos();
+        $('#tablaPedidos tbody').html('<tr><td colspan="8">No se pudieron cargar los pedidos.</td></tr>');
+        mostrarErrorAjax(xhr, 'No se pudieron cargar los pedidos.');
     });
+}
+
+function destruirTablaPedidos() {
+    if ($.fn.DataTable.isDataTable('#tablaPedidos')) {
+        $('#tablaPedidos').DataTable().destroy();
+    }
+}
+
+function nuevoPedido() {
+    $('#formPedido')[0].reset();
+    $('#formPedido').validate().resetForm();
+    $('#id_producto').rules('add', { required: true });
+    $('#id_pedido').val('');
+    $('#id_estatus').val('1');
+    var hoy = new Date();
+    var fecha = hoy.getFullYear() + '-' +
+        String(hoy.getMonth() + 1).padStart(2, '0') + '-' +
+        String(hoy.getDate()).padStart(2, '0');
+    $('#fecha').val(fecha);
+    detallePedido = [];
+    $('#tituloFormularioPedido').text('Nuevo pedido');
+    $('#precio_unitario').val('');
+    mostrarDetalle();
+    $('#modalPedido').modal('show');
+}
+
+function editarPedido(id) {
+    var pedido = pedidos.find(function(item) {
+        return String(item.id) === String(id);
+    });
+
+    if (!pedido) {
+        mostrarToastErrorPedido('No se encontró el pedido seleccionado. Actualiza la lista e inténtalo nuevamente.');
+        return;
+    }
+
+    $('#formPedido')[0].reset();
+    $('#formPedido').validate().resetForm();
+    $('#id_producto').rules('remove', 'required');
+    $('#id_pedido').val(pedido.id);
+    $('#id_cliente').val(pedido.id_cliente);
+    $('#id_vendedor').val(pedido.id_vendedor);
+    $('#fecha').val(pedido.fecha);
+    $('#id_estatus').val(pedido.id_estatus);
+    $('#tituloFormularioPedido').text('Editar pedido');
+    detallePedido = [];
+    mostrarDetalle();
+    $('#modalPedido').modal('show');
 
     $.ajax({
         url: 'app/controllers/PedidoController.php',
         type: 'POST',
-        data: { action: 'detalle', id_pedido: idPedido },
-        dataType: 'json'
-    }).done(function(resp) {
-        if (resp && resp.success) {
-            detallePedido = (resp.data || []).map(function(item) {
-                return {
-                    id_producto: item.id_producto,
-                    cantidad: parseInt(item.cantidad || 0, 10),
-                    precio_unitario: parseFloat(item.precio_unitario || 0),
-                    nombre: descripcionProducto({
-                        producto: item.producto,
-                        presentacion: item.presentacion,
-                        medida: item.medida
-                    })
-                };
+        dataType: 'json',
+        data: { action: 'detalle', id_pedido: id }
+    }).done(function(respuesta) {
+        if (!respuesta.success) {
+            mostrarToastErrorPedido(respuesta.message || 'No se pudo cargar el detalle del pedido.');
+            return;
+        }
+
+        detallePedido = [];
+        respuesta.data.forEach(function(item) {
+            var nombre = item.producto;
+            if (item.presentacion || item.medida) {
+                nombre += ' (' + [item.presentacion, item.medida].filter(Boolean).join(' ') + ')';
+            }
+            sumarProductoDetalle({
+                id_producto: item.id_producto,
+                cantidad: Number(item.cantidad),
+                precio_unitario: Number(item.precio_unitario),
+                nombre: nombre
             });
-            renderDetalle();
-        } else {
-            mostrarMensajePedido(resp && resp.message ? resp.message : 'No se pudieron cargar los productos del pedido.', 'error');
-        }
-    }).fail(function(xhr, textStatus, errorThrown) {
-        console.error('AJAX error detalle pedido:', textStatus, errorThrown);
-        const respuesta = xhr.responseJSON || {};
-        mostrarMensajePedido(respuesta.message || 'No se pudieron cargar los productos del pedido. Verifica tu conexión e inténtalo de nuevo.', 'error');
-    });
-}
-
-// -------------------------------------------------------------------------------------------------
-// Agregar productos al detalle
-// -------------------------------------------------------------------------------------------------
-function agregarItem() {
-    $('#id_producto').data('pedido-tocado', true);
-    const productoValido = productosDisponibles.some(function(producto) {
-        return String(producto.id) === String($('#id_producto').val());
-    });
-    if (!productoValido) {
-        mostrarErrorCampo('id_producto', 'Selecciona el producto que deseas agregar.');
-    } else {
-        limpiarErrorCampo('id_producto');
-    }
-
-    if (!validarCampoCantidad($('#cantidad')) || !productoValido) {
-        if (!productoValido) {
-            $('#id_producto').trigger('focus');
-        } else {
-            $('#cantidad').trigger('focus');
-        }
-        mostrarMensajePedido(!productoValido
-            ? 'Falta seleccionar el producto que deseas agregar.'
-            : 'Revisa la cantidad: debe ser un número entero mayor que cero.', 'error');
-        return;
-    }
-
-    const idProducto = $('#id_producto').val();
-    const cantidad = Number($('#cantidad').val());
-
-    const producto = productosDisponibles.find(function(p) {
-        return String(p.id) === String(idProducto);
-    });
-
-    const precio = parseFloat(producto ? producto.precio : 0) || 0;
-
-    const existente = detallePedido.find(function(item) {
-        return String(item.id_producto) === String(idProducto);
-    });
-
-    if (existente) {
-        existente.cantidad += cantidad;
-        existente.precio_unitario = precio;
-    } else {
-        detallePedido.push({
-            id_producto: idProducto,
-            cantidad: cantidad,
-            precio_unitario: precio,
-            nombre: producto ? producto.nombre : '-'
         });
-    }
-
-    renderDetalle();
-    limpiarErrorCampo('detalle');
-    $('#cantidad').val(1);
-    $('#cantidad').removeClass('input-error').addClass('input-success');
-    limpiarErrorCampo('cantidad');
-    $('#cantidad').data('tocado', false);
-    $('#btnAgregarItem').prop('disabled', false);
-    $('#id_producto').val('');
-    $('#precio_unitario').val(0);
-    $('#id_producto').data('pedido-tocado', false);
-    mostrarMensajePedido('Producto agregado al pedido.', 'success');
+        mostrarDetalle();
+    }).fail(function(xhr) {
+        mostrarErrorAjax(xhr, 'No se pudo cargar el detalle del pedido.');
+    });
 }
 
-// -------------------------------------------------------------------------------------------------
-// Validar y mostrar detalle
-// -------------------------------------------------------------------------------------------------
-function validarCampoCantidad(campo) {
-    const valor = campo.val();
-    const cantidad = Number(valor);
-    const esValida = valor !== '' && Number.isInteger(cantidad) && cantidad > 0;
-    const mostrarError = valor !== '' || campo.data('tocado');
-
-    if (esValida) {
-        campo.removeClass('input-error').addClass('input-success');
-        limpiarErrorCampo('cantidad');
-    } else if (mostrarError) {
-        campo.removeClass('input-success').addClass('input-error');
-        mostrarErrorCampo('cantidad', valor === ''
-            ? 'La cantidad es obligatoria.'
-            : 'La cantidad debe ser un número entero mayor que cero.');
-    } else {
-        campo.removeClass('input-error input-success');
-        limpiarErrorCampo('cantidad');
-    }
-
-    $('#btnAgregarItem').prop('disabled', !esValida);
-    return esValida;
+function actualizarPrecio() {
+    var producto = productosDisponibles.find(function(item) {
+        return String(item.id) === String($('#id_producto').val());
+    });
+    $('#precio_unitario').val(producto ? producto.precio : '');
 }
 
-function renderDetalle() {
-    if (!detallePedido.length) {
-        $('#tablaDetallePedido').html('<tr><td colspan="5" style="text-align:center; color:#999">Agregue productos al pedido</td></tr>');
-        return;
-    }
-
-    let html = '';
-    detallePedido.forEach(function(item, index) {
-        const subtotal = parseFloat(item.cantidad || 0) * parseFloat(item.precio_unitario || 0);
-        html += '<tr>' +
-            '<td>' + escapeHtml(item.nombre || '-') + '</td>' +
-            '<td>' + item.cantidad + '</td>' +
-            '<td>' + money(item.precio_unitario) + '</td>' +
-            '<td>' + money(subtotal) + '</td>' +
-            '<td><button class="btn btn-xs btn-danger js-eliminar-item" title="Eliminar" data-index="' + index + '"><i class="material-icons">delete</i></button></td>' +
-            '</tr>';
+function agregarItem() {
+    var idProducto = $('#id_producto').val();
+    var cantidad = Number($('#cantidad').val());
+    var producto = productosDisponibles.find(function(item) {
+        return String(item.id) === String(idProducto);
     });
 
-    $('#tablaDetallePedido').html(html);
-}
-
-// -------------------------------------------------------------------------------------------------
-// Eliminar producto del detalle
-// -------------------------------------------------------------------------------------------------
-function eliminarItem(index) {
-    detallePedido.splice(index, 1);
-    renderDetalle();
-}
-
-// -------------------------------------------------------------------------------------------------
-// Guardar pedido
-// -------------------------------------------------------------------------------------------------
-function guardarPedido() {
-    const encabezado = validarEncabezadoPedido(true);
-    if (!encabezado.valido) {
-        mostrarMensajePedido('Falta completar: ' + encabezado.faltantes.join(', ') + '.', 'error');
-        $('#' + encabezado.primerCampo).trigger('focus');
+    if (!producto) {
+        mostrarErrorValidacionPedido('id_producto', 'Selecciona un producto válido.');
         return;
     }
 
-    if (!detallePedido.length) {
-        mostrarErrorCampo('detalle', 'Agrega al menos un producto antes de guardar el pedido.');
-        mostrarMensajePedido('El pedido todavía no tiene productos.', 'error');
-        $('#id_producto').trigger('focus');
-        return;
-    } else {
-        limpiarErrorCampo('detalle');
+    var nombre = producto.nombre;
+    if (producto.presentacion || producto.medida) {
+        nombre += ' (' + [producto.presentacion, producto.medida].filter(Boolean).join(' ') + ')';
     }
-
-    const itemInvalido = detallePedido.find(function(item) {
-        return !Number.isInteger(Number(item.cantidad)) || Number(item.cantidad) <= 0;
-    });
-    if (itemInvalido) {
-        mostrarMensajePedido('Hay un producto con una cantidad inválida. Elimínalo y agrégalo nuevamente con una cantidad entera mayor que cero.', 'error');
-        return;
-    }
-
-    const datos = {
-        action: 'guardar',
-        id: $('#id_pedido').val(),
-        id_cliente: $('#id_cliente').val(),
-        id_vendedor: $('#id_vendedor').val(),
-        fecha: $('#fecha').val(),
-        id_estatus: $('#id_estatus').val(),
-        detalle: detallePedido
+    var productoDetalle = {
+        id_producto: producto.id,
+        cantidad: cantidad,
+        precio_unitario: Number(producto.precio),
+        nombre: nombre
     };
 
-    $('#btnGuardarPedido').prop('disabled', true).text('Guardando...');
-    $.ajax({
-        url: 'app/controllers/PedidoController.php',
-        type: 'POST',
-        data: datos,
-        dataType: 'json'
-    }).done(function(res) {
-        if (res && res.success) {
-            $('#modalPedido').modal('hide');
-            resetPedido();
-            listarPedidos();
-            mostrarMensajePedido(res.message || 'Pedido guardado correctamente.', 'success');
-        } else {
-            mostrarMensajePedido(res && res.message ? res.message : 'No se pudo guardar el pedido. Revisa los datos e inténtalo nuevamente.', 'error');
-        }
-    }).fail(function(xhr, textStatus, errorThrown) {
-        console.error('AJAX error guardar pedido:', textStatus, errorThrown);
-        const respuesta = xhr.responseJSON || {};
-        mostrarMensajePedido(respuesta.message || 'No se pudo comunicar con el servidor. Verifica tu conexión e inténtalo de nuevo.', 'error');
-    }).always(function() {
-        $('#btnGuardarPedido').prop('disabled', false).text('Guardar pedido');
+    if (!sumarProductoDetalle(productoDetalle)) {
+        mostrarErrorValidacionPedido('cantidad', 'La cantidad total del producto no puede superar ' + cantidadMaxima + '.');
+        return;
+    }
+
+    $('#cantidad').val('1');
+    mostrarDetalle();
+    showToast.success('Producto agregado al pedido.', {
+        position: 'top-right',
+        duration: 2000
     });
 }
 
-// -------------------------------------------------------------------------------------------------
-// Eliminar pedido
-// -------------------------------------------------------------------------------------------------
-function eliminarPedido(idPedido) {
+function sumarProductoDetalle(producto) {
+    if (!Number.isSafeInteger(producto.cantidad) ||
+        producto.cantidad <= 0 ||
+        producto.cantidad > cantidadMaxima) {
+        return false;
+    }
+
+    var existente = detallePedido.find(function(item) {
+        return String(item.id_producto) === String(producto.id_producto);
+    });
+
+    if (!existente) {
+        detallePedido.push(producto);
+        return true;
+    }
+
+    var cantidadTotal = existente.cantidad + producto.cantidad;
+    if (!Number.isSafeInteger(cantidadTotal) || cantidadTotal > cantidadMaxima) {
+        return false;
+    }
+
+    var subtotal = existente.cantidad * existente.precio_unitario +
+        producto.cantidad * producto.precio_unitario;
+    existente.cantidad = cantidadTotal;
+    existente.precio_unitario = subtotal / cantidadTotal;
+    return true;
+}
+
+function mostrarDetalle() {
+    if (!detallePedido.length) {
+        $('#tablaDetallePedido').html('<tr><td colspan="5">Agrega productos al pedido.</td></tr>');
+        return;
+    }
+
+    var filas = '';
+    $.each(detallePedido, function(indice, item) {
+        var subtotal = item.cantidad * item.precio_unitario;
+        filas += '<tr>' +
+            '<td>' + escaparHtml(item.nombre) + '</td>' +
+            '<td>' + item.cantidad + '</td>' +
+            '<td>$' + item.precio_unitario + '</td>' +
+            '<td>$' + subtotal.toFixed(2) + '</td>' +
+            '<td><button type="button" class="btn bg-red btn-circle waves-effect waves-circle waves-float js-eliminar-item" title="Eliminar producto" data-index="' + indice + '">' +
+                '<i class="material-icons">delete</i></button></td>' +
+            '</tr>';
+    });
+    $('#tablaDetallePedido').html(filas);
+}
+
+function eliminarItem(indice) {
+    detallePedido.splice(indice, 1);
+    mostrarDetalle();
+}
+
+function guardarPedido() {
+    $('#btnGuardarPedido').prop('disabled', true);
+    $.ajax({
+        url: 'app/controllers/PedidoController.php',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            action: 'guardar',
+            id: $('#id_pedido').val(),
+            id_cliente: $('#id_cliente').val(),
+            id_vendedor: $('#id_vendedor').val(),
+            fecha: $('#fecha').val(),
+            id_estatus: $('#id_estatus').val(),
+            detalle: detallePedido
+        }
+    }).done(function(respuesta) {
+        if (!respuesta.success) {
+            mostrarToastErrorPedido(respuesta.message || 'No se pudo guardar el pedido.');
+            return;
+        }
+
+        $('#modalPedido').modal('hide');
+        listarPedidos();
+        showToast.success(respuesta.message || 'Pedido guardado correctamente.', {
+            position: 'top-right',
+            duration: 2000
+        });
+    }).fail(function(xhr) {
+        mostrarErrorAjax(xhr, 'No se pudo guardar el pedido.');
+    }).always(function() {
+        $('#btnGuardarPedido').prop('disabled', false);
+    });
+}
+
+function eliminarPedido(id) {
     Swal.fire({
         title: '¿Eliminar este pedido?',
         text: 'Se eliminarán también los productos asociados. Esta acción no se puede deshacer.',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
         confirmButtonText: 'Sí, eliminar',
         cancelButtonText: 'Cancelar'
     }).then(function(resultado) {
@@ -572,31 +424,27 @@ function eliminarPedido(idPedido) {
         $.ajax({
             url: 'app/controllers/PedidoController.php',
             type: 'POST',
-            data: { action: 'eliminar', id: idPedido },
-            dataType: 'json'
-        }).done(function(res) {
-            if (res && res.success) {
-                listarPedidos();
-                mostrarMensajePedido(res.message || 'Pedido eliminado correctamente.', 'success');
-            } else {
-                mostrarMensajePedido(res && res.message ? res.message : 'No se pudo eliminar el pedido.', 'error');
+            dataType: 'json',
+            data: { action: 'eliminar', id: id }
+        }).done(function(respuesta) {
+            if (!respuesta.success) {
+                mostrarToastErrorPedido(respuesta.message || 'No se pudo eliminar el pedido.');
+                return;
             }
-        }).fail(function(xhr, textStatus, errorThrown) {
-            console.error('AJAX error eliminar pedido:', textStatus, errorThrown);
-            const respuesta = xhr.responseJSON || {};
-            mostrarMensajePedido(respuesta.message || 'No se pudo comunicar con el servidor al eliminar el pedido.', 'error');
+            listarPedidos();
+            showToast.success(respuesta.message || 'Pedido eliminado correctamente.', {
+                position: 'top-right',
+                duration: 2000
+            });
+        }).fail(function(xhr) {
+            mostrarErrorAjax(xhr, 'No se pudo eliminar el pedido.');
         });
     });
 }
 
-// -------------------------------------------------------------------------------------------------
-// Cambiar estatus
-// -------------------------------------------------------------------------------------------------
-function cambiarEstatusPedido(idPedido) {
+function cambiarEstatusPedido(id) {
     Swal.fire({
         title: 'Cambiar estatus del pedido',
-        text: 'Selecciona el nuevo estatus:',
-        icon: 'question',
         input: 'select',
         inputOptions: {
             2: 'Entregado/Listo',
@@ -605,53 +453,33 @@ function cambiarEstatusPedido(idPedido) {
         inputPlaceholder: 'Seleccione un estatus',
         showCancelButton: true,
         confirmButtonText: 'Cambiar estatus',
-        cancelButtonText: 'Cancelar',
-        inputValidator: function(value) {
-            return value ? undefined : 'Selecciona un estatus para continuar.';
-        }
+        cancelButtonText: 'Cancelar'
     }).then(function(resultado) {
-        if (!resultado.isConfirmed) {
+        if (!resultado.isConfirmed || !resultado.value) {
             return;
         }
 
         $.ajax({
             url: 'app/controllers/PedidoController.php',
             type: 'POST',
+            dataType: 'json',
             data: {
                 action: 'cambiarEstatus',
-                id: idPedido,
+                id: id,
                 id_estatus: resultado.value
-            },
-            dataType: 'json'
-        }).done(function(respuesta) {
-            if (respuesta && respuesta.success) {
-                if (Number($('#id_pedido').val()) === idPedido) {
-                    $('#id_estatus').val(resultado.value);
-                    $('#estatusPedidoTexto').text(resultado.value === '2' ? 'Entregado/Listo' : 'Cancelado');
-                }
-                listarPedidos();
-                Swal.fire({
-                    icon: 'success',
-                    title: '¡Excelente!',
-                    text: respuesta.message || 'Estatus del pedido actualizado.',
-                    showConfirmButton: false,
-                    timer: 2000
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: respuesta && respuesta.message ? respuesta.message : 'No se pudo cambiar el estatus.'
-                });
             }
-        }).fail(function(xhr, textStatus, errorThrown) {
-            console.error('AJAX error cambiar estatus:', textStatus, errorThrown);
-            const respuesta = xhr.responseJSON || {};
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: respuesta.message || 'No se pudo cambiar el estatus.'
+        }).done(function(respuesta) {
+            if (!respuesta.success) {
+                mostrarToastErrorPedido(respuesta.message || 'No se pudo cambiar el estatus.');
+                return;
+            }
+            listarPedidos();
+            showToast.success(respuesta.message || 'Estatus actualizado correctamente.', {
+                position: 'top-right',
+                duration: 2000
             });
+        }).fail(function(xhr) {
+            mostrarErrorAjax(xhr, 'No se pudo cambiar el estatus.');
         });
     });
 }
