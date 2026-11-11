@@ -11,7 +11,7 @@
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="material-icons">badge</i></span>
                                 <div class="form-line">
-                                    <input type="text" class="form-control" placeholder="Cédula" id="cedula" maxlength="20" inputmode="numeric" autocomplete="off">
+                                    <input type="text" class="form-control" placeholder="Cédula" id="cedula" name="cedula" maxlength="20" inputmode="numeric" autocomplete="off">
                                 </div>
                             </div>
                         </div>
@@ -19,7 +19,7 @@
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="material-icons">person</i></span>
                                 <div class="form-line">
-                                    <input type="text" class="form-control" placeholder="Nombre" id="nombre" autocomplete="given-name">
+                                    <input type="text" class="form-control" placeholder="Nombre" id="nombre" name="nombre" autocomplete="given-name">
                                 </div>
                             </div>
                         </div>
@@ -27,7 +27,7 @@
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="material-icons">person_outline</i></span>
                                 <div class="form-line">
-                                    <input type="text" class="form-control" placeholder="Apellido" id="apellido" autocomplete="family-name">
+                                    <input type="text" class="form-control" placeholder="Apellido" id="apellido" name="apellido" autocomplete="family-name">
                                 </div>
                             </div>
                         </div>
@@ -37,7 +37,7 @@
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="material-icons">wc</i></span>
                                 <div class="form-line">
-                                    <select class="form-control" id="sexo">
+                                    <select class="form-control" id="sexo" name="sexo">
                                         <option value="">-- Seleccione Sexo --</option>
                                         <option value="Masculino">Masculino</option>
                                         <option value="Femenino">Femenino</option>
@@ -52,7 +52,7 @@
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="material-icons">location_city</i></span>
                                 <div class="form-line">
-                                    <select class="form-control" id="id_ciudad">
+                                    <select class="form-control" id="id_ciudad" name="id_ciudad">
                                         <option value="">-- Seleccione Ciudad --</option>
                                     </select>
                                 </div>
@@ -62,7 +62,7 @@
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="material-icons">home</i></span>
                                 <div class="form-line">
-                                    <input type="text" class="form-control" placeholder="Dirección" id="direccion" maxlength="100">
+                                    <input type="text" class="form-control" placeholder="Dirección" id="direccion" name="direccion" maxlength="100">
                                 </div>
                             </div>
                         </div>
@@ -110,7 +110,7 @@
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="material-icons">badge</i></span>
                                 <div class="form-line">
-                                    <input type="text" class="form-control" placeholder="Cédula" id="cedulaEditar" maxlength="20" inputmode="numeric" autocomplete="off">
+                                    <input type="text" class="form-control" placeholder="Cédula" id="cedulaEditar" name="cedula" maxlength="20" inputmode="numeric" autocomplete="off">
                                 </div>
                             </div>
                         </div>
@@ -118,7 +118,7 @@
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="material-icons">person</i></span>
                                 <div class="form-line">
-                                    <input type="text" class="form-control" placeholder="Nombre" id="nombreEditar" autocomplete="given-name">
+                                    <input type="text" class="form-control" placeholder="Nombre" id="nombreEditar" name="nombre" autocomplete="given-name">
                                 </div>
                             </div>
                         </div>
@@ -126,7 +126,7 @@
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="material-icons">person_outline</i></span>
                                 <div class="form-line">
-                                    <input type="text" class="form-control" placeholder="Apellido" id="apellidoEditar" autocomplete="family-name">
+                                    <input type="text" class="form-control" placeholder="Apellido" id="apellidoEditar" name="apellido" autocomplete="family-name">
                                 </div>
                             </div>
                         </div>
@@ -136,7 +136,7 @@
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="material-icons">wc</i></span>
                                 <div class="form-line">
-                                    <select class="form-control" id="sexoEditar">
+                                    <select class="form-control" id="sexoEditar" name="sexo">
                                         <option value="">-- Seleccione Sexo --</option>
                                         <option value="Masculino">Masculino</option>
                                         <option value="Femenino">Femenino</option>
@@ -151,7 +151,7 @@
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="material-icons">location_city</i></span>
                                 <div class="form-line">
-                                    <select class="form-control" id="id_ciudadEditar">
+                                    <select class="form-control" id="id_ciudadEditar" name="id_ciudad">
                                         <option value="">-- Seleccione Ciudad --</option>
                                     </select>
                                 </div>
@@ -161,7 +161,7 @@
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="material-icons">home</i></span>
                                 <div class="form-line">
-                                    <input type="text" class="form-control" placeholder="Dirección" id="direccionEditar" maxlength="100">
+                                    <input type="text" class="form-control" placeholder="Dirección" id="direccionEditar" name="direccion" maxlength="100">
                                 </div>
                             </div>
                         </div>
@@ -204,14 +204,14 @@
                 <form id="formCiudad">
                     <div class="form-group">
                         <label>Estado</label>
-                        <select class="form-control" id="id_estado_mod"></select>
+                        <select class="form-control" id="id_estado_mod" name="id_estado"></select>
                         <button type="button" class="btn btn-xs btn-info waves-effect" data-toggle="modal" data-target="#modalEstado" style="margin-top: 5px;">
                             <i class="material-icons" style="font-size: 14px;">add</i> Crear Nuevo Estado
                         </button>
                     </div>
                     <div class="form-group">
                         <label>Municipio</label>
-                        <select class="form-control" id="id_municipio_mod">
+                        <select class="form-control" id="id_municipio_mod" name="id_municipio">
                             <option value="">-- Seleccione un Estado Primero --</option>
                         </select>
                         <button type="button" class="btn btn-xs btn-info waves-effect" data-toggle="modal" data-target="#modalMunicipio" style="margin-top: 5px;">
@@ -221,7 +221,7 @@
                     <div class="form-group">
                         <label>Nombre de la Ciudad</label>
                         <div class="form-line">
-                            <input type="text" class="form-control" id="nombre_ciudad_mod" placeholder="Ej. Barquisimeto">
+                            <input type="text" class="form-control" id="nombre_ciudad_mod" name="nombre_ciudad" placeholder="Ej. Barquisimeto">
                         </div>
                     </div>
                 </form>
@@ -246,17 +246,17 @@
                     
                     <div class="form-group">
                         <label>Estado</label>
-                        <select class="form-control" id="id_estado_edit_mod"></select>
+                        <select class="form-control" id="id_estado_edit_mod" name="id_estado"></select>
                     </div>
                     <div class="form-group">
                         <label>Municipio</label>
-                        <select class="form-control" id="id_municipio_edit_mod"></select>
+                        <select class="form-control" id="id_municipio_edit_mod" name="id_municipio"></select>
                     </div>
 
                     <div class="form-group">
                         <label>Nombre de la Ciudad</label>
                         <div class="form-line">
-                            <input type="text" class="form-control" id="nombre_ciudad_edit_mod">
+                            <input type="text" class="form-control" id="nombre_ciudad_edit_mod" name="nombre_ciudad">
                         </div>
                     </div>
                 </form>
@@ -276,12 +276,14 @@
                 <h4 class="modal-title">Nuevo Estado</h4>
             </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label>Nombre del Estado</label>
-                    <div class="form-line">
-                        <input type="text" class="form-control" id="nombre_estado_nuevo">
+                <form id="formEstado">
+                    <div class="form-group">
+                        <label>Nombre del Estado</label>
+                        <div class="form-line">
+                            <input type="text" class="form-control" id="nombre_estado_nuevo" name="nombre">
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-success waves-effect" id="btnGuardarEstadoExpress">Guardar</button>
@@ -298,16 +300,18 @@
                 <h4 class="modal-title">Nuevo Municipio</h4>
             </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label>Seleccione el Estado</label>
-                    <select class="form-control" id="id_estado_muni_nuevo"></select>
-                </div>
-                <div class="form-group">
-                    <label>Nombre del Municipio</label>
-                    <div class="form-line">
-                        <input type="text" class="form-control" id="nombre_municipio_nuevo">
+                <form id="formMunicipio">
+                    <div class="form-group">
+                        <label>Seleccione el Estado</label>
+                        <select class="form-control" id="id_estado_muni_nuevo" name="id_estado"></select>
                     </div>
-                </div>
+                    <div class="form-group">
+                        <label>Nombre del Municipio</label>
+                        <div class="form-line">
+                            <input type="text" class="form-control" id="nombre_municipio_nuevo" name="nombre">
+                        </div>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-success waves-effect" id="btnGuardarMunicipioExpress">Guardar</button>

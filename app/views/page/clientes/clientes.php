@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="public/css/home.css">
 <style>
-    .cliente-campo-error {
+    .txt-error {
         display: none;
         color: #f44336;
         font-size: 12px;

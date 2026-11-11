@@ -11,7 +11,7 @@
                                     <i class="material-icons">shopping_basket</i>
                                 </span>
                                 <div class="form-line">
-                                    <input type="text" class="form-control" placeholder="Nombre" id="nombre">
+                                    <input type="text" class="form-control" placeholder="Nombre" id="nombre" name="nombre">
                                 </div>
                             </div>
                         </div>
@@ -22,7 +22,7 @@
                                     <i class="material-icons">list</i>
                                 </span>
                                 <div class="form-line">
-                                    <select class="form-control" id="id_linea">
+                                    <select class="form-control" id="id_linea" name="id_linea">
                                         <option value="">-- Seleccione Línea --</option>
                                     </select>
                                 </div>
@@ -35,7 +35,7 @@
                                     <i class="material-icons">line_weight</i>
                                 </span>
                                 <div class="form-line">
-                                    <select class="form-control" id="presentacion">
+                                    <select class="form-control" id="presentacion" name="presentacion">
                                         <option value="">-- Seleccione Presentación --</option>
                                     </select>
                                 </div>
@@ -48,7 +48,7 @@
                                     <i class="material-icons">straighten</i>
                                 </span>
                                 <div class="form-line">
-                                    <select class="form-control" id="id_medida">
+                                    <select class="form-control" id="id_medida" name="id_medida">
                                         <option value="">-- Unidad de Medida --</option>
                                     </select>
                                 </div>
@@ -61,7 +61,7 @@
                                     <i class="material-icons">attach_money</i>
                                 </span>
                                 <div class="form-line">
-                                    <input type="number" step="0.01" class="form-control" placeholder="Precio" id="precio">
+                                    <input type="number" step="any" class="form-control" placeholder="Precio" id="precio" name="precio">
                                 </div>
                             </div>
                         </div>
@@ -96,7 +96,7 @@
                                     <i class="material-icons">shopping_basket</i>
                                 </span>
                                 <div class="form-line">
-                                    <input type="text" class="form-control" placeholder="Nombre" id="nombreEditar">
+                                    <input type="text" class="form-control" placeholder="Nombre" id="nombreEditar" name="nombre">
                                 </div>
                             </div>
                         </div>
@@ -107,7 +107,7 @@
                                     <i class="material-icons">list</i>
                                 </span>
                                 <div class="form-line">
-                                    <select class="form-control" id="id_lineaEditar">
+                                    <select class="form-control" id="id_lineaEditar" name="id_linea">
                                         <option value="">-- Seleccione Línea --</option>
                                     </select>
                                 </div>
@@ -120,7 +120,7 @@
                                     <i class="material-icons">line_weight</i>
                                 </span>
                                 <div class="form-line">
-                                    <select class="form-control" id="presentacionEditar">
+                                    <select class="form-control" id="presentacionEditar" name="presentacion">
                                         <option value="">-- Seleccione Presentación --</option>
                                     </select>
                                 </div>
@@ -135,7 +135,7 @@
                                     <i class="material-icons">straighten</i>
                                 </span>
                                 <div class="form-line">
-                                    <select class="form-control" id="id_medidaEditar">
+                                    <select class="form-control" id="id_medidaEditar" name="id_medida">
                                         <option value="">-- Unidad de Medida --</option>
                                     </select>
                                 </div>
@@ -148,7 +148,7 @@
                                     <i class="material-icons">attach_money</i>
                                 </span>
                                 <div class="form-line">
-                                    <input type="number" step="0.01" class="form-control" placeholder="Precio" id="precioEditar">
+                                    <input type="number" step="any" class="form-control" placeholder="Precio" id="precioEditar" name="precio">
                                 </div>
                             </div>
                         </div>
@@ -184,7 +184,7 @@
                                     <i class="material-icons">list</i>
                                 </span>
                                 <div class="form-line">
-                                    <select class="form-control" id="id_subcategoria">
+                                    <select class="form-control" id="id_subcategoria" name="id_subcategoria">
                                         <option value="">-- Seleccione Línea --</option>
                                     </select>
                                 </div>
@@ -197,7 +197,7 @@
                                     <i class="material-icons">shopping_basket</i>
                                 </span>
                                 <div class="form-line">
-                                    <input type="text" class="form-control" placeholder="Nombre" id="nombrePresentacion">
+                                    <input type="text" class="form-control" placeholder="Nombre" id="nombrePresentacion" name="nombre">
                                 </div>
                             </div>
                         </div>
@@ -222,8 +222,8 @@
                 <h4 class="modal-title" id="defaultModalLabel"> Editar Categoria </h4>
             </div>
             <div class="modal-body">
-                <form id="formularioEditar">
-                    <input type="hidden" id="idLinea">
+                <form id="formEditarSubcategoria">
+                    <input type="hidden" id="idLinea" name="idLinea">
 
                     <div class="row">
 
@@ -235,7 +235,7 @@
                                     <i class="material-icons">list</i>
                                 </span>
                                 <div class="form-line">
-                                    <select class="form-control" id="id_subcategoriaEditar">
+                                    <select class="form-control" id="id_subcategoriaEditar" name="id_subcategoria">
                                         <option value="">-- Seleccione Línea --</option>
                                     </select>
                                 </div>
@@ -248,7 +248,7 @@
                                     <i class="material-icons">shopping_basket</i>
                                 </span>
                                 <div class="form-line">
-                                    <input type="text" class="form-control" placeholder="Nombre" id="nombreEditarSubcategoria">
+                                    <input type="text" class="form-control" placeholder="Nombre" id="nombreEditarSubcategoria" name="nombre">
                                 </div>
                             </div>
                         </div>

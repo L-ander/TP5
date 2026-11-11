@@ -10,7 +10,175 @@ $(document).ready(function() {
             $('a[href="' + pestaña + '"]').tab('show');
         }
     }
+
+
+
+
+var formularioProducto = $('#formulario');
+formularioProducto.validate({
+        rules: {
+            nombre: {
+                required: true,
+                maxlength: 255
+            },
+            id_linea: {
+                required: true
+            },
+            presentacion: {
+                required: true
+            },
+            id_medida: {
+                required: true
+            },
+            precio: {
+                required: true,
+                number: true,
+                min: 0
+            }
+        },
+        messages: {
+            nombre: {
+                required: 'El campo nombre del producto no puede estar vacío.',
+                maxlength: 'El nombre es demasiado largo.'
+            },
+            id_linea: {
+                required: 'Debe seleccionar una línea de producto.'
+            },
+            presentacion: {
+                required: 'Debe seleccionar una presentación.'
+            },
+            id_medida: {
+                required: 'Debe seleccionar una unidad de medida.'
+            },
+            precio: {
+                required: 'El precio del producto no puede estar vacío.',
+                number: 'Ingrese un número válido.',
+                min: 'El precio no puede ser un número negativo.'
+            }
+        },
+        errorElement: 'small',
+        errorClass: 'txt-error',
+        highlight: function(element) {
+            var linea = $(element).closest('.form-line');
+            if (linea.length === 0) {
+                linea = $(element).closest('.input-group').find('.form-line');
+            }
+            linea.css('border-bottom', '2px solid #F44336');
+        },
+        unhighlight: function(element) {
+            var linea = $(element).closest('.form-line');
+            if (linea.length === 0) {
+                linea = $(element).closest('.input-group').find('.form-line');
+            }
+            linea.css('border-bottom', '2px solid #4CAF50');
+        },
+        errorPlacement: function(error, element) {
+            error.css({
+                color: '#F44336',
+                display: 'block',
+                marginTop: '5px'
+            });
+            var linea = element.closest('.form-line');
+            if (linea.length === 0) {
+                linea = element.closest('.input-group').find('.form-line');
+            }
+            error.insertAfter(linea);
+        },
+        submitHandler: function(form) {
+            crear();
+        }
+    });
+
+    var formularioEditarProducto = $('#modalEditarProducto form');
+    formularioEditarProducto.validate({
+        rules: {
+            nombre: {
+                required: true,
+                maxlength: 255
+            },
+            id_linea: {
+                required: true
+            },
+            presentacion: {
+                required: true
+            },
+            id_medida: {
+                required: true
+            },
+            precio: {
+                required: true,
+                number: true,
+                min: 0
+            }
+        },
+        messages: {
+            nombre: {
+                required: 'El campo nombre del producto no puede estar vacío.'
+            },
+            id_linea: {
+                required: 'Debe seleccionar una línea de producto.'
+            },
+            presentacion: {
+                required: 'Debe seleccionar una presentación.'
+            },
+            id_medida: {
+                required: 'Debe seleccionar una unidad de medida.'
+            },
+            precio: {
+                required: 'El precio del producto no puede estar vacío.',
+                number: 'Ingrese un número válido.',
+                min: 'El precio no puede ser negativo.'
+            }
+        },
+        errorElement: 'small',
+        errorClass: 'txt-error',
+        highlight: function(element) {
+            var linea = $(element).closest('.form-line');
+            if (linea.length === 0) {
+                linea = $(element).closest('.input-group').find('.form-line');
+            }
+            linea.css('border-bottom', '2px solid #F44336');
+        },
+        unhighlight: function(element) {
+            var linea = $(element).closest('.form-line');
+            if (linea.length === 0) {
+                linea = $(element).closest('.input-group').find('.form-line');
+            }
+            linea.css('border-bottom', '2px solid #4CAF50');
+        },
+        errorPlacement: function(error, element) {
+            error.css({
+                color: '#F44336',
+                display: 'block',
+                marginTop: '5px'
+            });
+            var linea = element.closest('.form-line');
+            if (linea.length === 0) {
+                linea = element.closest('.input-group').find('.form-line');
+            }
+            error.insertAfter(linea);
+        },
+        submitHandler: function(form) {
+            editar();
+        }
+    });
+
+    $('#modalEditarProducto').on('hidden.bs.modal', function() {
+        var formulario = $(this).find('form');
+        var validador = formulario.data('validator');
+
+        if (validador) {
+            validador.resetForm();
+        }
+
+        formulario.find('.txt-error').remove();
+        formulario.find('.form-line').css('border-bottom', '');
+    });
+
 });
+
+
+
 
 // -------------------------------------------------------------------------------------------------
 // listar
@@ -63,14 +231,19 @@ function listar() {
 //animacion guardar
 
 function mostrarExitoProducto(mensaje) {
-    Swal.fire({
-        icon: 'success',
-        title: '¡Excelente!',
+    $.toast({
+        heading: 'Éxito',
         text: mensaje,
-        showConfirmButton: false,
-        timer: 2000
+        showHideTransition: 'slide',
+        icon: 'success',
+        position: 'top-right',
+        bgColor: '#6ad86a',
+        textColor: '#ffffff'
     });
 }
+
+
+
 
 
 //animacion eliminar
@@ -93,12 +266,14 @@ function confirmarEliminacion(id, nombreProducto) {
 }
 
 function mostrarErrorProducto(mensaje) {
-    Swal.fire({
-        icon: 'error',
-        title: '¡Ops!',
+    $.toast({
+        heading: 'Error',
         text: mensaje,
-        confirmButtonColor: '#d33',
-        confirmButtonText: 'Entendido'
+        showHideTransition: 'slide',
+        icon: 'error',
+        position: 'top-right',
+        bgColor: '#e74d4d',
+        textColor: '#fffdfd'
     });
 }
 
@@ -108,6 +283,11 @@ function mostrarErrorProducto(mensaje) {
 // crear
 // -------------------------------------------------------------------------------------------------
 $('#guardar').on('click', function() {
+    if (!$('#formulario').valid()) {
+        mostrarErrorProducto('Completa todos los campos solicitados.');
+        return;
+    }
+
     crear();
 });
 
@@ -292,6 +472,11 @@ $(document).on('click', 'button.boton-update', function() {
 });
 
 $('#editar').on('click', function() {
+    if (!$('#modalEditarProducto form').valid()) {
+        mostrarErrorProducto('Completa todos los campos solicitados.');
+        return;
+    }
+
     editar();
 });
 
