@@ -1,11 +1,5 @@
 <?php
 
-    # _____________ Configuracion de rutas del sistema ________________________
-    # accion recibida por $_GET['action']
-    #
-    # Los roles con acceso a cada ruta se leen de la base de datos (tabla permisos).
-    # El rol 1 (administrador) SIEMPRE tiene acceso a todo, para no quedarse bloqueado.
-    # Las rutas con 'roles' => [1] son solo del administrador (no dependen de un módulo).
 
 require_once __DIR__ . '/conex.php';
 
