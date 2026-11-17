@@ -2,8 +2,35 @@ var pedidos = [];
 var productosDisponibles = [];
 var detallePedido = [];
 var cantidadMaxima = 1000000;
+var miTabla;
 
 $(function() {
+    miTabla = $('#tablaPedidos').DataTable({
+        paging: true,
+        searching: true,
+        ordering: true,
+        info: true,
+        order: [[0, 'desc']],
+        lengthMenu: [5, 25, 50, 100],
+        language: {
+            emptyTable: 'No hay pedidos registrados.',
+            info: 'Mostrando _START_ a _END_ de _TOTAL_ pedidos',
+            infoEmpty: 'Mostrando 0 a 0 de 0 pedidos',
+            infoFiltered: '(filtrado de _MAX_ pedidos en total)',
+            lengthMenu: 'Mostrar _MENU_ pedidos',
+            loadingRecords: 'Cargando...',
+            processing: 'Procesando...',
+            search: 'Buscar:',
+            zeroRecords: 'No se encontraron pedidos coincidentes',
+            paginate: {
+                first: 'Primero',
+                last: 'Último',
+                next: 'Siguiente',
+                previous: 'Anterior'
+            }
+        }
+    });
+
     cargarClientes();
     cargarVendedores();
     cargarProductos();
@@ -131,81 +158,75 @@ function cargarProductos() {
     });
 }
 
+// -------------------------------------------------------------------------------------------------
+// listar
+// -------------------------------------------------------------------------------------------------
 function listarPedidos() {
     $.ajax({
         url: 'app/controllers/PedidoController.php',
         type: 'POST',
         dataType: 'json',
-        data: { action: 'ordenes' }
-    }).done(function(respuesta) {
-        if (!respuesta.success) {
-            destruirTablaPedidos();
-            $('#tablaPedidos tbody').html('<tr><td colspan="8">No se pudieron cargar los pedidos.</td></tr>');
-            mostrarToastErrorPedido(respuesta.message || 'No se pudieron cargar los pedidos.');
-            return;
-        }
-
-        pedidos = respuesta.data;
-        var filas = '';
-        $.each(pedidos, function(indice, pedido) {
-            var cambiarEstatus = Number(pedido.id_estatus) === 1
-                ? '<button type="button" class="btn bg-green btn-circle waves-effect waves-circle waves-float js-cambiar-estatus-pedido" title="Cambiar estatus" data-id="' + pedido.id + '">' +
-                    '<i class="material-icons">sync_alt</i></button> '
-                : '';
-
-            filas += '<tr>' +
-                '<td>' + escaparHtml(pedido.id) + '</td>' +
-                '<td>' + escaparHtml(pedido.cliente || '-') + '</td>' +
-                '<td>' + escaparHtml(pedido.vendedor || '-') + '</td>' +
-                '<td>' + escaparHtml(pedido.fecha || '-') + '</td>' +
-                '<td>' + escaparHtml(pedido.productos || 0) + '</td>' +
-                '<td>$' + escaparHtml(pedido.total || 0) + '</td>' +
-                '<td>' + escaparHtml(pedido.estatus || '-') + '</td>' +
-                '<td><div class="d-flex gap-2">' +
-                    cambiarEstatus +
-                    '<button type="button" class="btn bg-deep-orange btn-circle waves-effect waves-circle waves-float js-editar-pedido" title="Editar pedido" data-id="' + pedido.id + '">' +
-                        '<i class="material-icons">mode_edit</i></button> ' +
-                    '<button type="button" class="btn bg-red btn-circle waves-effect waves-circle waves-float js-eliminar-pedido" title="Eliminar pedido" data-id="' + pedido.id + '">' +
-                        '<i class="material-icons">delete</i></button>' +
-                '</div></td>' +
-                '</tr>';
-        });
-        destruirTablaPedidos();
-        $('#tablaPedidos tbody').html(filas);
-        $('#tablaPedidos').DataTable({
-            pageLength: 20,
-            order: [[0, 'desc']],
-            language: {
-                emptyTable: 'No hay pedidos registrados.',
-                info: 'Mostrando _START_ a _END_ de _TOTAL_ pedidos',
-                infoEmpty: 'Mostrando 0 a 0 de 0 pedidos',
-                infoFiltered: '(filtrado de _MAX_ pedidos en total)',
-                lengthMenu: 'Mostrar _MENU_ pedidos',
-                loadingRecords: 'Cargando...',
-                processing: 'Procesando...',
-                search: 'Buscar:',
-                zeroRecords: 'No se encontraron pedidos coincidentes',
-                paginate: {
-                    first: 'Primero',
-                    last: 'Último',
-                    next: 'Siguiente',
-                    previous: 'Anterior'
-                }
+        data: { action: 'ordenes' },
+        success: function(respuestaServidor) {
+            if (!respuestaServidor || !respuestaServidor.success) {
+                pedidos = [];
+                miTabla.clear();
+                miTabla.draw();
+                mostrarToastErrorPedido(respuestaServidor && respuestaServidor.message
+                    ? respuestaServidor.message
+                    : 'No se pudieron cargar los pedidos.');
+                return;
             }
-        });
-    }).fail(function(xhr) {
-        destruirTablaPedidos();
-        $('#tablaPedidos tbody').html('<tr><td colspan="8">No se pudieron cargar los pedidos.</td></tr>');
-        mostrarErrorAjax(xhr, 'No se pudieron cargar los pedidos.');
+
+            if (!Array.isArray(respuestaServidor.data)) {
+                pedidos = [];
+                miTabla.clear();
+                miTabla.draw();
+                mostrarToastErrorPedido('La respuesta del servidor no contiene una lista válida de pedidos.');
+                return;
+            }
+
+            pedidos = respuestaServidor.data;
+            miTabla.clear();
+
+            pedidos.forEach(function(pedido) {
+                var id = escaparHtml(pedido.id);
+                    var pedidoPendiente = Number(pedido.id_estatus) === 1;
+                    var opciones = pedidoPendiente
+                    ? '<button type="button" class="btn bg-green btn-circle waves-effect waves-circle waves-float js-cambiar-estatus-pedido" title="Cambiar estatus" data-id="' + id + '">' +
+                            '<i class="material-icons">sync_alt</i></button> ' +
+                            '<button type="button" class="btn bg-deep-orange btn-circle waves-effect waves-circle waves-float js-editar-pedido" title="Editar pedido" data-id="' + id + '">' +
+                                '<i class="material-icons">mode_edit</i></button> ' +
+                            '<button type="button" class="btn bg-red btn-circle waves-effect waves-circle waves-float js-eliminar-pedido" title="Eliminar pedido" data-id="' + id + '">' +
+                                '<i class="material-icons">delete</i></button>'
+                        : '';
+
+                miTabla.row.add([
+                    pedido.id,
+                    pedido.cliente,
+                    pedido.vendedor,
+                    pedido.fecha,
+                    pedido.productos,
+                    '$' + pedido.total,
+                    pedido.estatus,
+                    opciones ? '<div class="d-flex gap-2">' + opciones + '</div>' : ''
+                ]);
+            });
+
+            miTabla.draw();
+        },
+        error: function(xhr) {
+            pedidos = [];
+            miTabla.clear();
+            miTabla.draw();
+            mostrarErrorAjax(xhr, 'No se pudieron cargar los pedidos.');
+        }
     });
 }
 
-function destruirTablaPedidos() {
-    if ($.fn.DataTable.isDataTable('#tablaPedidos')) {
-        $('#tablaPedidos').DataTable().destroy();
-    }
-}
-
+// -------------------------------------------------------------------------------------------------
+// crear
+// -------------------------------------------------------------------------------------------------
 function nuevoPedido() {
     $('#formPedido')[0].reset();
     $('#formPedido').validate().resetForm();
@@ -224,6 +245,9 @@ function nuevoPedido() {
     $('#modalPedido').modal('show');
 }
 
+// -------------------------------------------------------------------------------------------------
+// modificar
+// -------------------------------------------------------------------------------------------------
 function editarPedido(id) {
     var pedido = pedidos.find(function(item) {
         return String(item.id) === String(id);
@@ -277,6 +301,9 @@ function editarPedido(id) {
     });
 }
 
+// -------------------------------------------------------------------------------------------------
+// gestionar detalle
+// -------------------------------------------------------------------------------------------------
 function actualizarPrecio() {
     var producto = productosDisponibles.find(function(item) {
         return String(item.id) === String($('#id_producto').val());
@@ -374,6 +401,9 @@ function eliminarItem(indice) {
     mostrarDetalle();
 }
 
+// -------------------------------------------------------------------------------------------------
+// guardar
+// -------------------------------------------------------------------------------------------------
 function guardarPedido() {
     $('#btnGuardarPedido').prop('disabled', true);
     $.ajax({
@@ -408,6 +438,9 @@ function guardarPedido() {
     });
 }
 
+// -------------------------------------------------------------------------------------------------
+// eliminar
+// -------------------------------------------------------------------------------------------------
 function eliminarPedido(id) {
     Swal.fire({
         title: '¿Eliminar este pedido?',
@@ -442,6 +475,9 @@ function eliminarPedido(id) {
     });
 }
 
+// -------------------------------------------------------------------------------------------------
+// cambiar estatus
+// -------------------------------------------------------------------------------------------------
 function cambiarEstatusPedido(id) {
     Swal.fire({
         title: 'Cambiar estatus del pedido',

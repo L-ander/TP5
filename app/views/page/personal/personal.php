@@ -19,7 +19,7 @@
                             </li>
                             <li role="presentation">
                                 <a href="#tab_staff" data-toggle="tab" style="color:white; font-weight:bold;">
-                                    <i class="material-icons">people</i> Listado de Personal
+                                    <i class="material-icons">people</i> Listado de Vendedores
                                 </a>
                             </li>
                         </ul>

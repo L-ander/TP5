@@ -1,5 +1,4 @@
 <link rel="stylesheet" href="public/css/home.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap.min.css">
 <section class="content">
     <div class="container-fluid">
         <div class="bloque-encabezado">
@@ -140,11 +139,8 @@
     </div>
 </div>
 
-
-<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.22.1/jquery.validate.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/toastjs-notifications@1.16.0/dist/toast-notifications.min.js"></script>
+<link href="resources/library/plugins/toastjs-notifications/1.16.0/dist/toast-notifications.min.css" rel="stylesheet">
+<script src="resources/library/plugins/toastjs-notifications/1.16.0/dist/toast-notifications.min.js"></script>
 
 <script src="public/js/validaciones.js"></script>
-<script src="public/js/pedidos.js?v=15"></script>
+<script src="public/js/pedidos.js?v=17"></script>

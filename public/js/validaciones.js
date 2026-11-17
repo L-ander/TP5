@@ -69,6 +69,16 @@ if (typeof jQuery !== 'undefined' &&
                 digits: true,
                 min: 1,
                 max: 1000000
+            },
+            usuario: {
+                required: true,
+                minlength: 4,
+                maxlength: 15
+            },
+            password: {
+                required: true,
+                minlength: 8,
+                maxlength: 16
             }
         },
         messages: {
@@ -90,7 +100,17 @@ if (typeof jQuery !== 'undefined' &&
                 digits: "Ingrese un número entero.",
                 min: "La cantidad debe ser al menos 1.",
                 max: "La cantidad no puede exceder 1000000."
-            }  
+            },
+            usuario: {
+                required: "Ingrese un nombre de usuario.",
+                minlength: "El nombre de usuario debe tener al menos 4 caracteres.",
+                maxlength: "El nombre de usuario no puede exceder 15 caracteres."
+            },
+            password: {
+                required: "Ingrese una contraseña.",
+                minlength: "La contraseña debe tener al menos 8 caracteres.",
+                maxlength: "La contraseña no puede exceder 16 caracteres."
+            }   
         },
         submitHandler: function() {
             if (!detallePedido.length) {

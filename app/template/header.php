@@ -19,12 +19,12 @@
 
     <script src="resources/library/plugins/jquery/jquery.min.js"></script>
     <script src="resources/library/plugins/bootstrap/js/bootstrap.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="resources/library/plugins/sweetalert2/11.26.25/sweetalert2.all.min.js"></script>
 
-    <link href="https://cdn.jsdelivr.net/npm/jquery-toast-plugin@1.3.2/dist/jquery.toast.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/jquery-toast-plugin@1.3.2/dist/jquery.toast.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/localization/messages_es.min.js"></script>
+    <link href="resources/library/plugins/jquery-toast-plugin/1.3.2/dist/jquery.toast.min.css" rel="stylesheet">
+    <script src="resources/library/plugins/jquery-toast-plugin/1.3.2/dist/jquery.toast.min.js"></script>
+    <script src="resources/library/plugins/jquery-validation/1.19.5/jquery.validate.min.js"></script>
+    <script src="resources/library/plugins/jquery-validation/1.19.5/messages_es.min.js"></script>
 
 </head>
 

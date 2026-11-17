@@ -90,7 +90,7 @@ $(document).ready(function () {
 
                 // Configuración base de DataTables
                 let dtConfig = {
-                    language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+                    language: { url: 'resources/library/plugins/jquery-datatable/1.13.6/i18n/es-ES.json' },
                     responsive: true,
                     pageLength: 10,
                     destroy: true, // Permite reinicializar

@@ -8,9 +8,9 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="resources/library/plugins/bootstrap/css/bootstrap.css" rel="stylesheet">
     <link href="public/css/login.css?v=2" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/jquery-toast-plugin@1.3.2/dist/jquery.toast.min.css" rel="stylesheet">
+    <link href="resources/library/plugins/jquery-toast-plugin/1.3.2/dist/jquery.toast.min.css" rel="stylesheet">
     
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="resources/library/plugins/sweetalert2/11.26.25/sweetalert2.all.min.js"></script>
 </head>
 <body>
 
@@ -22,18 +22,18 @@
         <div class="login-title">Inicio de Sesión</div>
         
         <div class="login-step-indicator" id="loginStepIndicator">Ingresa tu usuario</div>
-        <div class="login-error" id="loginError" role="alert" aria-live="polite" hidden></div>
 
         <form id="sign_in" method="POST" novalidate>
             <div id="loginStepUsuario">
-                <div class="input-group" id="usuarioGroup">
+                <div class="input-group" id="usuarioGroup" style="margin-bottom: 5px;">
                     <span class="input-group-addon"><i class="material-icons">person</i></span>
                     <div class="form-line">
-                        <input type="text" class="form-control" name="usuario" id="usuario" placeholder="Usuario" autocomplete="username" aria-describedby="loginError" autofocus>
+                        <input type="text" class="form-control" name="usuario" id="usuario" placeholder="Usuario" autocomplete="username" autofocus>
                     </div>
                 </div>
+                <span class="error-msg" id="loginErrorUsuario" style="display: none; color: #f44336; font-size: 12px; margin-bottom: 15px; text-align: left;"></span>
 
-                <button class="btn-login" type="button" id="Continuar">CONTINUAR</button>
+                <button class="btn-login" type="button" id="Continuar" style="margin-top: 10px;">CONTINUAR</button>
             </div>
 
             <div id="loginStepPassword" hidden>
@@ -43,12 +43,13 @@
                     <button type="button" id="CambiarUsuario">Cambiar</button>
                 </div>
 
-                <div class="input-group" id="passwordGroup">
+                <div class="input-group" id="passwordGroup" style="margin-bottom: 5px;">
                     <span class="input-group-addon"><i class="material-icons">lock</i></span>
                     <div class="form-line">
-                        <input type="password" class="form-control" name="password" id="password" placeholder="Contraseña" autocomplete="current-password" aria-describedby="loginError">
+                        <input type="password" class="form-control" name="password" id="password" placeholder="Contraseña" autocomplete="current-password">
                     </div>
                 </div>
+                <span class="error-msg" id="loginErrorPassword" style="display: none; color: #f44336; font-size: 12px; margin-bottom: 15px; text-align: left;"></span>
 
                 <div class="switch-container">
                     <label style="cursor:pointer; font-weight:normal;">
@@ -62,9 +63,10 @@
     </div>
 
     <script src="resources/library/plugins/jquery/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery-toast-plugin@1.3.2/dist/jquery.toast.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/localization/messages_es.min.js"></script>
+    <script src="resources/library/plugins/jquery-toast-plugin/1.3.2/dist/jquery.toast.min.js"></script>
+    <script src="resources/library/plugins/jquery-validation/1.19.5/jquery.validate.min.js"></script>
+    <script src="resources/library/plugins/jquery-validation/1.19.5/messages_es.min.js"></script>
     <script src="public/js/login.js?v=5"></script>
+    <script src="public/js/validaciones.js"></script>
 </body>
 </html>

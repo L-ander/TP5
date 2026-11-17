@@ -20,6 +20,9 @@ class PedidoController extends BaseController {
         return $this->jsonResponse(['success' => false, 'message' => 'Accion no reconocida'], 404);
     }
 
+    // -------------------------------------------------------------------------------------------------
+    // listar
+    // -------------------------------------------------------------------------------------------------
     protected function ordenes($data) {
         return $this->respuesta($this->modelo->listarOrdenes(), 'Error al obtener los pedidos');
     }
@@ -40,16 +43,28 @@ class PedidoController extends BaseController {
         return $this->respuesta($this->modelo->listarDetalle($idPedido), 'Error al obtener el detalle');
     }
 
+    // -------------------------------------------------------------------------------------------------
+    // crear y modificar
+    // -------------------------------------------------------------------------------------------------
     protected function guardar($data) {
         $camposFaltantes = [];
+        $valoresValidos = [];
         foreach ([
             'id_cliente' => 'Cliente',
             'id_vendedor' => 'Vendedor'
         ] as $campo => $nombre) {
             $valor = filter_var($data[$campo] ?? null, FILTER_VALIDATE_INT);
-            if ($valor === false || $valor <= 0) {
+            if ($valor === false) {
                 $camposFaltantes[] = $nombre;
+                continue;
             }
+
+            if ($valor <= 0) {
+                $camposFaltantes[] = $nombre;
+                continue;
+            }
+
+            $valoresValidos[$campo] = $valor;
         }
 
         $fecha = trim((string)($data['fecha'] ?? ''));
@@ -57,7 +72,7 @@ class PedidoController extends BaseController {
             $camposFaltantes[] = 'Fecha';
         }
 
-        if ($camposFaltantes) {
+        if (!empty($camposFaltantes)) {
             return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Falta completar o corregir: ' . implode(', ', $camposFaltantes) . '.'
@@ -65,7 +80,14 @@ class PedidoController extends BaseController {
         }
 
         $fechaValida = DateTime::createFromFormat('!Y-m-d', $fecha);
-        if (!$fechaValida || $fechaValida->format('Y-m-d') !== $fecha) {
+        if ($fechaValida === false) {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => 'La fecha del pedido no es válida. Selecciona una fecha correcta.'
+            ], 422);
+        }
+
+        if ($fechaValida->format('Y-m-d') !== $fecha) {
             return $this->jsonResponse([
                 'success' => false,
                 'message' => 'La fecha del pedido no es válida. Selecciona una fecha correcta.'
@@ -73,54 +95,184 @@ class PedidoController extends BaseController {
         }
 
         $idPedido = trim((string)($data['id'] ?? ''));
-        if ($idPedido !== '' && (filter_var($idPedido, FILTER_VALIDATE_INT) === false || (int)$idPedido <= 0)) {
-            return $this->jsonResponse([
-                'success' => false,
-                'message' => 'El número del pedido que intentas editar no es válido.'
-            ], 422);
+        $idPedidoNumerico = 0;
+        if ($idPedido !== '') {
+            $idPedidoValidado = filter_var($idPedido, FILTER_VALIDATE_INT);
+
+            if ($idPedidoValidado === false) {
+                return $this->jsonResponse([
+                    'success' => false,
+                    'message' => 'El número del pedido que intentas editar no es válido.'
+                ], 422);
+            }
+
+            if ($idPedidoValidado <= 0) {
+                return $this->jsonResponse([
+                    'success' => false,
+                    'message' => 'El número del pedido que intentas editar no es válido.'
+                ], 422);
+            }
+
+            $idPedidoNumerico = $idPedidoValidado;
         }
 
         $detalle = $data['detalle'] ?? null;
-        if (!is_array($detalle) || !$detalle) {
+        if (!is_array($detalle)) {
             return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Agrega al menos un producto antes de guardar el pedido.'
             ], 422);
         }
 
+        if (empty($detalle)) {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => 'Agrega al menos un producto antes de guardar el pedido.'
+            ], 422);
+        }
+
+        $cantidadesPorProducto = [];
         foreach ($detalle as $indice => $item) {
             $numeroItem = (int)$indice + 1;
-            $idProducto = is_array($item)
-                ? filter_var($item['id_producto'] ?? null, FILTER_VALIDATE_INT)
-                : false;
-            $cantidad = is_array($item)
-                ? filter_var($item['cantidad'] ?? null, FILTER_VALIDATE_INT)
-                : false;
 
-            if ($idProducto === false || $idProducto <= 0) {
+            if (!is_array($item)) {
                 return $this->jsonResponse([
                     'success' => false,
                     'message' => 'Selecciona un producto válido en el producto número ' . $numeroItem . '.'
                 ], 422);
             }
 
-            if ($cantidad === false || $cantidad <= 0 || $cantidad > 1000000) {
+            $idProducto = filter_var($item['id_producto'] ?? null, FILTER_VALIDATE_INT);
+            if ($idProducto === false) {
+                return $this->jsonResponse([
+                    'success' => false,
+                    'message' => 'Selecciona un producto válido en el producto número ' . $numeroItem . '.'
+                ], 422);
+            }
+
+            if ($idProducto <= 0) {
+                return $this->jsonResponse([
+                    'success' => false,
+                    'message' => 'Selecciona un producto válido en el producto número ' . $numeroItem . '.'
+                ], 422);
+            }
+
+            $cantidad = filter_var($item['cantidad'] ?? null, FILTER_VALIDATE_INT);
+            if ($cantidad === false) {
                 return $this->jsonResponse([
                     'success' => false,
                     'message' => 'La cantidad del producto número ' . $numeroItem . ' debe ser un número entero entre 1 y 1000000.'
                 ], 422);
             }
+
+            if ($cantidad <= 0) {
+                return $this->jsonResponse([
+                    'success' => false,
+                    'message' => 'La cantidad del producto número ' . $numeroItem . ' debe ser un número entero entre 1 y 1000000.'
+                ], 422);
+            }
+
+            if ($cantidad > 1000000) {
+                return $this->jsonResponse([
+                    'success' => false,
+                    'message' => 'La cantidad del producto número ' . $numeroItem . ' debe ser un número entero entre 1 y 1000000.'
+                ], 422);
+            }
+
+            $cantidadTotal = ($cantidadesPorProducto[$idProducto] ?? 0) + $cantidad;
+            if ($cantidadTotal > 1000000) {
+                return $this->jsonResponse([
+                    'success' => false,
+                    'message' => 'La cantidad total del producto número ' . $numeroItem . ' no puede superar 1000000.'
+                ], 422);
+            }
+            $cantidadesPorProducto[$idProducto] = $cantidadTotal;
         }
 
-        $this->cargarModelo($data);
-        $resultado = $this->modelo->guardarPedido();
-        if (!empty($resultado['validation'])) {
-            return $this->jsonResponse(['success' => false, 'message' => $resultado['error']], 422);
+        $idCliente = $valoresValidos['id_cliente'];
+        $idVendedor = $valoresValidos['id_vendedor'];
+
+        $referencias = $this->modelo->obtenerDatosPedido(
+            $idPedidoNumerico,
+            $idCliente,
+            $idVendedor,
+            array_keys($cantidadesPorProducto)
+        );
+
+        if (!$referencias['success']) {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => 'No se pudieron consultar los datos del pedido.'
+            ], 500);
         }
+
+        $datosReferencias = $referencias['datos'];
+        if ($idPedido !== '') {
+            if (!$datosReferencias['pedido']) {
+                return $this->jsonResponse([
+                    'success' => false,
+                    'message' => 'No se encontró el pedido que intentas editar.'
+                ], 404);
+            }
+
+            if ((int)$datosReferencias['pedido']['id_estatus'] !== 1) {
+                return $this->jsonResponse([
+                    'success' => false,
+                    'message' => 'No se puede modificar un pedido entregado o cancelado.'
+                ], 409);
+            }
+        }
+
+        if (!$datosReferencias['cliente']) {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => 'El cliente seleccionado ya no existe. Actualiza la lista y vuelve a seleccionarlo.'
+            ], 422);
+        }
+
+        if (!$datosReferencias['vendedor']) {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => 'El vendedor seleccionado ya no existe. Actualiza la lista y vuelve a seleccionarlo.'
+            ], 422);
+        }
+
+        $productosPorId = [];
+        foreach ($datosReferencias['productos'] as $producto) {
+            $productosPorId[(int)$producto['id']] = $producto;
+        }
+
+        $detallePedido = [];
+        foreach ($cantidadesPorProducto as $idProducto => $cantidad) {
+            if (!isset($productosPorId[$idProducto])) {
+                return $this->jsonResponse([
+                    'success' => false,
+                    'message' => 'El producto número ' . (count($detallePedido) + 1) . ' ya no está disponible. Actualiza la lista y vuelve a intentarlo.'
+                ], 422);
+            }
+
+            $detallePedido[] = [
+                'id_producto' => (int)$idProducto,
+                'cantidad' => $cantidad,
+                'precio_unitario' => (float)$productosPorId[$idProducto]['precio']
+            ];
+        }
+
+        $this->cargarModelo(
+            $idPedidoNumerico,
+            $idCliente,
+            $idVendedor,
+            $fecha,
+            $detallePedido
+        );
+        $resultado = $this->modelo->guardarPedido();
 
         return $this->respuesta($resultado, 'Error al guardar el pedido', 'Pedido guardado correctamente');
     }
 
+    // -------------------------------------------------------------------------------------------------
+    // cambiar estatus
+    // -------------------------------------------------------------------------------------------------
     protected function cambiarEstatus($data) {
         $idPedido = filter_var($data['id'] ?? null, FILTER_VALIDATE_INT);
         $idEstatus = filter_var($data['id_estatus'] ?? null, FILTER_VALIDATE_INT);
@@ -133,17 +285,10 @@ class PedidoController extends BaseController {
         }
 
         $resultado = $this->modelo->cambiarEstatusPedido($idPedido, $idEstatus);
-        if (!empty($resultado['validation'])) {
+        if (!empty($resultado['success']) && $resultado['filasAfectadas'] !== 1) {
             return $this->jsonResponse([
                 'success' => false,
-                'message' => $resultado['error']
-            ], 422);
-        }
-
-        if (!empty($resultado['conflict'])) {
-            return $this->jsonResponse([
-                'success' => false,
-                'message' => $resultado['error']
+                'message' => 'Solo se puede cambiar el estatus de un pedido pendiente.'
             ], 409);
         }
 
@@ -160,6 +305,9 @@ class PedidoController extends BaseController {
         ]);
     }
 
+    // -------------------------------------------------------------------------------------------------
+    // eliminar
+    // -------------------------------------------------------------------------------------------------
     protected function eliminar($data) {
         $idPedido = filter_var($data['id'] ?? null, FILTER_VALIDATE_INT);
         if ($idPedido === false || $idPedido <= 0) {
@@ -169,17 +317,41 @@ class PedidoController extends BaseController {
             ], 422);
         }
 
+        $pedido = $this->modelo->obtenerPedido($idPedido);
+        if (!$pedido['success']) {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => 'No se pudo consultar el pedido.'
+            ], 500);
+        }
+
+        if (!$pedido['datos']) {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => 'No se encontró el pedido que intentas eliminar.'
+            ], 404);
+        }
+
+        if ((int)$pedido['datos']['id_estatus'] !== 1) {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => 'No se puede eliminar un pedido entregado o cancelado.'
+            ], 409);
+        }
+
         $resultado = $this->modelo->eliminarPedido($idPedido);
         return $this->respuesta($resultado, 'Error al eliminar el pedido', 'Pedido eliminado correctamente');
     }
 
-    private function cargarModelo($data) {
-        $this->modelo->setId($data['id'] ?? 0);
-        $this->modelo->setCliente($data['id_cliente'] ?? 0);
-        $this->modelo->setVendedor($data['id_vendedor'] ?? 0);
-        $this->modelo->setFecha($data['fecha'] ?? date('Y-m-d'));
-        $this->modelo->setEstatus($data['id_estatus'] ?? 1);
-        $this->modelo->setDetalle($data['detalle'] ?? []);
+    // -------------------------------------------------------------------------------------------------
+    // helpers de respuesta y carga del modelo
+    // -------------------------------------------------------------------------------------------------
+    private function cargarModelo($idPedido, $idCliente, $idVendedor, $fecha, $detalle) {
+        $this->modelo->setId($idPedido);
+        $this->modelo->setCliente($idCliente);
+        $this->modelo->setVendedor($idVendedor);
+        $this->modelo->setFecha($fecha);
+        $this->modelo->setDetalle($detalle);
     }
 
     private function respuesta($resultado, $error, $mensaje = 'Operacion realizada correctamente') {
