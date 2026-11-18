@@ -74,4 +74,4 @@
 </section>
 
 <?php include 'app/views/page/inventario/modal_presentacion_linea.php'; ?>
-<script src="public/js/presentacion_linea.js"></script>
+<script src="public/js/configuracion.js"></script>

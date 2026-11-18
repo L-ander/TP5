@@ -44,12 +44,34 @@
             // var_dump( $data );
             // exit;
 
+            $nombre = trim($data["nombre"] ?? '');
+            $id_linea = $data["id_linea"] ?? '';
+            $presentacion = $data["presentacion"] ?? '';
+            $id_medida = $data["id_medida"] ?? '';
+            $precio = $data["precio"] ?? '';
+
+            if (empty($nombre) || mb_strlen($nombre) > 40) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'El nombre del producto es inválido o excede los 40 caracteres.'],400);
+            }
+            if (empty($id_linea)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'Debe seleccionar una línea de producto.'],400);
+            }
+            if (empty($presentacion)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'Debe seleccionar una presentación.'],400);
+            }
+            if (empty($id_medida)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'Debe seleccionar una unidad de medida.'],400);
+            }
+            if (!is_numeric($precio) || !is_finite((float)$precio) || (float)$precio <= 0 || !preg_match('/^(?=.*[1-9])\d+(?:\.\d{1,6})?$/', (string)$precio)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'El precio debe ser mayor que 0 y tener como máximo 6 decimales.'],400);
+            }
+
             $producto = new productoModel();
-            $producto->setNombre($data["nombre"]);
-            $producto->setLinea($data["id_linea"]);
-            $producto->setPresentacion($data["presentacion"]);
-            $producto->setMedida($data["id_medida"]);
-            $producto->setPrecio($data["precio"]);
+            $producto->setNombre($nombre);
+            $producto->setLinea($id_linea);
+            $producto->setPresentacion($presentacion);
+            $producto->setMedida($id_medida);
+            $producto->setPrecio($precio);
 
             $user = $producto->crear();
 
@@ -63,7 +85,7 @@
                 ]);
             } else {
 
-                return $this->jsonResponse(['success' => false, 'error' => 3, 'msj' => 'Error Al Guardar la Informacion']);
+                return $this->jsonResponse(['success' => false, 'error' => 3, 'msj' => 'Error Al Guardar la Informacion'], 500);
             }
         }
 
@@ -145,6 +167,33 @@
             // var_dump( $data );
             // exit;
 
+            $id = $data["id"] ?? '';
+            $nombre = trim($data["nombre"] ?? '');
+            $id_linea = $data["id_linea"] ?? '';
+            $presentacion = $data["presentacion"] ?? '';
+            $id_medida = $data["id_medida"] ?? '';
+            $precio = $data["precio"] ?? '';
+
+            if (empty($id)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'ID de producto no válido.'],400);
+            }
+            if (empty($nombre) || mb_strlen($nombre) > 40) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'El nombre del producto es inválido o excede los 40 caracteres.'],400);
+            }
+            if (empty($id_linea)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'Debe seleccionar una línea de producto.'],400);
+            }
+            if (empty($presentacion)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'Debe seleccionar una presentación.'],400);
+            }
+            if (empty($id_medida)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'Debe seleccionar una unidad de medida.'],400);
+            }
+            if (!is_numeric($precio) || !is_finite((float)$precio) || (float)$precio <= 0 || !preg_match('/^(?=.*[1-9])\d+(?:\.\d{1,6})?$/', (string)$precio)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'El precio debe ser mayor que 0 y tener como máximo 6 decimales.'],400);
+            }
+
+
             $producto = new productoModel();
             $producto->setId($data["id"]);
             $producto->setNombre($data["nombre"]);
@@ -164,7 +213,7 @@
                 ]);
             } else {
 
-                return $this->jsonResponse(['success' => false, 'error' => 3, 'msj' => 'Error Al Guardar la Informacion']);
+                return $this->jsonResponse(['success' => false, 'error' => 3, 'msj' => 'Error Al Guardar la Informacion'], 500);
             }
         }
 

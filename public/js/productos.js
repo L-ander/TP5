@@ -11,7 +11,13 @@ $(document).ready(function() {
         }
     }
 
+$.validator.addMethod("sinEspaciosVacios", function(value, element) {
+    return this.optional(element) || /.*\S+.*/.test(value);
+}, "El campo no puede contener solo espacios en blanco.");
 
+$.validator.addMethod("precioProductoValido", function(value, element) {
+    return this.optional(element) || /^(?=.*[1-9])\d+(?:\.\d{1,6})?$/.test(value);
+}, "El precio debe ser mayor que 0 y tener como máximo 6 decimales.");
 
 
 var formularioProducto = $('#formulario');
@@ -19,7 +25,8 @@ formularioProducto.validate({
         rules: {
             nombre: {
                 required: true,
-                maxlength: 40
+                maxlength: 40,
+                sinEspaciosVacios: true
             },
             id_linea: {
                 required: true
@@ -33,13 +40,15 @@ formularioProducto.validate({
             precio: {
                 required: true,
                 number: true,
-                min: 0.01
+                min: 0.000001,
+                precioProductoValido: true
             }
         },
         messages: {
             nombre: {
                 required: 'El campo nombre del producto no puede estar vacío.',
-                maxlength: 'El nombre es demasiado largo.'
+                maxlength: 'El nombre es demasiado largo.',
+                sinEspaciosVacios: 'El nombre no puede contener solo espacios en blanco.'
             },
             id_linea: {
                 required: 'Debe seleccionar una línea de producto.'
@@ -53,7 +62,8 @@ formularioProducto.validate({
             precio: {
                 required: 'El precio del producto no puede estar vacío.',
                 number: 'Ingrese un número válido.',
-                min: 'El precio no puede ser menor o igual a 0.00.'
+                min: 'El precio debe ser mayor que 0.',
+                precioProductoValido: 'Use un precio mayor que 0 y con máximo 6 decimales.'
             }
         },
         errorElement: 'small',
@@ -94,7 +104,8 @@ formularioProducto.validate({
         rules: {
             nombre: {
                 required: true,
-                maxlength: 255
+                maxlength: 40,
+                sinEspaciosVacios: true
             },
             id_linea: {
                 required: true
@@ -108,12 +119,15 @@ formularioProducto.validate({
             precio: {
                 required: true,
                 number: true,
-                min: 0.01
+                min: 0.000001,
+                precioProductoValido: true
             }
         },
         messages: {
             nombre: {
-                required: 'El campo nombre del producto no puede estar vacío.'
+                required: 'El campo nombre del producto no puede estar vacío.',
+                maxlength: 'El nombre es demasiado largo.',
+                sinEspaciosVacios: 'El nombre no puede contener solo espacios en blanco.'
             },
             id_linea: {
                 required: 'Debe seleccionar una línea de producto.'
@@ -127,7 +141,8 @@ formularioProducto.validate({
             precio: {
                 required: 'El precio del producto no puede estar vacío.',
                 number: 'Ingrese un número válido.',
-                min: 'El precio no puede ser menor o igual a 0.00.'
+                min: 'El precio debe ser mayor que 0.',
+                precioProductoValido: 'Use un precio mayor que 0 y con máximo 6 decimales.'
             }
         },
         errorElement: 'small',
@@ -331,13 +346,14 @@ function crear() {
             $('#cerrar').click();
             limpiarFormularioNuevo();
             mostrarExitoProducto('Producto guardado con éxito');
+            console.log("Producto creado:", data);
         } else {
             mostrarErrorProducto(data.msj || 'Error al guardar el producto.');
         }
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
-        console.error('AJAX error crear:', textStatus, errorThrown);
-        mostrarErrorProducto('Error al crear el producto.');
+        console.error('AJAX error crear:', jqXHR.status, textStatus, errorThrown, jqXHR.responseJSON);
+        mostrarErrorProducto((jqXHR.responseJSON && jqXHR.responseJSON.msj) || 'Error al crear el producto.');
     });
 }
 
@@ -493,8 +509,8 @@ function editar() {
         }
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
-        console.error('AJAX error editar:', textStatus, errorThrown);
-        mostrarErrorProducto('Error al actualizar el producto.');
+        console.error('AJAX error editar:', jqXHR.status, textStatus, errorThrown, jqXHR.responseJSON);
+        mostrarErrorProducto((jqXHR.responseJSON && jqXHR.responseJSON.msj) || 'Error al actualizar el producto.');
     });
 }
 
