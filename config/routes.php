@@ -52,6 +52,11 @@ return [
         'menu'  => true,
         'roles' => $rolesDe('clientes')
     ],
+    'ciudades' => [
+        'vista' => 'clientes/ciudades.php',
+        'menu'  => true,
+        'roles' => $rolesDe('clientes')
+    ],
     'personal' => [
         'vista' => 'personal/personal.php',
         'menu'  => true,
@@ -62,6 +67,11 @@ return [
         'menu'  => true,
         'roles' => $rolesDe('productos')
     ],
+    'configuracion' => [
+        'vista' => 'configuracion/configuracion.php',
+        'menu'  => true,
+        'roles' => $rolesDe('productos')
+    ],
     'pedidos' => [
         'vista' => 'pedidos/pedidos.php',
         'menu'  => true,
@@ -69,6 +79,11 @@ return [
     ],
 
     // Solo administrador
+        'configuracion_usuarios' => [
+        'vista' => 'personal/configuracion_usuarios.php',
+        'menu'  => true,
+        'roles' => [1]
+    ],
     'roles' => [
         'vista' => 'permisos/roles.php',
         'menu'  => true,
@@ -79,16 +94,8 @@ return [
         'menu'  => true,
         'roles' => $rolesDe('reportes')
     ],
-    'configuracion' => [
-        'vista' => 'configuracion/configuracion.php',
-        'menu'  => true,
-        'roles' => [1]
-    ],
-    'configuracion_usuarios' => [
-        'vista' => 'personal/configuracion_usuarios.php',
-        'menu'  => true,
-        'roles' => [1]
-    ],
+    
+
 
     'salir' => [
         'vista' => 'salir.php',

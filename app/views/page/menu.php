@@ -5,6 +5,43 @@ $nombreUsuario = trim(($_SESSION['nombre'] ?? 'Usuario') . ' ' . ($_SESSION['ape
 require_once 'app/core/Router.php';
 $routerMenu = new Router();
 $todasLasRutas = $routerMenu->getRoutes();
+
+$accionesConfiguracion = ['ciudades', 'configuracion_usuarios', 'configuracion'];
+$rutasVisibles = [];
+foreach ($todasLasRutas as $accion => $config) {
+    if (empty($config['menu'])) {
+        continue;
+    }
+
+    $rolesPermitidos = $config['roles'];
+    $tieneAcceso = in_array('*', $rolesPermitidos, true)
+        || in_array($rolUsuario, array_map('intval', $rolesPermitidos), true);
+
+    if ($tieneAcceso) {
+        $rutasVisibles[$accion] = $config;
+    }
+}
+
+$itemsMenu = [];
+foreach ($rutasVisibles as $accion => $config) {
+    if (!in_array($accion, $accionesConfiguracion, true)) {
+        $itemsMenu[$accion] = $config;
+    }
+}
+
+$submodulosConfiguracionVisibles = [];
+foreach ($accionesConfiguracion as $accion) {
+    if (isset($rutasVisibles[$accion])) {
+        $submodulosConfiguracionVisibles[$accion] = $rutasVisibles[$accion];
+    }
+}
+
+if ($submodulosConfiguracionVisibles) {
+    $itemsMenu['__encabezado_configuracion'] = [
+        'encabezado' => 'TABLAS DE CONFIGURACIÓN'
+    ];
+    $itemsMenu += $submodulosConfiguracionVisibles;
+}
 ?>
 <link rel="stylesheet" href="public/css/custom.css?v=3">
 
@@ -37,47 +74,37 @@ $todasLasRutas = $routerMenu->getRoutes();
 
     <div class="menu">
             <ul class="list">
-                <?php foreach ($todasLasRutas as $accion => $config): ?>
-                    <?php 
-                        // Si la ruta no debe mostrarse en el menú, la saltamos
-                        if (empty($config['menu'])) {
-                            continue;
-                        }
+                <?php foreach ($itemsMenu as $accion => $config): ?>
+                    <?php if (isset($config['encabezado'])): ?>
+                        <li class="header"><?php echo $config['encabezado']; ?></li>
+                        <?php continue; ?>
+                    <?php endif; ?>
 
-                        // Validamos si el rol del usuario actual tiene acceso a esta ruta según routes.php
-                        $rolesPermitidos = $config['roles'];
-                        $tieneAcceso = in_array('*', $rolesPermitidos) || in_array($rolUsuario, array_map('intval', $rolesPermitidos), true);
-
-                        // Si no tiene acceso, no dibujamos esta opción en el menú
-                        if (!$tieneAcceso) {
-                            continue;
-                        }
-
-                        if (in_array($accion, ['configuracion', 'configuracion_usuarios'], true)) {
-                            continue;
-                        }
-
-                        // Definimos iconos representativos según la acción
+                    <?php
                         $icono = 'folder'; // Icono por defecto
                         switch ($accion) {
                             case 'home': $icono = 'home'; break;
                             case 'clientes': $icono = 'people'; break;
+                            case 'ciudades': $icono = 'location_on'; break;
                             case 'personal': $icono = 'badge'; break;
                             case 'producto': $icono = 'shopping_cart'; break; 
                             case 'pedidos': $icono = 'playlist_add'; break;
                             case 'reportes': $icono = 'insert_chart'; break;
-                            case 'configuracion': $icono = 'settings'; break;
+                            case 'configuracion': $icono = 'table_chart'; break;
                             case 'roles': $icono = 'lock'; break;
+                            case 'configuracion_usuarios': $icono = 'person'; break;
                         }
 
                         // Formateamos el nombre del menú de la primera letra en mayúscula
                         $nombreModulo = ucfirst($accion);
                         if ($accion === 'personal') $nombreModulo = 'Personal';
+                        if ($accion === 'configuracion') $nombreModulo = 'Tablas de Producto';
+                        if ($accion === 'configuracion_usuarios') $nombreModulo = 'Usuarios';
                         if ($accion === 'pedido' || $accion === 'pedidos') $nombreModulo = 'Pedidos';
                         if ($accion === 'roles') $nombreModulo = 'Permisos';
                     ?>
                     <li>
-                        <a href="<?php echo $accion; ?>">
+                        <a href="<?php echo htmlspecialchars($accion, ENT_QUOTES, 'UTF-8'); ?>">
                             <i class="material-icons"><?php echo $icono; ?></i>
                             <span><?php echo $nombreModulo; ?></span>
                         </a>

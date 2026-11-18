@@ -16,6 +16,9 @@
                                     <i class="material-icons">lock</i> Roles
                                 </a>
                             </li>
+                            <li role="presentation">
+                                <a href="#tabTiposPersonal" data-toggle="tab"><i class="material-icons">work</i> Cargos de Personal</a>
+                            </li>
                         </ul>
 
 
@@ -27,7 +30,6 @@
 
                         <div class="body tab-content">
                             <div role="tabpanel" class="tab-pane fade in active" id="tab_productos">
-
                                 <div style="margin-left: 15px; ">
                                     <button type="button" class="btn btn-success btn-circle waves-effect" data-toggle="modal" data-target="#modalRol" id="abrirModal">
                                         <i class="material-icons">add</i>
@@ -48,6 +50,27 @@
                                 </tbody>
                             </table>
                             </div>
+                            </div>
+
+                            <div role="tabpanel" class="tab-pane fade" id="tabTiposPersonal">
+                            <div style="margin-bottom: 15px;">
+                                <button type="button" class="btn btn-success waves-effect" id="btnNuevoTipoPersonal">
+                                    <i class="material-icons">add</i> NUEVO CARGO
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nombre del Cargo</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tablaTiposPersonal"></tbody>
+                                </table>
+                            </div>
+                        </div>
 
                         </div>
 
@@ -65,4 +88,6 @@
 </section>
 
 <?php include 'app/views/page/permisos/modal.php'; ?>
+<?php include 'app/views/page/personal/modal_tipo_personal.php'; ?>
 <script src="public/js/permisos.js"></script>
+<script src="public/js/configuracion_usuarios.js"></script>

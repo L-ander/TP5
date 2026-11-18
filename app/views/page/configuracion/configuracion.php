@@ -9,7 +9,7 @@
 <section class="content">
     <div class="container-fluid">
         <div class="bloque-encabezado">
-            <h2>Configuración</h2>
+            <h2>Tablas De Producto</h2>
         </div>
         
         <div class="card">
@@ -17,7 +17,6 @@
                 <ul class="nav nav-tabs config-tabs" role="tablist">
 
 
-                    <li><a href="producto"><i class="material-icons" style="font-size: 24px;">arrow_back</i></a></li>
                     <li role="presentation" class="active"><a href="#configCategorias" data-toggle="tab"><i class="material-icons">category</i> Categorías</a></li>
                     <li role="presentation"><a href="#configSubcategorias" data-toggle="tab"><i class="material-icons">account_tree</i> Subcategorías</a></li>
                     <li role="presentation"><a href="#tab_lineas" data-toggle="tab"><i class="material-icons">layers</i> Líneas de Producto</a></li>

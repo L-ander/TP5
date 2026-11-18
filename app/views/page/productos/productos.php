@@ -18,10 +18,6 @@
                             </li>
                         </ul>
                         <a href="configuracion">
-                        <button type="button" class="btn bg-teal waves-effect" id="btnConfiguracion" style="background: transparent; border: none; color: white;" title="Configuración">
-                            <i class="material-icons" style="font-size: 24px;">settings</i>
-                        </a>
-                        </button>
 
 
                             <!-- Se usar para abrir el modal editar, no abre el modal con jQuery x.x -->

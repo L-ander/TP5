@@ -13,8 +13,10 @@ $(document).ready(function() {
     const estadoEditUsuario = { username: true, password: true, rol: true };
 
     // Inicializacion al cargar la pagina
-    cargarCombos();
-    listarUsuarios();
+    if ($('#formUsuario').length) {
+        cargarCombos();
+        listarUsuarios();
+    }
     listarTiposPersonal();
 
     //2. VALIDACIONES EN TIEMPO REAL

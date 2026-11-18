@@ -29,11 +29,6 @@
                                 <i class="material-icons">add</i>
                             </button> <b style="margin-left:10px; margin-right:20px;">Nuevo Personal</b>
 
-                            <a href="configuracion_usuarios">
-                                <button type="button" class="btn bg-teal waves-effect" style="background: transparent; border: none; color: white;" title="Configuración de Accesos">
-                                    <i class="material-icons" style="font-size: 24px;">settings</i>
-                                </button>
-                            </a>
                         </div>
                     </div>
 
