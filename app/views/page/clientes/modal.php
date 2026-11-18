@@ -19,7 +19,7 @@
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="material-icons">person</i></span>
                                 <div class="form-line">
-                                    <input type="text" class="form-control" placeholder="Nombre" id="nombre" name="nombre" autocomplete="given-name">
+                                    <input type="text" class="form-control" placeholder="Nombre" id="nombre" name="nombre" maxlength="50" autocomplete="given-name">
                                 </div>
                             </div>
                         </div>
@@ -27,7 +27,7 @@
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="material-icons">person_outline</i></span>
                                 <div class="form-line">
-                                    <input type="text" class="form-control" placeholder="Apellido" id="apellido" name="apellido" autocomplete="family-name">
+                                    <input type="text" class="form-control" placeholder="Apellido" id="apellido" name="apellido" maxlength="50" autocomplete="family-name">
                                 </div>
                             </div>
                         </div>
@@ -118,7 +118,7 @@
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="material-icons">person</i></span>
                                 <div class="form-line">
-                                    <input type="text" class="form-control" placeholder="Nombre" id="nombreEditar" name="nombre" autocomplete="given-name">
+                                    <input type="text" class="form-control" placeholder="Nombre" id="nombreEditar" name="nombre" maxlength="50" autocomplete="given-name">
                                 </div>
                             </div>
                         </div>
@@ -126,7 +126,7 @@
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="material-icons">person_outline</i></span>
                                 <div class="form-line">
-                                    <input type="text" class="form-control" placeholder="Apellido" id="apellidoEditar" name="apellido" autocomplete="family-name">
+                                    <input type="text" class="form-control" placeholder="Apellido" id="apellidoEditar" name="apellido" maxlength="50" autocomplete="family-name">
                                 </div>
                             </div>
                         </div>
@@ -221,7 +221,7 @@
                     <div class="form-group">
                         <label>Nombre de la Ciudad</label>
                         <div class="form-line">
-                            <input type="text" class="form-control" id="nombre_ciudad_mod" name="nombre_ciudad" placeholder="Ej. Barquisimeto">
+                            <input type="text" class="form-control" id="nombre_ciudad_mod" name="nombre_ciudad" maxlength="26" placeholder="Ej. Barquisimeto">
                         </div>
                     </div>
                 </form>
@@ -256,7 +256,7 @@
                     <div class="form-group">
                         <label>Nombre de la Ciudad</label>
                         <div class="form-line">
-                            <input type="text" class="form-control" id="nombre_ciudad_edit_mod" name="nombre_ciudad">
+                            <input type="text" class="form-control" id="nombre_ciudad_edit_mod" name="nombre_ciudad" maxlength="26">
                         </div>
                     </div>
                 </form>
@@ -280,7 +280,7 @@
                     <div class="form-group">
                         <label>Nombre del Estado</label>
                         <div class="form-line">
-                            <input type="text" class="form-control" id="nombre_estado_nuevo" name="nombre">
+                            <input type="text" class="form-control" id="nombre_estado_nuevo" name="nombre" maxlength="50">
                         </div>
                     </div>
                 </form>
@@ -308,7 +308,7 @@
                     <div class="form-group">
                         <label>Nombre del Municipio</label>
                         <div class="form-line">
-                            <input type="text" class="form-control" id="nombre_municipio_nuevo" name="nombre">
+                            <input type="text" class="form-control" id="nombre_municipio_nuevo" name="nombre" maxlength="50">
                         </div>
                     </div>
                 </form>

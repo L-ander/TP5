@@ -46,11 +46,13 @@ $(document).ready(function(){
 				nombre: {
 					required: true,
 					clienteNombre: true,
+					maxlength: 50,
 					normalizer: function(value) { return $.trim(value); }
 				},
 				apellido: {
 					required: true,
 					clienteNombre: true,
+					maxlength: 50,
 					normalizer: function(value) { return $.trim(value); }
 				},
 				sexo: { required: true },
@@ -71,10 +73,12 @@ $(document).ready(function(){
 				},
 				nombre: {
 					required: 'El nombre es obligatorio.',
+					maxlength: 'El nombre no debe exceder 50 caracteres.',
 					clienteNombre: 'El nombre solo debe contener letras y espacios.'
 				},
 				apellido: {
 					required: 'El apellido es obligatorio.',
+					maxlength: 'El apellido no debe exceder 50 caracteres.',
 					clienteNombre: 'El apellido solo debe contener letras y espacios.'
 				},
 				sexo: { required: 'Selecciona el sexo.' },

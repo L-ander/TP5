@@ -67,13 +67,13 @@ $(document).ready(function() {
         nombre: {
             required: true,
             nombreUbicacion: true,
-            maxlength: 100,
+            maxlength: 50,
             normalizer: function(value) { return $.trim(value); }
         }
     }, {
         nombre: {
             required: 'El nombre del estado es obligatorio.',
-            maxlength: 'El nombre no puede exceder los 100 caracteres.'
+            maxlength: 'El nombre del estado no puede exceder los 50 caracteres.'
         }
     }, function(form) {
         var nombre = $.trim($(form).find('[name="nombre"]').val());
@@ -90,8 +90,9 @@ $(document).ready(function() {
             } else {
                 mostrarToastUbicacion('error', data.msj || 'No se pudo guardar el estado.');
             }
-        }).fail(function() {
-            mostrarToastUbicacion('error', 'Error al guardar el estado.');
+        }).fail(function(xhr) {
+            var respuesta = xhr.responseJSON || {};
+            mostrarToastUbicacion('error', respuesta.msj || 'Error al guardar el estado.');
         });
     });
 
@@ -100,14 +101,14 @@ $(document).ready(function() {
         nombre: {
             required: true,
             nombreUbicacion: true,
-            maxlength: 100,
+            maxlength: 50,
             normalizer: function(value) { return $.trim(value); }
         }
     }, {
         id_estado: { required: 'Seleccione un estado.' },
         nombre: {
             required: 'El nombre del municipio es obligatorio.',
-            maxlength: 'El nombre no puede exceder los 100 caracteres.'
+            maxlength: 'El nombre del municipio no puede exceder los 50 caracteres.'
         }
     }, function(form) {
         var idEstado = $(form).find('[name="id_estado"]').val();
@@ -127,8 +128,9 @@ $(document).ready(function() {
             } else {
                 mostrarToastUbicacion('error', data.msj || 'No se pudo guardar el municipio.');
             }
-        }).fail(function() {
-            mostrarToastUbicacion('error', 'Error al guardar el municipio.');
+        }).fail(function(xhr) {
+            var respuesta = xhr.responseJSON || {};
+            mostrarToastUbicacion('error', respuesta.msj || 'Error al guardar el municipio.');
         });
     });
 
@@ -138,7 +140,7 @@ $(document).ready(function() {
         nombre_ciudad: {
             required: true,
             nombreUbicacion: true,
-            maxlength: 100,
+            maxlength: 26,
             normalizer: function(value) { return $.trim(value); }
         }
     }, {
@@ -146,7 +148,7 @@ $(document).ready(function() {
         id_municipio: { required: 'Seleccione un municipio.' },
         nombre_ciudad: {
             required: 'El nombre de la ciudad es obligatorio.',
-            maxlength: 'El nombre no puede exceder los 100 caracteres.'
+            maxlength: 'El nombre de la ciudad no puede exceder los 26 caracteres.'
         }
     }, function(form) {
         $.ajax({
@@ -168,8 +170,9 @@ $(document).ready(function() {
             } else {
                 mostrarToastUbicacion('error', data.msj || 'No se pudo registrar la ciudad.');
             }
-        }).fail(function() {
-            mostrarToastUbicacion('error', 'Error al registrar la ciudad.');
+        }).fail(function(xhr) {
+            var respuesta = xhr.responseJSON || {};
+            mostrarToastUbicacion('error', respuesta.msj || 'Error al registrar la ciudad.');
         });
     });
 
@@ -179,7 +182,7 @@ $(document).ready(function() {
         nombre_ciudad: {
             required: true,
             nombreUbicacion: true,
-            maxlength: 100,
+            maxlength: 26,
             normalizer: function(value) { return $.trim(value); }
         }
     }, {
@@ -187,7 +190,7 @@ $(document).ready(function() {
         id_municipio: { required: 'Seleccione un municipio.' },
         nombre_ciudad: {
             required: 'El nombre de la ciudad es obligatorio.',
-            maxlength: 'El nombre no puede exceder los 100 caracteres.'
+            maxlength: 'El nombre de la ciudad no puede exceder los 26 caracteres.'
         }
     }, function(form) {
         $.ajax({
@@ -210,8 +213,9 @@ $(document).ready(function() {
             } else {
                 mostrarToastUbicacion('error', data.msj || 'No se pudo actualizar la ciudad.');
             }
-        }).fail(function() {
-            mostrarToastUbicacion('error', 'Error al actualizar la ciudad.');
+        }).fail(function(xhr) {
+            var respuesta = xhr.responseJSON || {};
+            mostrarToastUbicacion('error', respuesta.msj || 'Error al actualizar la ciudad.');
         });
     });
 

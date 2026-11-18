@@ -18,6 +18,46 @@ class UbicacionModel extends Conexion {
     public function setIdEstado($id_estado) { $this->id_estado = $id_estado; }
     public function getIdEstado() { return $this->id_estado; }
 
+    public function verificarEstado($id) {
+        try {
+            $sql = "SELECT id FROM estado WHERE id = :id";
+            $stmt = parent::conectar()->prepare($sql);
+            $stmt->bindValue(':id', (int)$id, PDO::PARAM_INT);
+            $stmt->execute();
+            return array('success' => true, 'existe' => $stmt->fetchColumn() !== false);
+        } catch (Exception $e) {
+            return array('success' => false);
+        }
+    }
+
+    public function verificarMunicipioEstado($id_municipio, $id_estado) {
+        try {
+            $sql = "SELECT m.id
+                    FROM municipio m
+                    INNER JOIN estado e ON e.id = m.id_estado
+                    WHERE m.id = :id_municipio AND e.id = :id_estado";
+            $stmt = parent::conectar()->prepare($sql);
+            $stmt->bindValue(':id_municipio', (int)$id_municipio, PDO::PARAM_INT);
+            $stmt->bindValue(':id_estado', (int)$id_estado, PDO::PARAM_INT);
+            $stmt->execute();
+            return array('success' => true, 'existe' => $stmt->fetchColumn() !== false);
+        } catch (Exception $e) {
+            return array('success' => false);
+        }
+    }
+
+    public function verificarCiudad($id) {
+        try {
+            $sql = "SELECT id FROM parroquia WHERE id = :id";
+            $stmt = parent::conectar()->prepare($sql);
+            $stmt->bindValue(':id', (int)$id, PDO::PARAM_INT);
+            $stmt->execute();
+            return array('success' => true, 'existe' => $stmt->fetchColumn() !== false);
+        } catch (Exception $e) {
+            return array('success' => false);
+        }
+    }
+
    
     public function listarCiudadesCompletas() {
         try {

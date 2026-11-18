@@ -126,9 +126,6 @@
 				$result = array('success' => true);
 
 			} catch ( Exception $e ) {
-
-				var_dump($e->getMessage());
-				exit();
 				$result = array('success' => false, 'error' => 1 );
 			}
 
@@ -190,6 +187,18 @@
 
     return $result;
 } #Fin Funcion
+
+		public function verificarCiudad($id){
+			try {
+				$sql = "SELECT id FROM parroquia WHERE id = :id";
+				$stmt = parent::conectar()->prepare($sql);
+				$stmt->bindValue(":id", (int)$id, PDO::PARAM_INT);
+				$stmt->execute();
+				return array('success' => true, 'existe' => $stmt->fetchColumn() !== false);
+			} catch (Exception $e) {
+				return array('success' => false);
+			}
+		}
 
 		public function cedulaExiste($excluirId = 0){
 			try {
