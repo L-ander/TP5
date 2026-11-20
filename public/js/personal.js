@@ -116,17 +116,37 @@ $(document).ready(function () {
         $('#cedula, #nombre, #apellido, #telefono').on('focus', function () { $(this).data('tocado', true); });
         $('#id_tipo_personal').on('change', function () { $(this).data('tocado', true); });
 
+        // Bloquea la tecla Espacio por completo en Cédula y Teléfono
+        $('#cedula, #telefono').on('keydown', function (e) {
+            if (e.key === ' ' || e.code === 'Space') {
+                e.preventDefault();
+            }
+        });
+
         ['cedula', 'nombre', 'apellido', 'telefono'].forEach(id => {
             $(`#${id}`).on('input blur', function (e) {
-                let valor = $(this).val().trim();
+                let valor = $(this).val();
+
+                if (id === 'cedula' || id === 'telefono') {
+                    const sinEspacios = valor.replace(/\s+/g, '');
+                    if (valor !== sinEspacios) {
+                        $(this).val(sinEspacios);
+                        valor = sinEspacios;
+                    }
+                }
 
                 if (valor === "") {
+                    estadoFormulario[id] = false;
                     if ((e.type === 'blur' || e.type === 'change') && $(this).data('tocado')) {
-                        estadoFormulario[id] = false;
                         window.toggleError(this, false, `error-${id}`);
                     }
                 } else {
-                    estadoFormulario[id] = Validaciones[id](valor);
+                
+                    const espaciosInvalidos = (id === 'cedula' || id === 'telefono')
+                        ? /\s/.test(valor)
+                        : /^\s|\s$|\s{2,}/.test(valor);
+
+                    estadoFormulario[id] = !espaciosInvalidos && Validaciones[id](valor);
                     window.toggleError(this, estadoFormulario[id], `error-${id}`);
                 }
                 verificarFormularioCompleto();

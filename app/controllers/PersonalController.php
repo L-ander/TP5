@@ -17,8 +17,9 @@ class PersonalController extends BaseController {
 
     // Funcion auxiliar para validaciones
     private function validarDatos($datos, $modelo, $esEdicion = false) {
-        if (!is_numeric($datos['cedula']) || $datos['cedula'] < 5000000) {
-            return "La cédula debe contener un mínimo de siete dígitos";
+
+    if (!preg_match('/^\d{7,10}$/', $datos['cedula']) || (int)$datos['cedula'] < 5000000) {
+            return "La cédula debe contener solo números (mínimo siete dígitos, sin espacios).";
         }
         
         $modelo->setCedula($datos['cedula']);
@@ -27,12 +28,12 @@ class PersonalController extends BaseController {
             return "La cédula {$datos['cedula']} ya se encuentra registrada en el sistema.";
         }
 
-        if (!preg_match('/^[a-zA-Z\s]+$/', $datos['nombre'])) {
-            return "El nombre solo puede contener letras (sin acentos).";
+        if (!preg_match('/^[a-zA-Z]+(?: [a-zA-Z]+)*$/', $datos['nombre']) || strlen($datos['nombre']) < 2 || strlen($datos['nombre']) > 30) {
+            return "El nombre solo puede contener letras (sin espacios al inicio, al final ni repetidos).";
         }
 
-        if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $datos['apellido'])) {
-            return "El apellido contiene caracteres no válidos.";
+        if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ]+(?: [a-zA-ZáéíóúÁÉÍÓÚñÑ]+)*$/u', $datos['apellido']) || mb_strlen($datos['apellido'], 'UTF-8') < 2 || mb_strlen($datos['apellido'], 'UTF-8') > 30) {
+            return "El apellido contiene caracteres o espacios no válidos.";
         }
 
         if (!preg_match('/^(?:\+58|0)(?:412|414|424|416|426|422|251)\d{7}$/', $datos['telefono'])) {
