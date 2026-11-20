@@ -9,6 +9,7 @@
 
     class LoginAjaxController extends BaseController {
 
+        // FASE 1: Despacho de acciones AJAX
         public function ejecutar($action, $data) {
             $method = lcfirst($action);
 
@@ -19,6 +20,7 @@
             }
         }
 
+        // FASE 2: Consultas y catálogos
         protected function listarC($data) {
 
             $categoria = new categoria();
@@ -39,29 +41,36 @@
             }
         }
 
+        // FASE 3: Alta y edición de líneas
         protected function crearC($data) {
-
-            // var_dump( $data );
-            // exit;
+            $nombre = $this->texto($data['nombre'] ?? null);
+            $idSubcategoria = $data['id_subcategoria'] ?? null;
+            if ($nombre === '' || $this->longitudTexto($nombre) > 40) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'El nombre de la línea es obligatorio y no debe exceder 40 caracteres.'], 400);
+            }
+            if (!$this->esIdPositivo($idSubcategoria)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'Debe seleccionar una subcategoría válida.'], 400);
+            }
 
             $categoria = new categoria();
-            $categoria->setNombre($data["nombre"]);
-            $categoria->setSubcategoria($data["id_subcategoria"]);
+            $subcategoria = $categoria->registroExiste('subcategoria', $idSubcategoria);
+            if (empty($subcategoria['success'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'No se pudo validar la subcategoría.'], 500);
+            }
+            if (empty($subcategoria['existe'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'La subcategoría seleccionada no existe.'], 400);
+            }
 
-
+            $categoria->setNombre($nombre);
+            $categoria->setSubcategoria((int)$idSubcategoria);
             $user = $categoria->crearC();
 
-            // var_dump( $user['success'] );
-            // exit();
-
             if ( $user['success'] ) {
-
                 return $this->jsonResponse([
                     'success' => true
                 ]);
             } else {
-
-                return $this->jsonResponse(['success' => false, 'error' => 3, 'msj' => 'Error Al Guardar la Informacion']);
+                return $this->jsonResponse(['success' => false, 'error' => 3, 'msj' => 'No se pudo guardar la línea de producto.'], 500);
             }
         }
 
@@ -103,81 +112,122 @@
 
 
         protected function consultarC($data) {
-
+            $id = $data['id'] ?? null;
+            if (!$this->esIdPositivo($id)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'ID de línea no válido.'], 400);
+            }
             $categoria = new categoria();
-            $categoria->setId($data["id"]);
+            $categoria->setId((int)$id);
             $user = $categoria->consultarC();
 
+            if (empty($user['success'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'No se pudo consultar la línea.'], 500);
+            }
+            if (empty($user['datos'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'La línea no existe.'], 404);
+            }
             if ( $user['success'] ) {
-
                 return $this->jsonResponse([
                     'success' => true,
                     'data' => $user
                 ]);
-            } else {
-
-                return $this->jsonResponse(['success' => false, 'error' => 3, 'msj' => 'Error Al Obtener la Informacion']);
             }
         }
 
         protected function editarC($data) {
-
-            // var_dump( $data );
-            // exit;
+            $id = $data['id'] ?? null;
+            if (!$this->esIdPositivo($id)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'ID de línea no válido.'], 400);
+            }
+            $nombre = $this->texto($data['nombre'] ?? null);
+            $idSubcategoria = $data['id_subcategoria'] ?? null;
+            if ($nombre === '' || $this->longitudTexto($nombre) > 40) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'El nombre de la línea es obligatorio y no debe exceder 40 caracteres.'], 400);
+            }
+            if (!$this->esIdPositivo($idSubcategoria)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'Debe seleccionar una subcategoría válida.'], 400);
+            }
 
             $categoria = new categoria();
-            $categoria->setId($data["id"]);
-            $categoria->setNombre($data["nombre"]);
-            $categoria->setSubcategoria($data["id_subcategoria"]);
+            $linea = $categoria->registroExiste('linea_producto', $id);
+            if (empty($linea['success'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'No se pudo validar la línea.'], 500);
+            }
+            if (empty($linea['existe'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'La línea que intenta editar no existe.'], 404);
+            }
+            $subcategoria = $categoria->registroExiste('subcategoria', $idSubcategoria);
+            if (empty($subcategoria['success'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'No se pudo validar la subcategoría.'], 500);
+            }
+            if (empty($subcategoria['existe'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'La subcategoría seleccionada no existe.'], 400);
+            }
+
+            $categoria->setId((int)$id);
+            $categoria->setNombre($nombre);
+            $categoria->setSubcategoria((int)$idSubcategoria);
             $user = $categoria->editarC();
 
-            // var_dump( $user['success'] );
-            // exit();
-
             if ( $user['success'] ) {
-
                 return $this->jsonResponse([
                     'success' => true
                 ]);
             } else {
-
-                return $this->jsonResponse(['success' => false, 'error' => 3, 'msj' => 'Error Al Guardar la Informacion']);
+                return $this->jsonResponse(['success' => false, 'error' => 3, 'msj' => 'No se pudo actualizar la línea de producto.'], 500);
             }
         }
 
+        // FASE 4: Eliminación de líneas
         protected function eliminarC($data) {
-
-            // var_dump( $data );
-            // exit;
+            $id = $data['id'] ?? null;
+            if (!$this->esIdPositivo($id)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'ID de línea no válido.'], 400);
+            }
 
             $categoria = new categoria();
-            $categoria->setId($data["id"]);
+            $linea = $categoria->registroExiste('linea_producto', $id);
+            if (empty($linea['success'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'No se pudo validar la línea.'], 500);
+            }
+            if (empty($linea['existe'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'La línea no existe.'], 404);
+            }
+
+            $categoria->setId((int)$id);
             $user = $categoria->eliminarC();
 
-            // var_dump( $user['success'] );
-            // exit();
-
             if ( $user['success'] ) {
-
                 return $this->jsonResponse([
                     'success' => true
                 ]);
             } else {
-
-                return $this->jsonResponse(['success' => false, 'error' => 3, 'msj' => 'Error Al Guardar la Informacion']);
+                return $this->jsonResponse(['success' => false, 'error' => 3, 'msj' => 'No se pudo eliminar la línea. Verifique que no tenga productos asociados.'], 409);
             }
         }
 
 
+        // FASE 5: Alta de subcategorías
         protected function crearSubcategoria($data) {
-
+            $idCategoria = $data['id_categoria'] ?? null;
+            $subcategoria = $this->texto($data['sub_categoria'] ?? null);
+            if (!$this->esIdPositivo($idCategoria)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'Debe seleccionar una categoría válida.'], 400);
+            }
+            if ($subcategoria === '' || $this->longitudTexto($subcategoria) > 40) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'El nombre de la subcategoría es obligatorio y no debe exceder 40 caracteres.'], 400);
+            }
             $categoria = new categoria();
-            
-            $id_categoria = $data["id_categoria"];
-            $sub_categoria = $data["sub_categoria"];
+            $categoriaExiste = $categoria->registroExiste('categoria', $idCategoria);
+            if (empty($categoriaExiste['success'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'No se pudo validar la categoría.'], 500);
+            }
+            if (empty($categoriaExiste['existe'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'La categoría seleccionada no existe.'], 400);
+            }
 
             // Llamamos al método del modelo que ejecutará la inserción
-            $user = $categoria->crearSubcategoria($id_categoria, $sub_categoria);
+            $user = $categoria->crearSubcategoria((int)$idCategoria, $subcategoria);
 
             if ( $user['success'] ) {
                 return $this->jsonResponse([
@@ -187,14 +237,27 @@
                 return $this->jsonResponse([
                     'success' => false, 
                     'error' => 3, 
-                    'msj' => 'Error Al Guardar la Subcategoría'
-                ]);
+                    'msj' => 'No se pudo guardar la subcategoría.'
+                ], 500);
             }
         }
 
-        
+        private function texto($valor) {
+            return is_scalar($valor) ? trim((string)$valor) : '';
+        }
+
+        private function esIdPositivo($valor) {
+            return (is_string($valor) || is_int($valor))
+                && filter_var($valor, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false;
+        }
+
+        private function longitudTexto($texto) {
+            $longitud = preg_match_all('/./us', $texto);
+            return $longitud === false ? PHP_INT_MAX : $longitud;
+        }
     }
 
+    // Punto de entrada del endpoint
     if (isset($_POST['action'])) {
         $controller = new LoginAjaxController();
         $controller->ejecutar($_POST['action'], $_POST);

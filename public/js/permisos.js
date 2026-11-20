@@ -1,4 +1,36 @@
+var tablaRoles;
+
+// Fases: inicialización/listado, alta de rol, asignación de módulos, edición y eliminación.
+function mensajeErrorPermisos(jqXHR, mensaje) {
+    return (jqXHR.responseJSON && jqXHR.responseJSON.msj) || mensaje;
+}
+
 $(document).ready(function() {
+    tablaRoles = $('#tabla').DataTable({
+        paging: true,
+        searching: true,
+        ordering: true,
+        info: true,
+        lengthMenu: [5, 10, 20, 30],
+        responsive: true,
+        language: {
+            emptyTable: 'No hay datos disponibles en la tabla',
+            info: 'Mostrando _START_ a _END_ de _TOTAL_ registros',
+            infoEmpty: 'Mostrando 0 a 0 de 0 registros',
+            infoFiltered: '(filtrado de _MAX_ registros totales)',
+            lengthMenu: 'Mostrar _MENU_ registros',
+            loadingRecords: 'Cargando...',
+            processing: 'Procesando...',
+            search: 'Buscar:',
+            zeroRecords: 'No se encontraron resultados',
+            paginate: {
+                first: 'Primero',
+                last: 'Último',
+                next: 'Siguiente',
+                previous: 'Anterior'
+            }
+        }
+    });
     listar();
 
     $('#abrirModal').on('click', function() {
@@ -16,9 +48,7 @@ $(document).ready(function() {
     }
 });
 
-// -------------------------------------------------------------------------------------------------
-// listar roles
-// -------------------------------------------------------------------------------------------------
+// FASE 1: Listado de roles
 function listar() {
     $.ajax({
         url: 'app/controllers/rolController.php',
@@ -28,25 +58,19 @@ function listar() {
     })
     .done(function(data) {
         if (data.success) {
-            var html = '';
+            tablaRoles.clear();
             $.each(data.data.datos, function(index, val) {
-                html += '' +
-                    '<tr>' +
-                        '<td>' + val.id + '</td>' +
-                        '<td>' + val.nombre + '</td>' +
-                        '<td>' +
-                            '<div class="d-flex gap-2">' +
-                                '<button type="button" class="btn bg-deep-orange btn-circle waves-effect waves-circle waves-float boton-update" id="' + val.id + '" title="Editar Rol y Permisos">' +
-                                    '<i class="material-icons">mode_edit</i>' +
-                                '</button>' +
-                                '<button type="button" class="btn bg-red btn-circle waves-effect waves-circle waves-float boton-borrar" id="' + val.id + '" title="Eliminar">' +
-                                    '<i class="material-icons">delete</i>' +
-                                '</button>' +
-                            '</div>' +
-                        '</td>' +
-                    '</tr>';
+                var botones = '<div class="d-flex gap-2">' +
+                    '<button type="button" class="btn bg-deep-orange btn-circle waves-effect waves-circle waves-float boton-update" id="' + val.id + '" title="Editar Rol y Permisos">' +
+                        '<i class="material-icons">mode_edit</i>' +
+                    '</button>' +
+                    '<button type="button" class="btn bg-red btn-circle waves-effect waves-circle waves-float boton-borrar" id="' + val.id + '" title="Eliminar">' +
+                        '<i class="material-icons">delete</i>' +
+                    '</button>' +
+                '</div>';
+                tablaRoles.row.add([val.id, val.nombre, botones]);
             });
-            $('#tabla tbody').html(html);
+            tablaRoles.draw();
         } else {
             console.error('Error listar roles:', data);
             alert(data.msj || 'No se pudo obtener la lista de roles.');
@@ -54,13 +78,11 @@ function listar() {
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         console.error('AJAX error listar:', textStatus, errorThrown);
-        alert('Error al cargar roles.');
+        alert(mensajeErrorPermisos(jqXHR, 'Error al cargar roles.'));
     });
 }
 
-// -------------------------------------------------------------------------------------------------
-// crear rol
-// -------------------------------------------------------------------------------------------------
+// FASE 2: Alta de rol
 $('#guardar').on('click', function() {
     crear();
 });
@@ -105,13 +127,11 @@ function crear() {
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         console.error('AJAX error crear:', textStatus, errorThrown);
-        alert('Error al crear el rol.');
+        alert(mensajeErrorPermisos(jqXHR, 'Error al crear el rol.'));
     });
 }
 
-// -------------------------------------------------------------------------------------------------
-// Gestión de Pila de Permisos
-// -------------------------------------------------------------------------------------------------
+// FASE 3: Administración de módulos y permisos
 $('#btnAgregarModuloNuevo').on('click', function() {
     agregarModuloAPila('#selectModuloNuevo', '#listaModulosPilaNuevo');
 });
@@ -245,14 +265,12 @@ function guardarPermisosAjax(codRol, modulos, callback) {
         } else {
             alert(data.msj || 'Error al guardar permisos');
         }
-    }).fail(function() {
-        alert('Error de conexión al guardar los permisos.');
+    }).fail(function(jqXHR) {
+        alert(mensajeErrorPermisos(jqXHR, 'Error de conexión al guardar los permisos.'));
     });
 }
 
-// -------------------------------------------------------------------------------------------------
-// modificar rol
-// -------------------------------------------------------------------------------------------------
+// FASE 4: Consulta y edición de roles
 $(document).on('click', 'button.boton-update', function() {
     var id = $(this).attr('id');
     $.ajax({
@@ -276,7 +294,7 @@ $(document).on('click', 'button.boton-update', function() {
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         console.error('AJAX error consultar:', textStatus, errorThrown);
-        alert('Error al consultar el rol.');
+        alert(mensajeErrorPermisos(jqXHR, 'Error al consultar el rol.'));
     });
 });
 
@@ -313,13 +331,11 @@ function editar() {
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         console.error('AJAX error editar:', textStatus, errorThrown);
-        alert('Error al actualizar el rol.');
+        alert(mensajeErrorPermisos(jqXHR, 'Error al actualizar el rol.'));
     });
 }
 
-// -------------------------------------------------------------------------------------------------
-// eliminar rol
-// -------------------------------------------------------------------------------------------------
+// FASE 5: Eliminación de roles
 $(document).on('click', 'button.boton-borrar', function() {
     var id = $(this).attr('id');
     if (confirm('¿Estás seguro de eliminar este registro?')) {
@@ -344,6 +360,6 @@ function eliminar(id) {
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         console.error('AJAX error eliminar:', textStatus, errorThrown);
-        alert('Error al eliminar el rol.');
+        alert(mensajeErrorPermisos(jqXHR, 'Error al eliminar el rol.'));
     });
 }

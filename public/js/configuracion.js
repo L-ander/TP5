@@ -17,14 +17,58 @@ class ConfiguracionApp {
             presentacion: [],
             linea_producto: []
         };
+        this.tablas = {};
         this.inicializar();
     }
 
     inicializar() {
+        // FASE 1: Preparación de la vista
         this.enlazarEventos();
+        this.inicializarTablas();
         this.cargarDatos();
     }
 
+    inicializarTablas() {
+        const configuracion = {
+            paging: true,
+            searching: true,
+            ordering: true,
+            info: true,
+            lengthMenu: [5, 10, 20, 30],
+            responsive: true,
+            language: {
+                emptyTable: 'No hay datos disponibles en la tabla',
+                info: 'Mostrando _START_ a _END_ de _TOTAL_ registros',
+                infoEmpty: 'Mostrando 0 a 0 de 0 registros',
+                infoFiltered: '(filtrado de _MAX_ registros totales)',
+                lengthMenu: 'Mostrar _MENU_ registros',
+                loadingRecords: 'Cargando...',
+                processing: 'Procesando...',
+                search: 'Buscar:',
+                zeroRecords: 'No se encontraron resultados',
+                paginate: {
+                    first: 'Primero',
+                    last: 'Último',
+                    next: 'Siguiente',
+                    previous: 'Anterior'
+                }
+            }
+        };
+        const selectores = {
+            categoria: '#tablaCategorias',
+            subcategoria: '#tablaSubcategorias',
+            unidad_medida: '#tablaMedidas',
+            presentacion: '#tablaPresentaciones',
+            linea_producto: '#tablaLineas'
+        };
+
+        Object.keys(selectores).forEach((tabla) => {
+            const $tabla = $(selectores[tabla]);
+            if ($tabla.length) this.tablas[tabla] = $tabla.DataTable(configuracion);
+        });
+    }
+
+    // FASE 2: Eventos de formularios y acciones de tabla
     enlazarEventos() {
         $(document).on('click', '.js-nueva-config, .js-nueva-pl', (evento) => {
             this.abrirFormulario($(evento.currentTarget).data('tabla'));
@@ -51,6 +95,7 @@ class ConfiguracionApp {
         });
     }
 
+    // FASE 3: Acceso al controlador y carga de datos
     api(datos) {
         return $.post('app/controllers/ConfiguracionController.php', datos, null, 'json')
             .fail((xhr) => {
@@ -64,14 +109,14 @@ class ConfiguracionApp {
     }
 
     cargarDatos() {
-        this.cargarTabla('categoria', '#tablaCategorias', 'categorias');
-        this.cargarTabla('subcategoria', '#tablaSubcategorias', 'subcategorias');
-        this.cargarTabla('unidad_medida', '#tablaMedidas', 'medidas');
-        this.cargarTabla('presentacion', '#tablaPresentaciones', 'presentaciones');
-        this.cargarTabla('linea_producto', '#tablaLineas', 'lineas');
+        this.cargarTabla('categoria', 'categorias');
+        this.cargarTabla('subcategoria', 'subcategorias');
+        this.cargarTabla('unidad_medida', 'medidas');
+        this.cargarTabla('presentacion', 'presentaciones');
+        this.cargarTabla('linea_producto', 'lineas');
     }
 
-    cargarTabla(tabla, selector, accion) {
+    cargarTabla(tabla, accion) {
         this.api({ action: accion }).done((respuesta) => {
             if (!respuesta.success) {
                 Swal.fire({
@@ -83,7 +128,10 @@ class ConfiguracionApp {
             }
 
             this.registros[tabla] = respuesta.data || [];
-            $(selector + ' tbody').html(this.generarFilas(tabla));
+            if (this.tablas[tabla]) {
+                const filas = $(this.generarFilas(tabla)).toArray();
+                this.tablas[tabla].clear().rows.add(filas).draw();
+            }
 
             if (tabla === 'categoria') this.cargarOpcionesCategoria();
             if (tabla === 'subcategoria') this.cargarOpcionesSubcategoria();
@@ -130,11 +178,13 @@ class ConfiguracionApp {
         $('#id_subcategoriaEditar').html(opciones);
     }
 
+    // FASE 4: Alta y edición desde los formularios comunes
     abrirFormulario(tabla) {
         if (tabla === 'presentacion' || tabla === 'linea_producto') {
             $('#formPresentacionLinea')[0].reset();
             $('#plId').val('');
             $('#plTabla').val(tabla);
+            $('#plNombre').attr('maxlength', tabla === 'linea_producto' ? 40 : 50);
             $('#grupoPlSubcategoria').toggle(tabla === 'linea_producto');
             $('#plSubcategoriaSelect').prop('required', tabla === 'linea_producto');
             $('#tituloPresentacionLinea').text(
@@ -182,6 +232,7 @@ class ConfiguracionApp {
         );
     }
 
+    // FASE 5: Guardado y eliminación
     guardarConfiguracion() {
         const tabla = $('#configTabla').val();
         const datos = {

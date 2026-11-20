@@ -10,6 +10,8 @@ function mostrarToastUbicacion(tipo, mensaje) {
     });
 }
 
+var tablaCiudadesModulo;
+
 if ($.validator && !$.validator.methods.nombreUbicacion) {
     $.validator.addMethod('nombreUbicacion', function(value, element) {
         return this.optional(element) || /^[\p{L}\p{M}][\p{L}\p{M} .'-]*$/u.test($.trim(value));
@@ -60,6 +62,31 @@ function reiniciarFormularioUbicacion(modal) {
 }
 
 $(document).ready(function() {
+    tablaCiudadesModulo = $('#tablaCiudades').DataTable({
+        paging: true,
+        searching: true,
+        ordering: true,
+        info: true,
+        lengthMenu: [5, 10, 20, 30],
+        responsive: true,
+        language: {
+            emptyTable: 'No hay datos disponibles en la tabla',
+            info: 'Mostrando _START_ a _END_ de _TOTAL_ registros',
+            infoEmpty: 'Mostrando 0 a 0 de 0 registros',
+            infoFiltered: '(filtrado de _MAX_ registros totales)',
+            lengthMenu: 'Mostrar _MENU_ registros',
+            loadingRecords: 'Cargando...',
+            processing: 'Procesando...',
+            search: 'Buscar:',
+            zeroRecords: 'No se encontraron resultados',
+            paginate: {
+                first: 'Primero',
+                last: 'Último',
+                next: 'Siguiente',
+                previous: 'Anterior'
+            }
+        }
+    });
     listarCiudadesModulo();
     cargarEstadosModulo();
 
@@ -276,7 +303,7 @@ function listarCiudadesModulo() {
         data: { action: 'listarCiudades' }
     }).done(function(data) {
         if(data.success) {
-            var $filas = $('<tbody>');
+            var filas = [];
             data.datos.forEach(function(item) {
                 var $fila = $('<tr>');
                 [item.id_ciudad, item.nombre_ciudad, item.municipio, item.estado].forEach(function(valor) {
@@ -305,9 +332,9 @@ function listarCiudadesModulo() {
                 }));
 
                 $fila.append($('<td>').append($editar, ' ', $eliminar));
-                $filas.append($fila);
+                filas.push($fila[0]);
             });
-            $('#tablaCiudades tbody').html($filas.contents());
+            tablaCiudadesModulo.clear().rows.add(filas).draw();
         } else {
             mostrarToastUbicacion('error', data.msj || 'No se pudieron cargar las ciudades.');
         }

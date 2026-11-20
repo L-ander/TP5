@@ -79,11 +79,11 @@ class PresentacionLineaApp {
 
     api(datos) {
         return $.post('app/controllers/PresentacionLineaController.php', datos, null, 'json')
-            .fail(() => {
+            .fail((xhr) => {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error de conexión',
-                    text: 'No se pudo conectar con el servidor.'
+                    text: (xhr.responseJSON && xhr.responseJSON.message) || 'No se pudo conectar con el servidor.'
                 });
             });
     }
@@ -126,6 +126,7 @@ class PresentacionLineaApp {
         $('#formPresentacionLinea')[0].reset();
         $('#plId').val('');
         $('#plTabla').val(tabla);
+        $('#plNombre').attr('maxlength', tabla === 'linea_producto' ? 40 : 50);
         $('#grupoPlSubcategoria').toggle(tabla === 'linea_producto');
         $('#plSubcategoriaSelect').prop('required', tabla === 'linea_producto');
         $('#tituloPresentacionLinea').text('Nuevo ' + (tabla === 'linea_producto' ? 'Línea de Producto' : 'Presentación'));

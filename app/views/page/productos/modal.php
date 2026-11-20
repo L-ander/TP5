@@ -1,3 +1,4 @@
+<!-- Fase 1: formularios de alta y edición de productos -->
 <div class="modal fade" id="modalProducto" tabindex="-1" role="dialog" style="display: none;">
     <div class="modal-dialog modal-lg" role="document"> <div class="modal-content">
             <div class="modal-header modal-col-grey">
@@ -77,7 +78,7 @@
     </div>
 </div>
 
--- --------------------------------------------------------
+<!-- Fase 2: formulario de edición de producto -->
 
 <div class="modal fade" id="modalEditarProducto" tabindex="-1" role="dialog" style="display: none;">
     <div class="modal-dialog modal-lg" role="document"> <div class="modal-content">
@@ -197,7 +198,7 @@
                                     <i class="material-icons">shopping_basket</i>
                                 </span>
                                 <div class="form-line">
-                                    <input type="text" class="form-control" placeholder="Nombre" id="nombrePresentacion" name="nombre">
+                                    <input type="text" class="form-control" placeholder="Nombre" id="nombrePresentacion" name="nombre" maxlength="40">
                                 </div>
                             </div>
                         </div>
@@ -214,7 +215,7 @@
     </div>
 </div>
 
--- --------------------------------------------------------
+<!-- Fase 3: formularios de gestión de líneas de producto -->
 
 <div class="modal fade" id="modalEditarCategoria" tabindex="-1" role="dialog" style="display: none;">
     <div class="modal-dialog modal-lg" role="document"> <div class="modal-content">
@@ -248,7 +249,7 @@
                                     <i class="material-icons">shopping_basket</i>
                                 </span>
                                 <div class="form-line">
-                                    <input type="text" class="form-control" placeholder="Nombre" id="nombreEditarSubcategoria" name="nombre">
+                                    <input type="text" class="form-control" placeholder="Nombre" id="nombreEditarSubcategoria" name="nombre" maxlength="40">
                                 </div>
                             </div>
                         </div>

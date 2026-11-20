@@ -29,6 +29,7 @@
                         </div>
 
                         <div class="body tab-content">
+                            <!-- Fase 1: listado y gestión de roles -->
                             <div role="tabpanel" class="tab-pane fade in active" id="tab_productos">
                                 <div style="margin-left: 15px; ">
                                     <button type="button" class="btn btn-success btn-circle waves-effect" data-toggle="modal" data-target="#modalRol" id="abrirModal">
@@ -52,6 +53,7 @@
                             </div>
                             </div>
 
+                            <!-- Fase 2: cargos de personal asociados a los permisos -->
                             <div role="tabpanel" class="tab-pane fade" id="tabTiposPersonal">
                             <div style="margin-bottom: 15px;">
                                 <button type="button" class="btn btn-success waves-effect" id="btnNuevoTipoPersonal">
@@ -59,7 +61,7 @@
                                 </button>
                             </div>
                             <div class="table-responsive">
-                                <table class="table table-bordered table-striped table-hover">
+                                <table class="table table-bordered table-striped table-hover" id="tablaTiposPersonalTable">
                                     <thead>
                                         <tr>
                                             <th>ID</th>
@@ -87,6 +89,7 @@
     </div>
 </section>
 
+<!-- Formularios de alta y edición de roles/permisos -->
 <?php include 'app/views/page/permisos/modal.php'; ?>
 <?php include 'app/views/page/personal/modal_tipo_personal.php'; ?>
 <script src="public/js/permisos.js"></script>

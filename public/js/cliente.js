@@ -12,8 +12,44 @@ function toast(icon, title) {
 
 var clienteGuardando = false;
 var clienteEditando = false;
+var tablaClientes;
 
 $(document).ready(function(){
+	tablaClientes = $('#tablaclientes').DataTable({
+		paging: true,
+		searching: true,
+		ordering: true,
+		info: true,
+		lengthMenu: [5, 10, 20, 30],
+		autoWidth: false,
+		createdRow: function(row) {
+			var etiquetas = [
+				'ID', 'Cédula', 'Nombre', 'Apellido', 'Sexo', 'Parroquia',
+				'Municipio', 'Estado', 'Dirección', 'Fecha creación', 'Acciones'
+			];
+			$('td', row).each(function(indice) {
+				$(this).attr('data-label', etiquetas[indice]);
+			});
+		},
+		language: {
+			emptyTable: 'No hay datos disponibles en la tabla',
+			info: 'Mostrando _START_ a _END_ de _TOTAL_ registros',
+			infoEmpty: 'Mostrando 0 a 0 de 0 registros',
+			infoFiltered: '(filtrado de _MAX_ registros totales)',
+			lengthMenu: 'Mostrar _MENU_ registros',
+			loadingRecords: 'Cargando...',
+			processing: 'Procesando...',
+			search: 'Buscar:',
+			zeroRecords: 'No se encontraron resultados',
+			paginate: {
+				first: 'Primero',
+				last: 'Último',
+				next: 'Siguiente',
+				previous: 'Anterior'
+			}
+		}
+	});
+
 	listar();
 	cargarCiudades();
 
@@ -184,35 +220,33 @@ function listar(){
 	.done(function(data) {
 
 		if ( data.success ) {
+			tablaClientes.clear();
 
-			let html = '';
+			$.each(data.data.datos, function(index, val) {
+				var botones = '<div class="d-flex gap-2">' +
+					'<button type="button" class="btn bg-deep-orange btn-circle waves-effect waves-circle waves-float boton-update" id="' + val.id + '">' +
+						'<i class="material-icons">mode_edit</i>' +
+					'</button>' +
+					'<button type="button" class="btn bg-red btn-circle waves-effect waves-circle waves-float boton-borrar" id="' + val.id + '">' +
+						'<i class="material-icons">delete</i>' +
+					'</button>' +
+				'</div>';
 
-				$.each(data.data.datos, function(index, val) {
-    html += `
-      <tr>
-        <td> ${val.id}</td>
-        <td> ${val.cedula}</td>
-        <td> ${val.nombre}</td>
-        <td> ${val.apellido}</td>
-        <td> ${val.sexo}</td>
-        <td> ${val.nombre_ciudad}</td>
-        <td> ${val.municipio}</td> <td> ${val.estado}</td>    <td> ${val.direccion}</td>
-        <td> ${val.fecha_creacion}</td>
-          <td>
-            <div class=\"d-flex gap-2\">
-                <button type=\"button\" class=\"btn bg-deep-orange btn-circle waves-effect waves-circle waves-float boton-update\" id=\"${val.id}\">
-                    <i class=\"material-icons\">mode_edit</i>
-                </button>
-                <button type=\"button\" class=\"btn bg-red btn-circle waves-effect waves-circle waves-float boton-borrar\" id=\"${val.id}\">
-                <i class=\"material-icons\">delete</i>
-                </button>
-            </div>
-          </td>
-      </tr>
-    `;
-});
-
-	      $('#tablaclientes tbody').html(html);
+				tablaClientes.row.add([
+					val.id,
+					val.cedula,
+					val.nombre,
+					val.apellido,
+					val.sexo,
+					val.nombre_ciudad,
+					val.municipio,
+					val.estado,
+					val.direccion,
+					val.fecha_creacion,
+					botones
+				]);
+			});
+			tablaClientes.draw();
 
 		} else {
 			toast('error', data.msj || 'Error al listar clientes');
@@ -339,8 +373,9 @@ $("body").on("click","button.boton-update",function(){
 
 			toast('error', data.msj || 'Error al consultar el cliente');
 		}
-	}).fail(function() {
-		toast('error', 'Error al consultar el cliente.');
+	}).fail(function(xhr) {
+		var respuesta = xhr.responseJSON || {};
+		toast('error', respuesta.msj || 'Error al consultar el cliente.');
 	});
 })
 

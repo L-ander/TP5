@@ -7,11 +7,13 @@
 		private $id;
 		private $nombre;
 
+		// FASE 1: Estado del modelo
 		public function setId($id) { $this->id = $id; }
 		public function getId() { return $this->id; }
 		public function setNombre($nombre) { $this->nombre = $nombre; }
 		public function getNombre() { return $this->nombre; }
 
+		// FASE 2: Consultas de roles
 		public function listar() {
 			try {
 				$sql = "SELECT r.id AS id, r.nombre AS nombre FROM roles r ORDER BY r.id";
@@ -35,6 +37,7 @@
 			}
 		}
 
+		// FASE 3: Alta, edición y eliminación de roles
 		public function crear() {
 			try {
 				$conex = parent::conectar();
@@ -113,9 +116,7 @@
 			}
 		}
 
-		// ---------------------------------------------------------------
-		// Permisos (rol <-> módulos)
-		// ---------------------------------------------------------------
+		// FASE 4: Relación de permisos entre roles y módulos
 
 		public function listarModulos() {
 			try {

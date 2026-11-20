@@ -24,7 +24,7 @@
                     </div>
 
                     <div class="body tab-content">
-                        <!-- TAB PRESENTACIONES -->
+                        <!-- Fase 1: listado de presentaciones -->
                         <div role="tabpanel" class="tab-pane fade in active" id="tab_presentaciones">
                             <div style="margin-left: 15px;">
                                 <button type="button" class="btn btn-success btn-circle waves-effect js-nueva-config" data-tabla="presentacion">
@@ -45,7 +45,7 @@
                             </div>
                         </div>
 
-                        <!-- TAB LINEAS DE PRODUCTO -->
+                        <!-- Fase 2: listado de líneas de producto -->
                         <div role="tabpanel" class="tab-pane fade" id="tab_lineas">
                             <div style="margin-left: 15px;">
                                 <button type="button" class="btn btn-success btn-circle waves-effect js-nueva-config" data-tabla="linea_producto">
@@ -73,5 +73,6 @@
     </div>
 </section>
 
+<!-- Formularios compartidos de alta y edición -->
 <?php include 'app/views/page/inventario/modal_presentacion_linea.php'; ?>
 <script src="public/js/configuracion.js"></script>

@@ -12,6 +12,7 @@
 		private $id_medida;
         private $precio;
 
+		// FASE 1: Acceso a los datos del producto
 		public function setId($id) { $this->id = $id; }
 		public function getId() { return $this->id; }
 		public function setNombre($nombre) { $this->nombre = $nombre; }
@@ -25,6 +26,7 @@
 		public function setPrecio($precio) { $this->precio = $precio; }
 		public function getPrecio() { return $this->precio; }
 
+		// FASE 2: Consultas del catálogo
 		public function listar() {
 			try {
 				$sql = "SELECT p.id AS id, p.nombre AS nombre, lp.nombre as nombre_linea, pr.contenido AS nombre_presentacion,  u.medida AS nombre_medida, p.precio AS precio
@@ -37,6 +39,19 @@
 				$stmt->execute();
 				$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 				return array('success' => true, 'datos' => $data);
+			} catch (Exception $e) {
+				return array('success' => false, 'error' => $e->getMessage());
+			}
+		}
+
+		public function verificarExistencia() {
+			try {
+				$sql = "SELECT id FROM producto WHERE nombre = :nombre LIMIT 1";
+				$stmt = parent::conectar()->prepare($sql);
+				$stmt->bindParam(":nombre", $this->nombre, PDO::PARAM_STR);
+				$stmt->execute();
+
+				return array('success' => true, 'existe' => $stmt->fetchColumn() !== false);
 			} catch (Exception $e) {
 				return array('success' => false, 'error' => $e->getMessage());
 			}
@@ -62,6 +77,7 @@
     }
 }
 
+		// FASE 3: Alta de producto
 		public function crear() {
 			try {
 				$sql = "INSERT INTO producto (nombre, id_linea, presentacion, id_medida, precio) VALUES (:nombre, :id_linea, :presentacion, :id_medida, :precio)";
@@ -78,6 +94,7 @@
 			}
 		}
 
+		// FASE 4: Opciones para los formularios
 		public function obtenerLineas() {
 			try {
 				$sql = "SELECT id, nombre FROM linea_producto ORDER BY nombre ASC";
@@ -114,6 +131,7 @@
 			}
 		}
 
+		// FASE 5: Edición y eliminación
 		public function editar() {
 			try {
 				$sql = "UPDATE producto SET nombre = :nombre, id_linea = :id_linea, presentacion = :presentacion, id_medida = :id_medida, precio = :precio WHERE id = :id";

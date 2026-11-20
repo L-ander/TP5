@@ -64,7 +64,11 @@
 
         $cedula = $this->texto($data, 'cedula');
         $cliente->setCedula($cedula);
-        if ($cliente->cedulaExiste()) {
+        $cedulaExiste = $cliente->cedulaExiste();
+        if ($cedulaExiste === null) {
+            return $this->jsonResponse(['success' => false, 'msj' => 'No se pudo validar la cédula.'], 500);
+        }
+        if ($cedulaExiste) {
             return $this->jsonResponse(['success' => false, 'msj' => 'La cédula ya está registrada.'], 400);
         }
         $cliente->setNombre($this->texto($data, 'nombre'));
@@ -135,20 +139,28 @@
 
 
         protected function consultar($data) {
+            $id = $data['id'] ?? null;
+            if (!$this->esIdPositivo($id)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'ID de cliente no válido.'], 400);
+            }
 
             $cliente = new clienteModel();
-            $cliente->setId($data["id"]);
+            $cliente->setId((int)$id);
             $user = $cliente->consultar();
 
-            if ( $user['success'] ) {
+            if (empty($user['success'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'No se pudo consultar el cliente.'], 500);
+            }
 
+            if (empty($user['datos'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'No se encontró el cliente.'], 404);
+            }
+
+            if ( $user['success'] ) {
                 return $this->jsonResponse([
                     'success' => true,
                     'data' => $user
                 ]);
-            } else {
-
-                return $this->jsonResponse(['success' => false, 'error' => 3, 'msj' => 'Error Al Obtener la Informacion']);
             }
         }
 
@@ -164,6 +176,15 @@
             }
 
             $cliente = new clienteModel();
+            $cliente->setId((int)$id);
+            $clienteExistente = $cliente->consultar();
+            if (empty($clienteExistente['success'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'No se pudo consultar el cliente.'], 500);
+            }
+            if (empty($clienteExistente['datos'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'No se encontró el cliente.'], 404);
+            }
+
             $ciudad = $cliente->verificarCiudad((int)$data['id_ciudad']);
             if (empty($ciudad['success'])) {
                 return $this->jsonResponse(['success' => false, 'msj' => 'No se pudo validar la ciudad seleccionada.'], 500);
@@ -172,9 +193,12 @@
                 return $this->jsonResponse(['success' => false, 'msj' => 'La ciudad seleccionada no es válida.'], 400);
             }
 
-            $cliente->setId((int)$id);
             $cliente->setCedula($this->texto($data, 'cedula'));
-            if ($cliente->cedulaExiste((int)$id)) {
+            $cedulaExiste = $cliente->cedulaExiste((int)$id);
+            if ($cedulaExiste === null) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'No se pudo validar la cédula.'], 500);
+            }
+            if ($cedulaExiste) {
                 return $this->jsonResponse(['success' => false, 'msj' => 'La cédula ya está registrada en otro cliente.'], 400);
             }
             $cliente->setNombre($this->texto($data, 'nombre'));
@@ -239,7 +263,7 @@
 
         private function esIdPositivo($valor) {
             return (is_string($valor) || is_int($valor))
-                && preg_match('/^[1-9][0-9]*$/D', (string)$valor) === 1;
+                && filter_var($valor, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false;
         }
 
         private function textoDentroDelLimite($texto, $limite) {
@@ -248,13 +272,23 @@
         }
 
         protected function validarCedula($data) {
-            $cedula = trim((string)($data['cedula'] ?? ''));
+            $cedula = $this->texto($data, 'cedula');
             if (!preg_match('/^[0-9]{5,20}$/', $cedula)) {
                 return $this->jsonResponse(['success' => false, 'msj' => 'La cédula debe contener entre 5 y 20 números.']);
             }
+
+            $id = $data['id'] ?? 0;
+            if ($id !== 0 && $id !== '0' && $id !== '' && !$this->esIdPositivo($id)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'ID de cliente no válido.'], 400);
+            }
+
             $cliente = new clienteModel();
             $cliente->setCedula($cedula);
-            $existe = $cliente->cedulaExiste((int)($data['id'] ?? 0));
+            $existe = $cliente->cedulaExiste((int)$id);
+            if ($existe === null) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'No se pudo validar la cédula.'], 500);
+            }
+
             return $this->jsonResponse([
                 'success' => !$existe,
                 'msj' => $existe ? 'La cédula ya está registrada.' : ''
@@ -262,18 +296,31 @@
         }
 
         protected function eliminar($data) {
-        $cliente = new clienteModel();
-        $cliente->setId($data["id"]);
-        $user = $cliente->eliminar();
+            $id = $data['id'] ?? null;
+            if (!$this->esIdPositivo($id)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'ID de cliente no válido.'], 400);
+            }
 
-        if ( $user['success'] ) {
-        return $this->jsonResponse(['success' => true]);
-        } else {
-       
-        return $this->jsonResponse(['success' => false, 'error' => 3, 'msj' => 'Error al eliminar. Verifique que el cliente no tenga pedidos asociados en el sistema.']);
+            $cliente = new clienteModel();
+            $cliente->setId((int)$id);
+            $clienteExistente = $cliente->consultar();
+            if (empty($clienteExistente['success'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'No se pudo consultar el cliente.'], 500);
+            }
+            if (empty($clienteExistente['datos'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'No se encontró el cliente.'], 404);
+            }
+
+            $user = $cliente->eliminar();
+            if ($user['success']) {
+                return $this->jsonResponse(['success' => true]);
+            }
+
+            return $this->jsonResponse(['success' => false, 'error' => 3, 'msj' => 'Error al eliminar. Verifique que el cliente no tenga pedidos asociados en el sistema.'], 409);
         }
-        }
+
     }
+
     if (isset($_POST['action'])) {
         $controller = new LoginAjaxController();
         $controller->ejecutar($_POST['action'], $_POST);

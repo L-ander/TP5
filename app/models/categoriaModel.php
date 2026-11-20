@@ -3,7 +3,8 @@ require_once '../../config/conex.php';
 
 class categoria extends Conexion{
 
-private $id;
+	// FASE 1: Estado del modelo
+	private $id;
 		private $nombre;
 		private $id_subcategoria;
 
@@ -16,6 +17,7 @@ private $id;
 		public function getSubcategoria(){ return $this->id_subcategoria; }
 
 
+		// FASE 2: Consultas y catálogos
 		public function listarC(){
     		try {
         		$sql = "SELECT lp.id, lp.nombre AS linea_producto, lp.id_subcategoria, sc.sub_categoria, sc.id_categoria, c.categoria
@@ -63,6 +65,7 @@ private $id;
 
 		} #Fin Funcion
 
+		// FASE 3: Alta y edición de líneas
 		public function crearC(){
 
 			try {
@@ -78,9 +81,6 @@ private $id;
 				$result = array('success' => true);
 
 			} catch ( Exception $e ) {
-
-				var_dump($e->getMessage());
-				exit();
 				$result = array('success' => false, 'error' => 1 );
 			}
 
@@ -119,6 +119,21 @@ private $id;
     		}
 		}
 
+		public function registroExiste($tabla, $id){
+			$tablasPermitidas = array('categoria', 'subcategoria', 'linea_producto');
+			if (!in_array($tabla, $tablasPermitidas, true) || filter_var($id, FILTER_VALIDATE_INT, array('options' => array('min_range' => 1))) === false) {
+				return array('success' => false);
+			}
+
+			try {
+				$stmt = parent::conectar()->prepare("SELECT id FROM $tabla WHERE id = ? LIMIT 1");
+				$stmt->execute(array((int)$id));
+				return array('success' => true, 'existe' => $stmt->fetchColumn() !== false);
+			} catch (Exception $e) {
+				return array('success' => false, 'error' => $e->getMessage());
+			}
+		}
+
 		public function editarC(){
 
 			try {
@@ -147,6 +162,7 @@ private $id;
 
 		} #Fin Funcion
 
+		// FASE 4: Eliminación de líneas
 		public function eliminarC(){
 
 			try {
@@ -174,6 +190,7 @@ private $id;
 		} #Fin Funcion
 
 
+		// FASE 5: Alta de subcategorías
 		public function crearSubcategoria($id_categoria, $sub_categoria) {
         try {
             // Reemplaza $this->db por la variable de conexión PDO que maneje tu proyecto

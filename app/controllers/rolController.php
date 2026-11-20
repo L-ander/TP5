@@ -11,6 +11,7 @@
             'listarModulos', 'obtenerPermisosRol', 'guardarPermisosRol'
         ];
 
+        // FASE 1: Autorización y despacho de acciones
         public function ejecutar($action, $data) {
             if (session_status() !== PHP_SESSION_ACTIVE) {
                 $this->startSession();
@@ -28,7 +29,8 @@
             return $this->$action($data);
         }
 
-        // Convierte la respuesta del modelo al formato que espera permisos.js
+        // FASE 2: Adaptación de respuestas del modelo
+        // Convierte la respuesta al formato que espera permisos.js.
         private function responder($r) {
             if (!empty($r['success'])) {
                 return $this->jsonResponse(['success' => true, 'data' => $r]);
@@ -42,20 +44,34 @@
             ]);
         }
 
+        // FASE 3: Consulta y mantenimiento de roles
         protected function listar($data) {
             return $this->responder((new rolModel())->listar());
         }
 
         protected function consultar($data) {
+            $id = $data['id'] ?? null;
+            if (!$this->esIdPositivo($id)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'ID de rol no válido.'], 400);
+            }
+
             $rol = new rolModel();
-            $rol->setId((int)($data['id'] ?? 0));
-            return $this->responder($rol->consultar());
+            $rol->setId((int)$id);
+            $resultado = $rol->consultar();
+            if (empty($resultado['success'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'No se pudo consultar el rol.'], 500);
+            }
+            if (empty($resultado['datos'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'El rol no existe.'], 404);
+            }
+
+            return $this->responder($resultado);
         }
 
         protected function crear($data) {
-            $nombre = trim($data['nombre'] ?? '');
-            if ($nombre === '' || mb_strlen($nombre) > 20) {
-                return $this->jsonResponse(['success' => false, 'msj' => 'El nombre es obligatorio (máximo 20 caracteres).']);
+            $nombre = $this->texto($data['nombre'] ?? null);
+            if ($nombre === '' || $this->longitudTexto($nombre) > 20) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'El nombre es obligatorio y no debe exceder 20 caracteres.'], 400);
             }
             $rol = new rolModel();
             $rol->setNombre($nombre);
@@ -63,46 +79,139 @@
         }
 
         protected function editar($data) {
-            $nombre = trim($data['nombre'] ?? '');
-            if ($nombre === '' || mb_strlen($nombre) > 20) {
-                return $this->jsonResponse(['success' => false, 'msj' => 'El nombre es obligatorio (máximo 20 caracteres).']);
+            $id = $data['id'] ?? null;
+            if (!$this->esIdPositivo($id)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'ID de rol no válido.'], 400);
             }
+
+            $nombre = $this->texto($data['nombre'] ?? null);
+            if ($nombre === '' || $this->longitudTexto($nombre) > 20) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'El nombre es obligatorio y no debe exceder 20 caracteres.'], 400);
+            }
+
+            $respuesta = $this->validarRolExistente($id);
+            if ($respuesta !== null) {
+                return $respuesta;
+            }
+
             $rol = new rolModel();
-            $rol->setId((int)($data['id'] ?? 0));
+            $rol->setId((int)$id);
             $rol->setNombre($nombre);
             return $this->responder($rol->editar());
         }
 
         protected function eliminar($data) {
+            $id = $data['id'] ?? null;
+            if (!$this->esIdPositivo($id)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'ID de rol no válido.'], 400);
+            }
+
+            $respuesta = $this->validarRolExistente($id);
+            if ($respuesta !== null) {
+                return $respuesta;
+            }
+
             $rol = new rolModel();
-            $rol->setId((int)($data['id'] ?? 0));
+            $rol->setId((int)$id);
             return $this->responder($rol->eliminar());
         }
 
+        // FASE 4: Gestión de permisos por módulo
         protected function listarModulos($data) {
             return $this->responder((new rolModel())->listarModulos());
         }
 
         protected function obtenerPermisosRol($data) {
+            $idRol = $data['cod_rol'] ?? null;
+            if (!$this->esIdPositivo($idRol)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'Rol no válido.'], 400);
+            }
+
+            $respuesta = $this->validarRolExistente($idRol);
+            if ($respuesta !== null) {
+                return $respuesta;
+            }
+
             $rol = new rolModel();
-            $rol->setId((int)($data['cod_rol'] ?? 0));
+            $rol->setId((int)$idRol);
             return $this->responder($rol->obtenerPermisosRol());
         }
 
         protected function guardarPermisosRol($data) {
-            $idRol = (int)($data['cod_rol'] ?? 0);
-            if ($idRol <= 0) {
-                return $this->jsonResponse(['success' => false, 'msj' => 'Rol no válido.']);
+            $idRol = $data['cod_rol'] ?? null;
+            if (!$this->esIdPositivo($idRol)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'Rol no válido.'], 400);
             }
+
+            $respuesta = $this->validarRolExistente($idRol);
+            if ($respuesta !== null) {
+                return $respuesta;
+            }
+
             // Si se quitan todos los módulos, jQuery no envía "modulos": se toma como lista vacía
-            $modulos = (isset($data['modulos']) && is_array($data['modulos'])) ? $data['modulos'] : [];
+            if (array_key_exists('modulos', $data) && !is_array($data['modulos'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'La lista de módulos no es válida.'], 400);
+            }
+            $modulos = $data['modulos'] ?? [];
+
+            $resultadoModulos = (new rolModel())->listarModulos();
+            if (empty($resultadoModulos['success'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'No se pudieron validar los módulos.'], 500);
+            }
+
+            $modulosPermitidos = array_map('intval', array_column($resultadoModulos['datos'], 'id'));
+            $modulosValidados = [];
+            foreach ($modulos as $idModulo) {
+                if (!$this->esIdPositivo($idModulo)) {
+                    return $this->jsonResponse(['success' => false, 'msj' => 'La lista contiene un módulo no válido.'], 400);
+                }
+
+                $idModulo = (int)$idModulo;
+                if (!in_array($idModulo, $modulosPermitidos, true)) {
+                    return $this->jsonResponse(['success' => false, 'msj' => 'La lista contiene un módulo no disponible.'], 400);
+                }
+                if (in_array($idModulo, $modulosValidados, true)) {
+                    return $this->jsonResponse(['success' => false, 'msj' => 'No se puede asignar un módulo más de una vez.'], 400);
+                }
+                $modulosValidados[] = $idModulo;
+            }
 
             $rol = new rolModel();
-            $rol->setId($idRol);
-            return $this->responder($rol->guardarPermisosRol($modulos));
+            $rol->setId((int)$idRol);
+            return $this->responder($rol->guardarPermisosRol($modulosValidados));
+        }
+
+        private function validarRolExistente($id) {
+            $rol = new rolModel();
+            $rol->setId((int)$id);
+            $resultado = $rol->consultar();
+
+            if (empty($resultado['success'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'No se pudo validar el rol.'], 500);
+            }
+            if (empty($resultado['datos'])) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'El rol no existe.'], 404);
+            }
+
+            return null;
+        }
+
+        private function texto($valor) {
+            return is_scalar($valor) ? trim((string)$valor) : '';
+        }
+
+        private function longitudTexto($texto) {
+            $longitud = preg_match_all('/./us', $texto);
+            return $longitud === false ? PHP_INT_MAX : $longitud;
+        }
+
+        private function esIdPositivo($valor) {
+            return (is_string($valor) || is_int($valor))
+                && filter_var($valor, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false;
         }
     }
 
+    // Punto de entrada del endpoint
     if (isset($_POST['action'])) {
         $controller = new RolAjaxController();
         $controller->ejecutar($_POST['action'], $_POST);

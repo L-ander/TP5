@@ -79,7 +79,7 @@
                         <!--LISTADO DE USUARIOS-->
                         <div role="tabpanel" class="tab-pane fade" id="tabListadoUsuarios">
                             <div class="table-responsive">
-                                <table class="table table-bordered table-striped table-hover">
+                                <table class="table table-bordered table-striped table-hover" id="tablaUsuariosRegistradosTable">
                                     <thead>
                                         <tr>
                                             <th>Username</th>
@@ -102,7 +102,7 @@
                                 </button>
                             </div>
                             <div class="table-responsive">
-                                <table class="table table-bordered table-striped table-hover">
+                                <table class="table table-bordered table-striped table-hover" id="tablaTiposPersonalTable">
                                     <thead>
                                         <tr>
                                             <th>ID</th>

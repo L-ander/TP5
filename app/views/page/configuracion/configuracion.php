@@ -28,25 +28,63 @@
                 
             </div>
             <div class="body tab-content">
+                <!-- Fase 1: unidades de medida -->
                 <div role="tabpanel" class="tab-pane fade in active" id="configMedidas">
                     <div class="config-toolbar"><button class="btn btn-success js-nueva-config" data-tabla="unidad_medida"><i class="material-icons">add</i> Nueva unidad</button></div>
-                    <div class="table-responsive"><table class="table table-bordered table-striped" id="tablaMedidas"><thead><tr><th>ID</th><th>Unidad</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped" id="tablaMedidas">
+                            <thead>
+                                <tr><th>ID</th><th>Unidad</th><th>Acciones</th></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
+                <!-- Fase 2: categorías y subcategorías -->
                 <div role="tabpanel" class="tab-pane fade" id="configCategorias">
                     <div class="config-toolbar"><button class="btn btn-success js-nueva-config" data-tabla="categoria"><i class="material-icons">add</i> Nueva categoría</button></div>
-                    <div class="table-responsive"><table class="table table-bordered table-striped" id="tablaCategorias"><thead><tr><th>ID</th><th>Nombre</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped" id="tablaCategorias">
+                            <thead>
+                                <tr><th>ID</th><th>Nombre</th><th>Acciones</th></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
                 <div role="tabpanel" class="tab-pane fade" id="configSubcategorias">
                     <div class="config-toolbar"><button class="btn btn-success js-nueva-config" data-tabla="subcategoria"><i class="material-icons">add</i> Nueva subcategoría</button></div>
-                    <div class="table-responsive"><table class="table table-bordered table-striped" id="tablaSubcategorias"><thead><tr><th>ID</th><th>Categoría</th><th>Subcategoría</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped" id="tablaSubcategorias">
+                            <thead>
+                                <tr><th>ID</th><th>Categoría</th><th>Subcategoría</th><th>Acciones</th></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
+                <!-- Fase 3: líneas y presentaciones -->
                 <div role="tabpanel" class="tab-pane fade" id="tab_lineas">
                     <div class="config-toolbar"><button class="btn btn-success js-nueva-pl" data-tabla="linea_producto"><i class="material-icons">add</i> Nueva Línea de Producto</button></div>
-                    <div class="table-responsive"><table class="table table-bordered table-striped" id="tablaLineas"><thead><tr><th>ID</th><th>Subcategoría</th><th>Nombre</th><th>Opciones</th></tr></thead><tbody></tbody></table></div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped" id="tablaLineas">
+                            <thead>
+                                <tr><th>ID</th><th>Subcategoría</th><th>Nombre</th><th>Opciones</th></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
                 <div role="tabpanel" class="tab-pane fade" id="tab_presentaciones">
                     <div class="config-toolbar"><button class="btn btn-success js-nueva-pl" data-tabla="presentacion"><i class="material-icons">add</i> Nueva Presentación</button></div>
-                    <div class="table-responsive"><table class="table table-bordered table-striped" id="tablaPresentaciones"><thead><tr><th>ID</th><th>Contenido</th><th>Opciones</th></tr></thead><tbody></tbody></table></div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped" id="tablaPresentaciones">
+                            <thead>
+                                <tr><th>ID</th><th>Contenido</th><th>Opciones</th></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -61,7 +99,7 @@
             <form id="formConfiguracion">
                 <input type="hidden" id="configId"><input type="hidden" id="configTabla">
                 <div id="grupoCategoria" class="form-group" style="display:none;"><label for="id_categoria">Categoría</label><select class="form-control" id="id_categoria" required></select></div>
-                <div class="form-group"><label for="configNombre">Nombre</label><input type="text" class="form-control" id="configNombre" maxlength="50" required></div>
+                <div class="form-group"><label for="configNombre">Nombre</label><input type="text" class="form-control" id="configNombre" maxlength="40" required></div>
             </form>
         </div>
         <div class="modal-footer"><button type="submit" form="formConfiguracion" class="btn btn-success">GUARDAR</button><button type="button" class="btn btn-default" data-dismiss="modal">CANCELAR</button></div>

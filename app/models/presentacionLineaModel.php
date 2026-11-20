@@ -36,6 +36,22 @@
             }
         }
 
+        public function registroExiste($tabla, $id) {
+            $tablasPermitidas = array('presentacion', 'linea_producto', 'subcategoria');
+            if (!in_array($tabla, $tablasPermitidas, true) ||
+                filter_var($id, FILTER_VALIDATE_INT, array('options' => array('min_range' => 1))) === false) {
+                return array('success' => false);
+            }
+
+            try {
+                $stmt = parent::conectar()->prepare("SELECT id FROM $tabla WHERE id = ? LIMIT 1");
+                $stmt->execute(array((int)$id));
+                return array('success' => true, 'existe' => $stmt->fetchColumn() !== false);
+            } catch (Exception $e) {
+                return array('success' => false, 'error' => $e->getMessage());
+            }
+        }
+
         public function crearPresentacion() {
             try {
                 $sql = "INSERT INTO presentacion (contenido) VALUES (:contenido)";

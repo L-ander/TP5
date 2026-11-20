@@ -202,6 +202,7 @@
 
 		public function cedulaExiste($excluirId = 0){
 			try {
+				$this->asegurarCedula();
 				$sql = "SELECT id FROM cliente WHERE cedula = :cedula";
 				if ((int)$excluirId > 0) {
 					$sql .= " AND id <> :id";
@@ -214,7 +215,7 @@
 				$stmt->execute();
 				return $stmt->fetchColumn() !== false;
 			} catch (Exception $e) {
-				return false;
+				return null;
 			}
 		}
 		

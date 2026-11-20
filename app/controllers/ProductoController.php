@@ -9,6 +9,7 @@
 
     class LoginAjaxController extends BaseController {
 
+        // FASE 1: Enrutamiento de acciones AJAX
         public function ejecutar($action, $data) {
             $method = lcfirst($action);
 
@@ -19,6 +20,7 @@
             }
         }
 
+        // FASE 2: Consultas del catálogo
         protected function listar($data) {
 
             $producto = new productoModel();
@@ -39,6 +41,7 @@
             }
         }
 
+        // FASE 3: Alta de productos
         protected function crear($data) {
 
             // var_dump( $data );
@@ -49,6 +52,18 @@
             $presentacion = $data["presentacion"] ?? '';
             $id_medida = $data["id_medida"] ?? '';
             $precio = $data["precio"] ?? '';
+
+
+            
+            if (empty($nombre)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'El nombre del producto es obligatorio.'],400);
+            }
+
+            //validar que el nombre no acepte unicamente espacios en blanco
+
+            if (empty(trim($nombre))) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'El nombre del producto no puede estar vacío o contener solo espacios en blanco.'],400);
+            }
 
             if (empty($nombre) || mb_strlen($nombre) > 40) {
                 return $this->jsonResponse(['success' => false, 'msj' => 'El nombre del producto es inválido o excede los 40 caracteres.'],400);
@@ -65,6 +80,27 @@
             if (!is_numeric($precio) || !is_finite((float)$precio) || (float)$precio <= 0 || !preg_match('/^(?=.*[1-9])\d+(?:\.\d{1,6})?$/', (string)$precio)) {
                 return $this->jsonResponse(['success' => false, 'msj' => 'El precio debe ser mayor que 0 y tener como máximo 6 decimales.'],400);
             }
+
+
+            //Validar si ya existe un producto con el mismo nombre en la base de datos antes de crear uno nuevo
+
+            if (!empty($nombre)) {
+                $producto = new productoModel();
+                $producto->setNombre($nombre);
+                $existeProducto = $producto->verificarExistencia();
+
+                if (!$existeProducto['success']) {
+                    return $this->jsonResponse([
+                        'success' => false,
+                        'msj' => 'No se pudo verificar si el producto ya existe.'
+                    ], 500);
+                }
+
+                if ($existeProducto['existe']) {
+                    return $this->jsonResponse(['success' => false, 'msj' => 'Ya existe un producto con el mismo nombre.'], 400);
+                }
+            }
+
 
             $producto = new productoModel();
             $producto->setNombre($nombre);
@@ -89,7 +125,7 @@
             }
         }
 
-
+        // FASE 4: Datos auxiliares para los formularios
         protected function cargarLineas($data) {
             $producto = new productoModel();
             $user = $producto->obtenerLineas(); // Este método lo crearemos en el modelo
@@ -144,6 +180,7 @@
 
 
 
+        // FASE 5: Consulta y edición de un producto
         protected function consultar($data) {
 
             $producto = new productoModel();
@@ -174,9 +211,20 @@
             $id_medida = $data["id_medida"] ?? '';
             $precio = $data["precio"] ?? '';
 
+            //Validaciones de los campos
+
+            //1 validar si el formulario esta vacio para señalar que llene todos los campos.
+
+
+
             if (empty($id)) {
                 return $this->jsonResponse(['success' => false, 'msj' => 'ID de producto no válido.'],400);
             }
+
+            if (empty($nombre)) {
+                return $this->jsonResponse(['success' => false, 'msj' => 'El nombre del producto es obligatorio.'],400);
+            }
+  
             if (empty($nombre) || mb_strlen($nombre) > 40) {
                 return $this->jsonResponse(['success' => false, 'msj' => 'El nombre del producto es inválido o excede los 40 caracteres.'],400);
             }
@@ -217,6 +265,7 @@
             }
         }
 
+        // FASE 6: Eliminación de productos
         protected function eliminar($data) {
 
             // var_dump( $data );
@@ -248,6 +297,7 @@
         }
     }
 
+    // Punto de entrada del endpoint
     if (isset($_POST['action'])) {
         $controller = new LoginAjaxController();
         $controller->ejecutar($_POST['action'], $_POST);

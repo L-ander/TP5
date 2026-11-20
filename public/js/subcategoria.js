@@ -1,3 +1,4 @@
+// Flujo de líneas de producto: inicialización, listado, alta, edición y eliminación.
 $(document).ready(function () {
     $('#modalCategoria').modal('hide');
     $('#modalEditarCategoria').modal('hide');
@@ -9,14 +10,14 @@ $(document).ready(function () {
         id_subcategoria: { required: true },
         nombre: {
             required: true,
-            maxlength: 100,
+            maxlength: 40,
             normalizer: function (value) { return $.trim(value); }
         }
     }, {
         id_subcategoria: { required: 'Seleccione una subcategoría.' },
         nombre: {
             required: 'El nombre de la línea es obligatorio.',
-            maxlength: 'El nombre no puede exceder los 100 caracteres.'
+            maxlength: 'El nombre no puede exceder los 40 caracteres.'
         }
     }, crearC);
 
@@ -24,14 +25,14 @@ $(document).ready(function () {
         id_subcategoria: { required: true },
         nombre: {
             required: true,
-            maxlength: 100,
+            maxlength: 40,
             normalizer: function (value) { return $.trim(value); }
         }
     }, {
         id_subcategoria: { required: 'Seleccione una subcategoría.' },
         nombre: {
             required: 'El nombre de la línea es obligatorio.',
-            maxlength: 'El nombre no puede exceder los 100 caracteres.'
+            maxlength: 'El nombre no puede exceder los 40 caracteres.'
         }
     }, editarC);
 
@@ -54,6 +55,7 @@ $(document).ready(function () {
     });
 });
 
+// FASE 1: Validación de los formularios
 function configurarValidacionSubcategoria(selector, rules, messages, submitHandler) {
     $(selector).validate({
         rules: rules,
@@ -84,6 +86,7 @@ function configurarValidacionSubcategoria(selector, rules, messages, submitHandl
     });
 }
 
+// FASE 2: Listado de líneas de producto
 function listarC() {
     $.ajax({
         url: 'app/controllers/categoriaController.php',
@@ -117,15 +120,13 @@ function listarC() {
         } else {
             mostrarErrorSubcategoria(data.msj || 'No se pudo cargar la lista.');
         }
-    }).fail(function () {
-        mostrarErrorSubcategoria('Error al cargar la lista.');
+    }).fail(function (xhr) {
+        mostrarErrorSubcategoria(mensajeErrorSubcategoria(xhr, 'Error al cargar la lista.'));
     });
 }
 
 
-// animaciones
-
-//animacion guardar
+// FASE 3: Mensajes y confirmaciones
 
 function mostrarExitoSubcategoria(mensaje) {
     $.toast({
@@ -151,6 +152,9 @@ function mostrarErrorSubcategoria(mensaje) {
     });
 }
 
+function mensajeErrorSubcategoria(xhr, mensaje) {
+    return (xhr.responseJSON && xhr.responseJSON.msj) || mensaje;
+}
 
 //animacion eliminar
 
@@ -178,6 +182,7 @@ function confirmarEliminacionSubcategoria(id, nombreProducto) {
 
 
 
+// FASE 4: Alta y carga de subcategorías
 function crearC() {
     $.ajax({
         url: 'app/controllers/categoriaController.php',
@@ -196,8 +201,8 @@ function crearC() {
         } else {
             mostrarErrorSubcategoria(data.msj || 'No se pudo guardar la línea.');
         }
-    }).fail(function () {
-        mostrarErrorSubcategoria('Error al guardar la línea.');
+    }).fail(function (xhr) {
+        mostrarErrorSubcategoria(mensajeErrorSubcategoria(xhr, 'Error al guardar la línea.'));
     });
 }
 
@@ -218,11 +223,12 @@ function cargarSubategorias() {
         } else {
             mostrarErrorSubcategoria(data.msj || 'No se pudieron cargar las subcategorías.');
         }
-    }).fail(function () {
-        mostrarErrorSubcategoria('Error al cargar las subcategorías.');
+    }).fail(function (xhr) {
+        mostrarErrorSubcategoria(mensajeErrorSubcategoria(xhr, 'Error al cargar las subcategorías.'));
     });
 }
 
+// FASE 5: Consulta y edición de líneas
 $('body').on('click', 'button.boton-update-categoria', function () {
     const id = $(this).attr('id');
     $.ajax({
@@ -244,8 +250,8 @@ $('body').on('click', 'button.boton-update-categoria', function () {
         } else {
             mostrarErrorSubcategoria(data.msj || 'No se pudo consultar la línea.');
         }
-    }).fail(function () {
-        mostrarErrorSubcategoria('Error al consultar la línea.');
+    }).fail(function (xhr) {
+        mostrarErrorSubcategoria(mensajeErrorSubcategoria(xhr, 'Error al consultar la línea.'));
     });
 });
 
@@ -268,11 +274,12 @@ function editarC() {
         } else {
             mostrarErrorSubcategoria(data.msj || 'No se pudo actualizar la línea.');
         }
-    }).fail(function () {
-        mostrarErrorSubcategoria('Error al actualizar la línea.');
+    }).fail(function (xhr) {
+        mostrarErrorSubcategoria(mensajeErrorSubcategoria(xhr, 'Error al actualizar la línea.'));
     });
 }
 
+// FASE 6: Eliminación de líneas
 $('body').on('click', 'button.boton-borrar-categoria', function () {
     const id = $(this).attr('id');
     const nombre = $(this).closest('tr').find('td:eq(1)').text();
@@ -292,7 +299,7 @@ function eliminarC(id) {
         } else {
             mostrarErrorSubcategoria(data.msj || 'No se pudo eliminar la categoría.');
         }
-    }).fail(function () {
-        mostrarErrorSubcategoria('Error al eliminar la categoría.');
+    }).fail(function (xhr) {
+        mostrarErrorSubcategoria(mensajeErrorSubcategoria(xhr, 'Error al eliminar la línea.'));
     });
 }

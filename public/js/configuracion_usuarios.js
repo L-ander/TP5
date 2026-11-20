@@ -1,4 +1,36 @@
 $(document).ready(function() {
+
+    const dataTableConfig = {
+        paging: true,
+        searching: true,
+        ordering: true,
+        info: true,
+        lengthMenu: [5, 10, 20, 30],
+        responsive: true,
+        language: {
+            emptyTable: 'No hay datos disponibles en la tabla',
+            info: 'Mostrando _START_ a _END_ de _TOTAL_ registros',
+            infoEmpty: 'Mostrando 0 a 0 de 0 registros',
+            infoFiltered: '(filtrado de _MAX_ registros totales)',
+            lengthMenu: 'Mostrar _MENU_ registros',
+            loadingRecords: 'Cargando...',
+            processing: 'Procesando...',
+            search: 'Buscar:',
+            zeroRecords: 'No se encontraron resultados',
+            paginate: {
+                first: 'Primero',
+                last: 'Último',
+                next: 'Siguiente',
+                previous: 'Anterior'
+            }
+        }
+    };
+    const tablaUsuarios = $('#tablaUsuariosRegistradosTable').length
+        ? $('#tablaUsuariosRegistradosTable').DataTable(dataTableConfig)
+        : null;
+    const tablaTiposPersonal = $('#tablaTiposPersonalTable').length
+        ? $('#tablaTiposPersonalTable').DataTable(dataTableConfig)
+        : null;
     
     //1. CONFIGURACION BASE
     const api = (data, cb) => $.post('app/controllers/PersonalController.php', data, cb, 'json');
@@ -125,28 +157,29 @@ $(document).ready(function() {
     function listarUsuarios() {
         api({ action: 'listar_usuarios' }, function(res) {
             if (res.success) {
-                let html = '';
+                if (!tablaUsuarios) return;
+                tablaUsuarios.clear();
                 res.data.forEach(u => {
                     let estado = (u.status == 1) 
                         ? '<span class="label bg-green">Activo</span>' 
                         : '<span class="label bg-red">Bloqueado</span>';
                     
-                    html += `<tr>
-                        <td><b>${u.username}</b></td>
-                        <td>${u.nombre} ${u.apellido}</td>
-                        <td>${u.nombre_rol}</td>
-                        <td>${estado}</td>
-                        <td>
+                    tablaUsuarios.row.add([
+                        `<b>${u.username}</b>`,
+                        `${u.nombre} ${u.apellido}`,
+                        u.nombre_rol,
+                        estado,
+                        `
                             <button class="btn btn-warning btn-xs waves-effect js-editar-usuario" title="Editar Credenciales" data-usuario='${JSON.stringify(u).replace(/'/g, "&#39;")}'>
                                 <i class="material-icons">edit</i>
                             </button>
                             <button class="btn btn-danger btn-xs waves-effect js-eliminar-usuario" title="Revocar Acceso" data-id="${u.id}" data-user="${u.username}">
                                 <i class="material-icons">delete</i>
                             </button>
-                        </td>
-                    </tr>`;
+                        `
+                    ]);
                 });
-                $('#tablaUsuariosRegistrados').html(html);
+                tablaUsuarios.draw();
             }
         });
     }
@@ -240,22 +273,23 @@ $(document).ready(function() {
     function listarTiposPersonal() {
         api({ action: 'tipos_personal' }, function(res) {
             if (res.success) {
-                let html = '';
+                if (!tablaTiposPersonal) return;
+                tablaTiposPersonal.clear();
                 res.data.forEach(t => {
-                    html += `<tr>
-                        <td>${t.id}</td>
-                        <td><b>${t.nombre}</b></td>
-                        <td>
+                    tablaTiposPersonal.row.add([
+                        t.id,
+                        `<b>${t.nombre}</b>`,
+                        `
                             <button class="btn btn-warning btn-xs waves-effect js-editar-tipo" title="Editar" data-id="${t.id}" data-nombre="${t.nombre}">
                                 <i class="material-icons">edit</i>
                             </button>
                             <button class="btn btn-danger btn-xs waves-effect js-eliminar-tipo" title="Eliminar" data-id="${t.id}" data-nombre="${t.nombre}">
                                 <i class="material-icons">delete</i>
                             </button>
-                        </td>
-                    </tr>`;
+                        `
+                    ]);
                 });
-                $('#tablaTiposPersonal').html(html);
+                tablaTiposPersonal.draw();
             }
         });
     }

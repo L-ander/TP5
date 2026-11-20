@@ -8,6 +8,7 @@ class ConfiguracionModel extends Conexion {
     private $idCategoria;
     private $idSubcategoria;
 
+    // FASE 1: Estado del modelo
     public function setId($id) { $this->id = $id; }
     public function getId() { return $this->id; }
     public function setNombre($nombre) { $this->nombre = $nombre; }
@@ -17,6 +18,7 @@ class ConfiguracionModel extends Conexion {
     public function setIdSubcategoria($idSubcategoria) { $this->idSubcategoria = $idSubcategoria; }
     public function getIdSubcategoria() { return $this->idSubcategoria; }
 
+    // FASE 2: Consultas de categorías, subcategorías y catálogos
     public function listarCategorias() {
         return $this->listar('SELECT id, categoria AS nombre FROM categoria ORDER BY categoria ASC');
     }
@@ -45,6 +47,22 @@ class ConfiguracionModel extends Conexion {
         );
     }
 
+    public function registroExiste($tabla, $id) {
+        $tablasPermitidas = ['categoria', 'subcategoria', 'unidad_medida', 'presentacion', 'linea_producto'];
+        if (!in_array($tabla, $tablasPermitidas, true) || !$this->idValido($id)) {
+            return ['success' => false];
+        }
+
+        try {
+            $stmt = parent::conectar()->prepare("SELECT id FROM $tabla WHERE id = ? LIMIT 1");
+            $stmt->execute([(int)$id]);
+            return ['success' => true, 'existe' => $stmt->fetchColumn() !== false];
+        } catch (Exception $e) {
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    // FASE 3: Altas y ediciones de catálogos
     public function crearCategoria() {
         return $this->guardar(
             'INSERT INTO categoria (categoria) VALUES (?)',
@@ -131,6 +149,7 @@ class ConfiguracionModel extends Conexion {
         );
     }
 
+    // FASE 4: Eliminación y utilidades de persistencia
     public function eliminar($tabla, $id) {
         $tablasPermitidas = ['categoria', 'subcategoria', 'unidad_medida', 'presentacion', 'linea_producto'];
         if (!in_array($tabla, $tablasPermitidas, true) || !$this->idValido($id)) {
