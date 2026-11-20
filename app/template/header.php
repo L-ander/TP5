@@ -8,7 +8,7 @@
 
     <!-- <script src="resources/library/plugins/jquery-3.3.1/jquery-3.3.1.min.js"></script> -->
 
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" type="text/css">
+<link href="resources/library/plugins/material-icons/material-icons.css" rel="stylesheet" type="text/css">
 
     <!-- Bootstrap Core Css -->
     <link href="resources/library/plugins/bootstrap/css/bootstrap.css" rel="stylesheet">

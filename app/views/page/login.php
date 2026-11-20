@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión | Distribuidora</title>
     
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- En el <head> de app/views/page/login.php -->
+    <link href="resources/library/plugins/material-icons/material-icons.css" rel="stylesheet">
     <link href="resources/library/plugins/bootstrap/css/bootstrap.css" rel="stylesheet">
     <link href="public/css/login.css?v=2" rel="stylesheet">
     <link href="resources/library/plugins/jquery-toast-plugin/1.3.2/dist/jquery.toast.min.css" rel="stylesheet">
-    
+
     <script src="resources/library/plugins/sweetalert2/11.26.25/sweetalert2.all.min.js"></script>
 </head>
 <body>
@@ -62,6 +63,7 @@
         </form>
     </div>
 
+    <!-- Antes de cerrar </body> en app/views/page/login.php -->
     <script src="resources/library/plugins/jquery/jquery.min.js"></script>
     <script src="resources/library/plugins/jquery-toast-plugin/1.3.2/dist/jquery.toast.min.js"></script>
     <script src="resources/library/plugins/jquery-validation/1.19.5/jquery.validate.min.js"></script>
