@@ -40,12 +40,6 @@ $(document).ready(function() {
     cargarMedidas();
     listar();
 
-    if (window.location.hash) {
-        var pestaña = window.location.hash;
-        if ($(pestaña).length) {
-            $('a[href="' + pestaña + '"]').tab('show');
-        }
-    }
 
     $.validator.addMethod("sinEspaciosVacios", function(value, element) {
         return this.optional(element) || /.*\S+.*/.test(value);
@@ -55,7 +49,6 @@ $(document).ready(function() {
         return this.optional(element) || /^(?=.*[1-9])\d+(?:\.\d{1,6})?$/.test(value);
     }, "El precio debe ser mayor que 0 y tener como máximo 6 decimales.");
 
-    // Reglas compartidas por los formularios de alta y edición
     function configurarValidacionProducto(formulario, alEnviar) {
         formulario.validate({
             rules: {
@@ -168,7 +161,10 @@ function cargarLineas() {
         url: 'app/controllers/ProductoController.php',
         type: 'POST',
         dataType: 'json',
-        data: { action: 'cargarLineas' }
+        data: { action: 'cargarLineas' },
+        beforeSend: function() {
+            $('#id_linea, #id_lineaEditar').prop('disabled', true);
+        }
     })
     .done(function(data) {
         if (data.success) {
@@ -184,6 +180,10 @@ function cargarLineas() {
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         console.error('AJAX error cargarLineas:', textStatus, errorThrown);
+        mostrarErrorProducto(obtenerMensajeErrorSolicitudProducto(jqXHR, 'No se pudieron cargar las líneas.'));
+    })
+    .always(function() {
+        $('#id_linea, #id_lineaEditar').prop('disabled', false);
     });
 }
 
@@ -192,7 +192,10 @@ function cargarPresentaciones() {
         url: 'app/controllers/ProductoController.php',
         type: 'POST',
         dataType: 'json',
-        data: { action: 'cargarPresentaciones' }
+        data: { action: 'cargarPresentaciones' },
+        beforeSend: function() {
+            $('#presentacion, #presentacionEditar').prop('disabled', true);
+        }
     })
     .done(function(data) {
         if (data.success) {
@@ -208,6 +211,10 @@ function cargarPresentaciones() {
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         console.error('AJAX error cargarPresentaciones:', textStatus, errorThrown);
+        mostrarErrorProducto(obtenerMensajeErrorSolicitudProducto(jqXHR, 'No se pudieron cargar las presentaciones.'));
+    })
+    .always(function() {
+        $('#presentacion, #presentacionEditar').prop('disabled', false);
     });
 }
 
@@ -216,7 +223,10 @@ function cargarMedidas() {
         url: 'app/controllers/ProductoController.php',
         type: 'POST',
         dataType: 'json',
-        data: { action: 'cargarMedidas' }
+        data: { action: 'cargarMedidas' },
+        beforeSend: function() {
+            $('#id_medida, #id_medidaEditar').prop('disabled', true);
+        }
     })
     .done(function(data) {
         if (data.success) {
@@ -232,6 +242,10 @@ function cargarMedidas() {
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         console.error('AJAX error cargarMedidas:', textStatus, errorThrown);
+        mostrarErrorProducto(obtenerMensajeErrorSolicitudProducto(jqXHR, 'No se pudieron cargar las unidades de medida.'));
+    })
+    .always(function() {
+        $('#id_medida, #id_medidaEditar').prop('disabled', false);
     });
 }
 
@@ -308,25 +322,6 @@ function mostrarErrorProducto(mensaje) {
     });
 }
 
-function enviarSolicitudConProgresoProducto(opciones, mensaje, $boton) {
-    var estabaDeshabilitado = $boton.prop('disabled');
-    $boton.prop('disabled', true);
-
-    Swal.fire({
-        title: mensaje,
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        didOpen: function() {
-            Swal.showLoading();
-        }
-    });
-
-    return $.ajax(opciones).always(function() {
-        Swal.close();
-        $boton.prop('disabled', estabaDeshabilitado);
-    });
-}
-
 function obtenerMensajeErrorSolicitudProducto(jqXHR, mensaje) {
     if (jqXHR.status === 0) {
         return 'No se pudo conectar con el servidor. Verifica tu conexión a Internet e inténtalo de nuevo.';
@@ -359,10 +354,19 @@ function crear() {
     var precio = $('#precio').val().trim();
 
 
-    enviarSolicitudConProgresoProducto({
+    $.ajax({
         url: 'app/controllers/ProductoController.php',
         type: 'POST',
         dataType: 'json',
+        beforeSend: function() {
+            $('#guardar').prop('disabled', true);
+            Swal.fire({
+                title: 'Guardando producto...',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: function() { Swal.showLoading(); }
+            });
+        },
         data: {
             action: 'crear',
             nombre: nombre,
@@ -371,7 +375,7 @@ function crear() {
             id_medida: id_medida,
             precio: precio
         }
-    }, 'Guardando producto...', $('#guardar'))
+    })
     .done(function(data) {
         if (data.success) {
             listar();
@@ -386,6 +390,10 @@ function crear() {
     .fail(function(jqXHR, textStatus, errorThrown) {
         console.error('AJAX error crear:', jqXHR.status, textStatus, errorThrown, jqXHR.responseJSON);
         mostrarErrorProducto(obtenerMensajeErrorSolicitudProducto(jqXHR, 'No se pudo crear el producto.'));
+    })
+    .always(function() {
+        Swal.close();
+        $('#guardar').prop('disabled', false);
     });
 }
 
@@ -401,12 +409,21 @@ function limpiarFormularioNuevo() {
 $(document).on('click', 'button.boton-update', function() {
     var id = $(this).attr('id');
     var $boton = $(this);
-    enviarSolicitudConProgresoProducto({
+    $.ajax({
         url: 'app/controllers/ProductoController.php',
         type: 'POST',
         dataType: 'json',
+        beforeSend: function() {
+            $boton.prop('disabled', true);
+            Swal.fire({
+                title: 'Consultando producto...',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: function() { Swal.showLoading(); }
+            });
+        },
         data: { action: 'consultar', id: id }
-    }, 'Consultando producto...', $boton)
+    })
     .done(function(data) {
         if (data.success && data.data && data.data.datos && data.data.datos.length > 0) {
             var product = data.data.datos[0];
@@ -424,6 +441,10 @@ $(document).on('click', 'button.boton-update', function() {
     .fail(function(jqXHR, textStatus, errorThrown) {
         console.error('AJAX error consultar:', textStatus, errorThrown);
         mostrarErrorProducto(obtenerMensajeErrorSolicitudProducto(jqXHR, 'No se pudo consultar el producto.'));
+    })
+    .always(function() {
+        Swal.close();
+        $boton.prop('disabled', false);
     });
 });
 
@@ -444,10 +465,19 @@ function editar() {
     var id_medida = $('#id_medidaEditar').val();
     var precio = $('#precioEditar').val();
 
-    enviarSolicitudConProgresoProducto({
+    $.ajax({
         url: 'app/controllers/ProductoController.php',
         type: 'POST',
         dataType: 'json',
+        beforeSend: function() {
+            $('#editar').prop('disabled', true);
+            Swal.fire({
+                title: 'Actualizando producto...',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: function() { Swal.showLoading(); }
+            });
+        },
         data: {
             action: 'editar',
             id: id,
@@ -457,7 +487,7 @@ function editar() {
             id_medida: id_medida,
             precio: precio
         }
-    }, 'Actualizando producto...', $('#editar'))
+    })
     .done(function(data) {
         if (data.success) {
             listar();
@@ -470,6 +500,10 @@ function editar() {
     .fail(function(jqXHR, textStatus, errorThrown) {
         console.error('AJAX error editar:', jqXHR.status, textStatus, errorThrown, jqXHR.responseJSON);
         mostrarErrorProducto(obtenerMensajeErrorSolicitudProducto(jqXHR, 'No se pudo actualizar el producto.'));
+    })
+    .always(function() {
+        Swal.close();
+        $('#editar').prop('disabled', false);
     });
 }
 
@@ -498,12 +532,21 @@ $(document).on('click', 'button.boton-borrar', function() {
 });
 
 function eliminar(id, $boton) {
-    enviarSolicitudConProgresoProducto({
+    $.ajax({
         url: 'app/controllers/ProductoController.php',
         type: 'POST',
         dataType: 'json',
+        beforeSend: function() {
+            $boton.prop('disabled', true);
+            Swal.fire({
+                title: 'Eliminando producto...',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: function() { Swal.showLoading(); }
+            });
+        },
         data: { action: 'eliminar', id: id }
-    }, 'Eliminando producto...', $boton)
+    })
     .done(function(data) {
         if (data.success) {
             listar();
@@ -515,6 +558,10 @@ function eliminar(id, $boton) {
     .fail(function(jqXHR, textStatus, errorThrown) {
         console.error('AJAX error eliminar:', textStatus, errorThrown);
         mostrarErrorProducto(obtenerMensajeErrorSolicitudProducto(jqXHR, 'No se pudo eliminar el producto.'));
+    })
+    .always(function() {
+        Swal.close();
+        $boton.prop('disabled', false);
     });
 }
 
