@@ -120,4 +120,4 @@
 
 <?php include 'app/views/page/clientes/modal.php'; ?>
 <script src="public/js/validaciones.js"></script>
-<script src="public/js/cliente.js?v=7"></script> 
+<script src="public/js/cliente.js?v=8"></script> 

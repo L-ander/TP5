@@ -59,14 +59,18 @@ $(document).ready(function(){
 		}, 'Use solo letras y espacios.');
 	}
 
+	if (!$.validator.methods.clienteCedula) {
+		$.validator.addMethod('clienteCedula', function(value, element) {
+			return this.optional(element) || /^[0-9]{5,20}$/.test(value);
+		}, 'La cédula solo debe contener números.');
+	}
+
 	function validacionCliente(selector, esEdicion) {
 		$(selector).validate({
 			rules: {
 				cedula: {
 					required: true,
-					digits: true,
-					minlength: 5,
-					maxlength: 20,
+					clienteCedula: true,
 					remote: {
 						url: 'app/controllers/ClienteController.php',
 						type: 'POST',
@@ -102,18 +106,16 @@ $(document).ready(function(){
 			messages: {
 				cedula: {
 					required: 'La cédula es obligatoria.',
-					digits: 'La cédula solo debe contener números.',
-					minlength: 'La cédula debe contener entre 5 y 20 números.',
-					maxlength: 'La cédula debe contener entre 5 y 20 números.',
+					clienteCedula: 'La cédula solo debe contener entre 5 y 20 números.',
 					remote: 'La cédula ya está registrada.'
 				},
 				nombre: {
-					required: 'El nombre es obligatorio.',
+					required: 'El nombre es obligatorio y no puede contener solo espacios en blanco.',
 					maxlength: 'El nombre no debe exceder 50 caracteres.',
 					clienteNombre: 'El nombre solo debe contener letras y espacios.'
 				},
 				apellido: {
-					required: 'El apellido es obligatorio.',
+					required: 'El apellido es obligatorio y no puede contener solo espacios en blanco.',
 					maxlength: 'El apellido no debe exceder 50 caracteres.',
 					clienteNombre: 'El apellido solo debe contener letras y espacios.'
 				},
@@ -172,10 +174,6 @@ $(document).ready(function(){
 		$formulario[0].reset();
 		$formulario.find('.cliente-input-error, .cliente-input-success').removeClass('cliente-input-error cliente-input-success');
 		$formulario.find('.form-line').css('border-bottom', '');
-	});
-
-	$('#cedula, #cedulaEditar').on('input', function() {
-		this.value = this.value.replace(/[^0-9]/g, '').slice(0, 20);
 	});
 
 	$('#id_ciudad').change(function() {

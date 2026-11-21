@@ -6,41 +6,31 @@ require_once 'app/core/Router.php';
 $routerMenu = new Router();
 $todasLasRutas = $routerMenu->getRoutes();
 
-$accionesConfiguracion = ['ciudades', 'configuracion_usuarios', 'configuracion'];
-$rutasVisibles = [];
+$itemsPrincipales = [];
+$itemsConfiguracion = [];
 foreach ($todasLasRutas as $accion => $config) {
     if (empty($config['menu'])) {
         continue;
     }
 
-    $rolesPermitidos = $config['roles'];
+    $rolesPermitidos = $config['roles'] ?? [];
     $tieneAcceso = in_array('*', $rolesPermitidos, true)
         || in_array($rolUsuario, array_map('intval', $rolesPermitidos), true);
 
     if ($tieneAcceso) {
-        $rutasVisibles[$accion] = $config;
+        if (!empty($config['seccion'])) {
+            $itemsConfiguracion[$accion] = $config;
+        } else {
+            $itemsPrincipales[$accion] = $config;
+        }
     }
 }
-
-$itemsMenu = [];
-foreach ($rutasVisibles as $accion => $config) {
-    if (!in_array($accion, $accionesConfiguracion, true)) {
-        $itemsMenu[$accion] = $config;
-    }
-}
-
-$submodulosConfiguracionVisibles = [];
-foreach ($accionesConfiguracion as $accion) {
-    if (isset($rutasVisibles[$accion])) {
-        $submodulosConfiguracionVisibles[$accion] = $rutasVisibles[$accion];
-    }
-}
-
-if ($submodulosConfiguracionVisibles) {
+$itemsMenu = $itemsPrincipales;
+if ($itemsConfiguracion) {
     $itemsMenu['__encabezado_configuracion'] = [
         'encabezado' => 'TABLAS DE CONFIGURACIÓN'
     ];
-    $itemsMenu += $submodulosConfiguracionVisibles;
+    $itemsMenu += $itemsConfiguracion;
 }
 ?>
 <link rel="stylesheet" href="public/css/custom.css?v=3">
@@ -75,38 +65,14 @@ if ($submodulosConfiguracionVisibles) {
     <div class="menu">
             <ul class="list">
                 <?php foreach ($itemsMenu as $accion => $config): ?>
-                    <?php if (isset($config['encabezado'])): ?>
-                        <li class="header"><?php echo $config['encabezado']; ?></li>
-                        <?php continue; ?>
-                    <?php endif; ?>
-
-                    <?php
-                        $icono = 'folder'; // Icono por defecto
-                        switch ($accion) {
-                            case 'home': $icono = 'home'; break;
-                            case 'clientes': $icono = 'people'; break;
-                            case 'ciudades': $icono = 'location_on'; break;
-                            case 'personal': $icono = 'badge'; break;
-                            case 'producto': $icono = 'shopping_cart'; break; 
-                            case 'pedidos': $icono = 'playlist_add'; break;
-                            case 'reportes': $icono = 'insert_chart'; break;
-                            case 'configuracion': $icono = 'table_chart'; break;
-                            case 'roles': $icono = 'lock'; break;
-                            case 'configuracion_usuarios': $icono = 'person'; break;
-                        }
-
-                        // Formateamos el nombre del menú de la primera letra en mayúscula
-                        $nombreModulo = ucfirst($accion);
-                        if ($accion === 'personal') $nombreModulo = 'Personal';
-                        if ($accion === 'configuracion') $nombreModulo = 'Tablas de Producto';
-                        if ($accion === 'configuracion_usuarios') $nombreModulo = 'Usuarios';
-                        if ($accion === 'pedido' || $accion === 'pedidos') $nombreModulo = 'Pedidos';
-                        if ($accion === 'roles') $nombreModulo = 'Permisos';
-                    ?>
+                <?php if (!empty($config['encabezado'])): ?>
+                    <li class="header"><?php echo htmlspecialchars($config['encabezado'], ENT_QUOTES, 'UTF-8'); ?></li>
+                    <?php continue; ?>
+                <?php endif; ?>
                     <li>
                         <a href="<?php echo htmlspecialchars($accion, ENT_QUOTES, 'UTF-8'); ?>">
-                            <i class="material-icons"><?php echo $icono; ?></i>
-                            <span><?php echo $nombreModulo; ?></span>
+                        <i class="material-icons"><?php echo htmlspecialchars($config['icono'] ?? 'folder', ENT_QUOTES, 'UTF-8'); ?></i>
+                        <span><?php echo htmlspecialchars($config['titulo'] ?? ucfirst($accion), ENT_QUOTES, 'UTF-8'); ?></span>
                         </a>
                     </li>
                 <?php endforeach; ?>
