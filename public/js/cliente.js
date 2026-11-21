@@ -155,6 +155,8 @@ $(document).ready(function(){
 
 	validacionCliente('#formulario', false);
 	validacionCliente('#formularioEditar', true);
+	ValidacionTiempoReal.activar('#formulario');
+	ValidacionTiempoReal.activar('#formularioEditar');
 
 	$('#guardar').on('click', function() {
 		$('#formulario').trigger('submit');

@@ -62,5 +62,6 @@
 <?php include 'app/views/page/productos/modal.php'; ?>
 
 <!-- Los scripts comparten los formularios del módulo; conservar este orden. -->
+<script src="public/js/validaciones.js"></script>
 <script src="public/js/productos.js"></script>
 <script src="public/js/subcategoria.js"></script>

@@ -48,6 +48,7 @@ function configurarValidacionUbicacion(selector, rules, messages, submitHandler)
         },
         submitHandler: submitHandler
     });
+    ValidacionTiempoReal.activar(selector);
 }
 
 function reiniciarFormularioUbicacion(modal) {

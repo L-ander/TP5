@@ -12,7 +12,7 @@
                     <div class="form-group" id="grupoPlSubcategoria" style="display: none;">
                         <label for="plSubcategoriaSelect">Subcategoría</label>
                         <div class="form-line">
-                            <select class="form-control" id="plSubcategoriaSelect">
+                            <select class="form-control" id="plSubcategoriaSelect" name="id_subcategoria">
                                 <option value="">Seleccione subcategoría</option>
                             </select>
                         </div>
@@ -25,7 +25,7 @@
                                 <i class="material-icons">edit</i>
                             </span>
                             <div class="form-line">
-                                <input type="text" class="form-control" placeholder="Nombre / Contenido" id="plNombre" maxlength="50" required>
+                                <input type="text" class="form-control" placeholder="Nombre / Contenido" id="plNombre" name="nombre" maxlength="50" required>
                             </div>
                         </div>
                     </div>

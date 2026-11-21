@@ -46,6 +46,17 @@ function toggleError(input, isValid, errorId) {
 
 }
 
+const ValidacionTiempoReal = {
+    activar: function(selector) {
+        const $formulario = $(selector);
+
+        $formulario.find('input, select, textarea').on('keyup change', function() {
+            const validador = $formulario.data('validator');
+            if (validador) validador.element(this);
+        });
+    }
+};
+
 if (typeof jQuery !== 'undefined' &&
     jQuery.fn.validate &&
     jQuery('#formPedido').length) {

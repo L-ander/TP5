@@ -98,8 +98,8 @@
         <div class="modal-body">
             <form id="formConfiguracion">
                 <input type="hidden" id="configId"><input type="hidden" id="configTabla">
-                <div id="grupoCategoria" class="form-group" style="display:none;"><label for="id_categoria">Categoría</label><select class="form-control" id="id_categoria" required></select></div>
-                <div class="form-group"><label for="configNombre">Nombre</label><input type="text" class="form-control" id="configNombre" maxlength="40" required></div>
+                <div id="grupoCategoria" class="form-group" style="display:none;"><label for="id_categoria">Categoría</label><select class="form-control" id="id_categoria" name="id_categoria" required></select></div>
+                <div class="form-group"><label for="configNombre">Nombre</label><input type="text" class="form-control" id="configNombre" name="nombre" maxlength="40" required></div>
             </form>
         </div>
         <div class="modal-footer"><button type="submit" form="formConfiguracion" class="btn btn-success">GUARDAR</button><button type="button" class="btn btn-default" data-dismiss="modal">CANCELAR</button></div>
@@ -107,4 +107,5 @@
 </div>
 
 <?php include 'app/views/page/inventario/modal_presentacion_linea.php'; ?>
+<script src="public/js/validaciones.js"></script>
 <script src="public/js/configuracion.js"></script>

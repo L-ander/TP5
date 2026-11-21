@@ -84,15 +84,44 @@ class ConfiguracionApp {
             this.confirmarEliminacion(boton.data('tabla'), Number(boton.data('id')));
         });
 
-        $('#formConfiguracion').on('submit', (evento) => {
-            evento.preventDefault();
-            this.guardarConfiguracion();
+        $('#formConfiguracion').validate({
+            rules: {
+                nombre: { required: true, minlength: 2, maxlength: 40 },
+                id_categoria: { required: true }
+            },
+            messages: {
+                nombre: {
+                    required: 'Ingrese el nombre.',
+                    minlength: 'El nombre debe tener al menos 2 caracteres.',
+                    maxlength: 'El nombre no puede exceder 40 caracteres.'
+                },
+                id_categoria: { required: 'Seleccione una categoría.' }
+            },
+            errorElement: 'small',
+            errorClass: 'txt-error',
+            submitHandler: () => this.guardarConfiguracion()
         });
 
-        $('#formPresentacionLinea').on('submit', (evento) => {
-            evento.preventDefault();
-            this.guardarPresentacionLinea();
+        $('#formPresentacionLinea').validate({
+            rules: {
+                nombre: { required: true, minlength: 2, maxlength: 50 },
+                id_subcategoria: { required: true }
+            },
+            messages: {
+                nombre: {
+                    required: 'Ingrese el nombre.',
+                    minlength: 'El nombre debe tener al menos 2 caracteres.',
+                    maxlength: 'El nombre no puede exceder 50 caracteres.'
+                },
+                id_subcategoria: { required: 'Seleccione una subcategoría.' }
+            },
+            errorElement: 'small',
+            errorClass: 'txt-error',
+            submitHandler: () => this.guardarPresentacionLinea()
         });
+
+        ValidacionTiempoReal.activar('#formConfiguracion');
+        ValidacionTiempoReal.activar('#formPresentacionLinea');
     }
 
     // FASE 3: Acceso al controlador y carga de datos
@@ -187,6 +216,14 @@ class ConfiguracionApp {
             $('#plNombre').attr('maxlength', tabla === 'linea_producto' ? 40 : 50);
             $('#grupoPlSubcategoria').toggle(tabla === 'linea_producto');
             $('#plSubcategoriaSelect').prop('required', tabla === 'linea_producto');
+            if (tabla === 'linea_producto') {
+                $('#plSubcategoriaSelect').rules('add', {
+                    required: true,
+                    messages: { required: 'Seleccione una subcategoría.' }
+                });
+            } else {
+                $('#plSubcategoriaSelect').rules('remove', 'required');
+            }
             $('#tituloPresentacionLinea').text(
                 'Nuevo ' + (tabla === 'linea_producto' ? 'Línea de Producto' : 'Presentación')
             );
@@ -199,6 +236,14 @@ class ConfiguracionApp {
         $('#configTabla').val(tabla);
         $('#grupoCategoria').toggle(tabla === 'subcategoria');
         $('#id_categoria').prop('required', tabla === 'subcategoria');
+        if (tabla === 'subcategoria') {
+            $('#id_categoria').rules('add', {
+                required: true,
+                messages: { required: 'Seleccione una categoría.' }
+            });
+        } else {
+            $('#id_categoria').rules('remove', 'required');
+        }
         $('#tituloConfiguracion').text(
             'Nuevo ' + (tabla === 'unidad_medida' ? 'unidad de medida' : tabla)
         );

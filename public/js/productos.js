@@ -140,6 +140,8 @@ $(document).ready(function() {
     var formularioEditarProducto = $('#modalEditarProducto form');
     configurarValidacionProducto(formularioProducto, crear);
     configurarValidacionProducto(formularioEditarProducto, editar);
+    ValidacionTiempoReal.activar('#formulario');
+    ValidacionTiempoReal.activar('#modalEditarProducto form');
 
 
     // Limpia los errores al cerrar cualquiera de los formularios

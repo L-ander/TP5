@@ -36,4 +36,5 @@
 </section>
 
 <?php include 'app/views/page/clientes/modal.php'; ?>
+<script src="public/js/validaciones.js"></script>
 <script src="public/js/ubicacion.js"></script>
