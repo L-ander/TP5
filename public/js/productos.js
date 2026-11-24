@@ -49,6 +49,14 @@ $(document).ready(function() {
         return this.optional(element) || /^(?=.*[1-9])\d+(?:\.\d{1,6})?$/.test(value);
     }, "El precio debe ser mayor que 0 y tener como máximo 6 decimales.");
 
+    var formularioProducto = $('#formulario');
+    var formularioEditarProducto = $('#modalEditarProducto form');
+    configurarValidacionProducto(formularioProducto, crear);
+    configurarValidacionProducto(formularioEditarProducto, editar);
+    ValidacionTiempoReal.activar('#formulario');
+    ValidacionTiempoReal.activar('#modalEditarProducto form');
+
+
     function configurarValidacionProducto(formulario, alEnviar) {
         formulario.validate({
             rules: {
@@ -95,33 +103,16 @@ $(document).ready(function() {
                     precioProductoValido: 'Use un precio mayor que 0 y con máximo 6 decimales.'
                 }
             },
-            errorElement: 'small',
-            errorClass: 'txt-error',
+            errorElement: 'label',
+            errorClass: 'error',
             highlight: function(element) {
-                var $linea = $(element).closest('.form-line');
-                if (!$linea.length) {
-                    $linea = $(element).closest('.input-group').find('.form-line');
-                }
-                $linea.css('border-bottom', '2px solid #F44336');
+                $(element).closest('.form-line').removeClass('success').addClass('error');
             },
             unhighlight: function(element) {
-                var $linea = $(element).closest('.form-line');
-                if (!$linea.length) {
-                    $linea = $(element).closest('.input-group').find('.form-line');
-                }
-                $linea.css('border-bottom', '2px solid #4CAF50');
+                $(element).closest('.form-line').removeClass('error').addClass('success');
             },
             errorPlacement: function(error, element) {
-                error.css({
-                    color: '#F44336',
-                    display: 'block',
-                    marginTop: '5px'
-                });
-                var $linea = element.closest('.form-line');
-                if (!$linea.length) {
-                    $linea = element.closest('.input-group').find('.form-line');
-                }
-                error.insertAfter($linea);
+                error.insertAfter(element.closest('.form-line'));
             },
             submitHandler: function() {
                 alEnviar();
@@ -129,12 +120,7 @@ $(document).ready(function() {
         });
     }
 
-    var formularioProducto = $('#formulario');
-    var formularioEditarProducto = $('#modalEditarProducto form');
-    configurarValidacionProducto(formularioProducto, crear);
-    configurarValidacionProducto(formularioEditarProducto, editar);
-    ValidacionTiempoReal.activar('#formulario');
-    ValidacionTiempoReal.activar('#modalEditarProducto form');
+
 
 
     // Limpia los errores al cerrar cualquiera de los formularios
@@ -146,8 +132,8 @@ $(document).ready(function() {
             validador.resetForm();
         }
 
-        formulario.find('.txt-error').remove();
-        formulario.find('.form-line').css('border-bottom', '');
+        formulario.find('label.error').remove();
+        formulario.find('.form-line').removeClass('error success');
     });
 
 });
@@ -162,9 +148,6 @@ function cargarLineas() {
         type: 'POST',
         dataType: 'json',
         data: { action: 'cargarLineas' },
-        beforeSend: function() {
-            $('#id_linea, #id_lineaEditar').prop('disabled', true);
-        }
     })
     .done(function(data) {
         if (data.success) {
@@ -182,9 +165,7 @@ function cargarLineas() {
         console.error('AJAX error cargarLineas:', textStatus, errorThrown);
         mostrarErrorProducto(obtenerMensajeErrorSolicitudProducto(jqXHR, 'No se pudieron cargar las líneas.'));
     })
-    .always(function() {
-        $('#id_linea, #id_lineaEditar').prop('disabled', false);
-    });
+
 }
 
 function cargarPresentaciones() {
@@ -193,9 +174,7 @@ function cargarPresentaciones() {
         type: 'POST',
         dataType: 'json',
         data: { action: 'cargarPresentaciones' },
-        beforeSend: function() {
-            $('#presentacion, #presentacionEditar').prop('disabled', true);
-        }
+
     })
     .done(function(data) {
         if (data.success) {
@@ -213,9 +192,7 @@ function cargarPresentaciones() {
         console.error('AJAX error cargarPresentaciones:', textStatus, errorThrown);
         mostrarErrorProducto(obtenerMensajeErrorSolicitudProducto(jqXHR, 'No se pudieron cargar las presentaciones.'));
     })
-    .always(function() {
-        $('#presentacion, #presentacionEditar').prop('disabled', false);
-    });
+
 }
 
 function cargarMedidas() {
@@ -224,9 +201,6 @@ function cargarMedidas() {
         type: 'POST',
         dataType: 'json',
         data: { action: 'cargarMedidas' },
-        beforeSend: function() {
-            $('#id_medida, #id_medidaEditar').prop('disabled', true);
-        }
     })
     .done(function(data) {
         if (data.success) {
@@ -244,9 +218,6 @@ function cargarMedidas() {
         console.error('AJAX error cargarMedidas:', textStatus, errorThrown);
         mostrarErrorProducto(obtenerMensajeErrorSolicitudProducto(jqXHR, 'No se pudieron cargar las unidades de medida.'));
     })
-    .always(function() {
-        $('#id_medida, #id_medidaEditar').prop('disabled', false);
-    });
 }
 
 // FASE 3: Consulta y visualización del listado

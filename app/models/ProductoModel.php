@@ -58,24 +58,24 @@
 		}
 
 		public function consultar() {
-    try {
-        $sql = "SELECT p.id AS id, p.nombre AS nombre, p.id_linea AS id_linea, p.presentacion AS presentacion, p.id_medida AS id_medida, 
-                lp.nombre AS nombre_linea, pr.contenido AS nombre_presentacion, u.medida AS nombre_medida, p.precio AS precio
-                FROM producto p
-                JOIN linea_producto lp ON p.id_linea = lp.id
-                JOIN presentacion pr ON p.presentacion = pr.id
-                JOIN unidad_medida u ON p.id_medida = u.id
-                WHERE p.id = :id";
+			try {
+				$sql = "SELECT p.id AS id, p.nombre AS nombre, p.id_linea AS id_linea, p.presentacion AS presentacion, p.id_medida AS id_medida, 
+						lp.nombre AS nombre_linea, pr.contenido AS nombre_presentacion, u.medida AS nombre_medida, p.precio AS precio
+						FROM producto p
+						JOIN linea_producto lp ON p.id_linea = lp.id
+						JOIN presentacion pr ON p.presentacion = pr.id
+						JOIN unidad_medida u ON p.id_medida = u.id
+						WHERE p.id = :id";
 
-        $stmt = parent::conectar()->prepare($sql);
-        $stmt->bindParam(":id", $this->id, PDO::PARAM_INT);
-        $stmt->execute();
-        $data = $stmt->fetchAll(PDO::FETCH_ASSOC); 
-        return array('success' => true, 'datos' => $data);
-    } catch (Exception $e) {
-        return array('success' => false, 'error' => $e->getMessage());
-    }
-}
+				$stmt = parent::conectar()->prepare($sql);
+				$stmt->bindParam(":id", $this->id, PDO::PARAM_INT);
+				$stmt->execute();
+				$data = $stmt->fetchAll(PDO::FETCH_ASSOC); 
+				return array('success' => true, 'datos' => $data);
+			} catch (Exception $e) {
+				return array('success' => false, 'error' => $e->getMessage());
+			}
+		}
 
 		// FASE 3: Alta de producto
 		public function crear() {

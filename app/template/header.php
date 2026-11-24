@@ -37,6 +37,13 @@
     <script src="resources/library/plugins/jquery-validation/1.19.5/jquery.validate.min.js"></script>
     <script src="resources/library/plugins/jquery-validation/1.19.5/messages_es.min.js"></script>
 
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0d6efd">
+
+
+    <link rel="icon" sizes="192x192" href="public/img/icon/tp.png">
+    <link rel="apple-touch-icon" href="public/img/icon/tp.png">
+
 </head>
 
 
